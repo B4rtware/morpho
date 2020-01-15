@@ -1,0 +1,13 @@
+{
+    "RegistrarURL": "http://127.0.0.1:8761/eureka",
+    "RegistrarUser": "",
+    "TTL": 0,
+    "HostName": "",
+    "AppName": "",
+    "PortToListen": "50051",
+    "DtaType": "",
+    "IsSSL": false,
+    "LogLevel": 0,
+    "CfgFile": "./dts/config.json",
+    "Init": true
+}
