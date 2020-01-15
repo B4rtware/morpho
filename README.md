@@ -4,10 +4,48 @@
 
 <div align="center">
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square"></a>
-<a href=""><img alt="License: MIT" src="https://img.shields.io/badge/License%3A-MIT-green?style=flat-square"></a>
+<a href=""><img alt="License: MIT" src="https://img.shields.io/badge/License%3A-MIT-green?style=flat-square">
+</a><a href=""><img src="https://img.shields.io/badge/Python%3A-%5E3.6-yellow?style=flat-square"></a>
 </div>
 
 # Install
+
+## Local Spring Boot Installation (linux / windows)
+
+1. download the latest spring boot java application from https://start.spring.io/
+    - **Project**: Maven Project
+    - **Language**: Language
+    - **Spring Boot**: 2.2.2
+    - **Project Metadata**
+        - *Group*: qds
+        - *Artifact*: doctrans
+    - **Dependencies**: Eureka Server
+
+2. click on **Generate**
+3. unzip the downloaded file and make the following file changes:
+
+*src/main/java/com/example/demo/DemoApplication.java*:
+
+    package com.example.demo;
+
+    import org.springframework.boot.SpringApplication;
+    import org.springframework.boot.autoconfigure.SpringBootApplication;
+    import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer; // insert this line
+
+    @EnableEurekaServer // insert this line
+    @SpringBootApplication
+    public class DemoApplication {
+
+            public static void main(String[] args) {
+                    SpringApplication.run(DemoApplication.class, args);
+            }
+
+    }
+
+*src/main/resources/application.properties:*
+    server.port=8761
+    eureka.client.register-with-eureka=false
+    eureka.client.fetch-registry=false
 
 # Usage
 
