@@ -14,7 +14,6 @@ _sym_db = _symbol_database.Default()
 
 
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from github.com.mwitkow.go_proto_validators import validator_pb2 as github_dot_com_dot_mwitkow_dot_go__proto__validators_dot_validator__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -22,9 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='dtaservice',
   syntax='proto3',
   serialized_options=_b('\n\024de.tu-berlin.qds.dtaB\010DTAProtoP\001'),
-  serialized_pb=_b('\n\x10\x64taservice.proto\x12\ndtaservice\x1a\x1cgoogle/api/annotations.proto\x1a\x36github.com/mwitkow/go-proto-validators/validator.proto\"e\n\x0f\x44ocumentRequest\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12\x10\n\x08\x64ocument\x18\x02 \x01(\x0c\x12\x1c\n\x0cservice_name\x18\x03 \x01(\tB\x06\xe2\xdf\x1f\x02X\x01\x12\x0f\n\x07options\x18\x04 \x03(\t\"X\n\x19TransformDocumentResponse\x12\x16\n\x0etrans_document\x18\x01 \x01(\x0c\x12\x14\n\x0ctrans_output\x18\x02 \x03(\t\x12\r\n\x05\x65rror\x18\x03 \x03(\t\"\x14\n\x12ListServiceRequest\"(\n\x14ListServicesResponse\x12\x10\n\x08services\x18\x01 \x03(\t\"A\n\x14TransformPipeRequest\x12)\n\x04pipe\x18\x01 \x03(\x0b\x32\x1b.dtaservice.DocumentRequest2\x82\x03\n\tDTAServer\x12~\n\x11TransformDocument\x12\x1b.dtaservice.DocumentRequest\x1a%.dtaservice.TransformDocumentResponse\"%\x82\xd3\xe4\x93\x02\x1f\"\x1a/v1/dta/document/transform:\x01*\x12n\n\x0cListServices\x12\x1e.dtaservice.ListServiceRequest\x1a .dtaservice.ListServicesResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/dta/service/list\x12\x84\x01\n\rTransformPipe\x12 .dtaservice.TransformPipeRequest\x1a%.dtaservice.TransformDocumentResponse\"*\x82\xd3\xe4\x93\x02$\"\x1f/v1/dta/document/transform-pipe:\x01*B\"\n\x14\x64\x65.tu-berlin.qds.dtaB\x08\x44TAProtoP\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x10\x64taservice.proto\x12\ndtaservice\x1a\x1cgoogle/api/annotations.proto\"]\n\x0f\x44ocumentRequest\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12\x10\n\x08\x64ocument\x18\x02 \x01(\x0c\x12\x14\n\x0cservice_name\x18\x03 \x01(\t\x12\x0f\n\x07options\x18\x04 \x03(\t\"X\n\x19TransformDocumentResponse\x12\x16\n\x0etrans_document\x18\x01 \x01(\x0c\x12\x14\n\x0ctrans_output\x18\x02 \x03(\t\x12\r\n\x05\x65rror\x18\x03 \x03(\t\"\x14\n\x12ListServiceRequest\"(\n\x14ListServicesResponse\x12\x10\n\x08services\x18\x01 \x03(\t\"A\n\x14TransformPipeRequest\x12)\n\x04pipe\x18\x01 \x03(\x0b\x32\x1b.dtaservice.DocumentRequest2\x82\x03\n\tDTAServer\x12~\n\x11TransformDocument\x12\x1b.dtaservice.DocumentRequest\x1a%.dtaservice.TransformDocumentResponse\"%\x82\xd3\xe4\x93\x02\x1f\"\x1a/v1/dta/document/transform:\x01*\x12n\n\x0cListServices\x12\x1e.dtaservice.ListServiceRequest\x1a .dtaservice.ListServicesResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/dta/service/list\x12\x84\x01\n\rTransformPipe\x12 .dtaservice.TransformPipeRequest\x1a%.dtaservice.TransformDocumentResponse\"*\x82\xd3\xe4\x93\x02$\"\x1f/v1/dta/document/transform-pipe:\x01*B\"\n\x14\x64\x65.tu-berlin.qds.dtaB\x08\x44TAProtoP\x01\x62\x06proto3')
   ,
-  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,github_dot_com_dot_mwitkow_dot_go__proto__validators_dot_validator__pb2.DESCRIPTOR,])
+  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
 
 
@@ -56,7 +55,7 @@ _DOCUMENTREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=_b('\342\337\037\002X\001'), file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='options', full_name='dtaservice.DocumentRequest.options', index=3,
       number=4, type=9, cpp_type=9, label=3,
@@ -76,8 +75,8 @@ _DOCUMENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=118,
-  serialized_end=219,
+  serialized_start=62,
+  serialized_end=155,
 )
 
 
@@ -121,8 +120,8 @@ _TRANSFORMDOCUMENTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=221,
-  serialized_end=309,
+  serialized_start=157,
+  serialized_end=245,
 )
 
 
@@ -145,8 +144,8 @@ _LISTSERVICEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=311,
-  serialized_end=331,
+  serialized_start=247,
+  serialized_end=267,
 )
 
 
@@ -176,8 +175,8 @@ _LISTSERVICESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=333,
-  serialized_end=373,
+  serialized_start=269,
+  serialized_end=309,
 )
 
 
@@ -207,8 +206,8 @@ _TRANSFORMPIPEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=375,
-  serialized_end=440,
+  serialized_start=311,
+  serialized_end=376,
 )
 
 _TRANSFORMPIPEREQUEST.fields_by_name['pipe'].message_type = _DOCUMENTREQUEST
@@ -256,7 +255,6 @@ _sym_db.RegisterMessage(TransformPipeRequest)
 
 
 DESCRIPTOR._options = None
-_DOCUMENTREQUEST.fields_by_name['service_name']._options = None
 
 _DTASERVER = _descriptor.ServiceDescriptor(
   name='DTAServer',
@@ -264,8 +262,8 @@ _DTASERVER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=443,
-  serialized_end=829,
+  serialized_start=379,
+  serialized_end=765,
   methods=[
   _descriptor.MethodDescriptor(
     name='TransformDocument',

@@ -29,7 +29,7 @@ option java_outer_classname = "DTAProto";
 package dtaservice;
 
 import "google/api/annotations.proto";
-import "github.com/mwitkow/go-proto-validators/validator.proto";
+// import "github.com/mwitkow/go-proto-validators/validator.proto";
 
 // The DTA service definition.
 service DTAServer {
@@ -57,7 +57,7 @@ service DTAServer {
 message DocumentRequest {
   string file_name = 1;
   bytes document = 2;
-  string service_name = 3 [(validator.field) = {string_not_empty : true}];
+  string service_name = 3;
   repeated string options = 4;
 }
 
