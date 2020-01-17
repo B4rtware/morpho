@@ -43,9 +43,25 @@
     }
 
 *src/main/resources/application.properties:*
+
     server.port=8761
     eureka.client.register-with-eureka=false
     eureka.client.fetch-registry=false
+
+4. to start the server execute the following command
+
+    - `./mvnw spring-boot:run` (linux)
+    - `./mvnw.cmd spring-boot:run` (windows)
+
+## Local doctrans-py setup
+
+1. make sure to use at least **python 3.6** (currently it is not important but I am planning to use f-strings which are only ^3.6 compatible)
+2. clone the repo `git clone https://github.com/B4rtware/doctrans-py.git`
+3. `cd doctrans-py` and install dependencies via
+    - `poetry install` ([Poetry](https://github.com/python-poetry/poetry))
+    or
+    - use the provided `requirements.txt`
+
 
 # Usage
 

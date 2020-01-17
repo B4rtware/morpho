@@ -6,11 +6,11 @@ sys.path.append(str(Path(".").resolve()))
 
 from services.services import DTAServer
 
-class QDS_ECHO(DTAServer):
+class QDS_COUNT_CHAR(DTAServer):
     version = "0.0.1"
     app_name = "QDS.ECHO"
 
-    def work(self, request, context) -> Tuple[str, Optional[str]]:
-        return (request.document.decode(), None)
+    def work(self, input: str) -> Tuple[str, Optional[str]]:
+        return (f"The document has {len(input)} characters.", None)
 
-QDS_ECHO.run(50052)
+QDS_COUNT_CHAR.run()

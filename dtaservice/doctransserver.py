@@ -25,6 +25,10 @@ class DocTransServer:
     LogLevel: int = 0
     CfgFile: str = "./dts/config.json"
     Init: bool = False
+    Test: bool = False
+
+    def setup_proxy_connection(self):
+        print("hook up proxy connection")
 
     def new_config_file(self):
         path = Path(self.CfgFile)
