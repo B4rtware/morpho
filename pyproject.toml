@@ -11,6 +11,12 @@ py-eureka-client = "^0.7.4"
 dataclasses-json = "^0.3.7"
 grpcio-tools = "^1.26.0"
 googleapis-common-protos = "^1.6.0"
+falcon = "^2.0.0"
+waitress = "^1.4.2"
+django = "^3.0.2"
+djangorestframework = "^3.11.0"
+django-cors-headers = "^3.2.1"
+psycopg2 = "^2.8.4"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
