@@ -1,17 +1,27 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+import dataclasses
 from pathlib import Path
 import sys
 from typing import Optional, Tuple
 import grpc
 import concurrent.futures as futures
 import argparse
+import py_eureka_client.eureka_client as eureka_client
+from dtaservice.dtaservice_pb2 import DocumentRequest
+import colorama as cr
+import urllib
+
+
+from dtaservice.dtaservice_pb2_grpc import DTAServerStub
 
 sys.path.append(str(Path(".").resolve()))
-
+from dtslog import log
 import dtaservice.doctransserver as pb
 import dtaservice.dtaservice_pb2_grpc as dtaservice_pb2_grpc
 import dtaservice.dtaservice_pb2 as dtaservice_pb2
 
+cr.init()
 
 parser = argparse.ArgumentParser()
 # fmt: off
@@ -39,6 +49,16 @@ parser.add_argument("--Trace", help="Connect Proxy for capturing traces to this 
 # fmt: on
 
 
+@dataclass
+class DtaService:
+    service_handler: pb.DocTransServer
+    resolver: eureka_client.RegistryClient
+
+
+QDS_PROXY_APP_NAME = "DE.TU-Berlin.QDS.PROXY"
+
+
+class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
     @abstractmethod
     def work(self, request, context) -> Tuple[str, Optional[str]]:
         pass
@@ -57,11 +77,16 @@ parser.add_argument("--Trace", help="Connect Proxy for capturing traces to this 
         return dtaservice_pb2.ListServicesResponse(services=services)
 
     @classmethod
-    def run(cls, port):
+    def run(cls):
         working_home_dir = Path.home()
 
+        app_name = getattr(cls, "app_name", "UNKNOWN")
         dts = pb.DocTransServer(
-            RegistrarURL="http://127.0.0.1:8761/eureka", PortToListen=port
+            AppName=app_name,
+            CfgFile=str(
+                working_home_dir / Path("/.dta/") / app_name / Path("/config.json")
+            ),
+            LogLevel="INFO",
         )
 
         # parse to fill the configuration
@@ -70,17 +95,82 @@ parser.add_argument("--Trace", help="Connect Proxy for capturing traces to this 
             if arg[1]:
                 setattr(dts, arg[0], arg[1])
 
+        log.getLogger().setLevel(log._nameToLevel[dts.LogLevel])
+
         if dts.Init:
             dts.new_config_file()
 
-        # max_port_seeks = 20
-        # # dts.create_listener(max_port_seeks)
+        # register at eureka server
+        eureka_client.init_registry_client(
+            eureka_server=dts.RegistrarURL,
+            instance_id=dts.HostName,
+            app_name=dts.AppName,
+            instance_port=int(dts.PortToListen),
+            instance_secure_port_enabled=dts.IsSSL,
+            metadata={"DTA-Type": dts.DtaType},
+        )
 
+        # create grpc server
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        server.add_insecure_port(f"[::]:{port}")
-        # #s.start()
+        # TODO: there is currently no case if the port is already in use
+        server.add_insecure_port(f"[::]:{dts.PortToListen}")
 
-        dtaservice_pb2_grpc.add_DTAServerServicer_to_server(cls(), server)
+        cls_instance = cls()
+        # bind properties to be used inside the class instance
+        cls.dts = dts
+        dtaservice_pb2_grpc.add_DTAServerServicer_to_server(cls_instance, server)
         server.start()
+
+        # fmt: off
+        if __debug__:
+            # use -O flag to remove all debug branches out of the bytecode
+            print("")
+            print(" +-------" + "-" * len(app_name) + "-------+")
+            print(f" |       {cr.Back.GREEN + cr.Fore.BLACK + app_name + cr.Back.RESET + cr.Fore.RESET}       |")
+            print(" +-------" + "-" * len(app_name) + "-------+")
+            for setting in dataclasses.asdict(dts).items():
+                print(f" |- {setting[0]:<15} - {setting[1]}")
+            print("")
+            print(f" -> listening on port {dts.PortToListen}")
+            print("")
+            print(cr.Fore.YELLOW + "     You see this message because __debug__ is true.")
+            print("     Use the -O flag to enable optimization `python -O`." + cr.Fore.RESET)
+            print("")
+        # fmt: on
+        
+        if dts.Trace:
+            # FIXME: if the client disconnects it the proxy still sends heart beats
+            # Maybe this can be fixed the proxy is looking for the client if it
+            # does not find the application it should delete it.
+            # But then the application proxy is till in the record ...
+            # get proxy instance if its avialable
+            proxy_service = None
+            try:
+                proxy_service = eureka_client.get_application(
+                    dts.RegistrarURL, QDS_PROXY_APP_NAME
+                )
+            except urllib.error.HTTPError as e:
+                if e.code == 404:
+                    log.error("no proxy for capturing traces was found")
+                    exit(1)
+
+            instance = proxy_service.instances[0]
+            # TODO: the docuement request is just a work around events or something similar should be used
+            # send register notification
+            with grpc.insecure_channel(
+                f"{instance.ipAddr}:{instance.port.port}"
+            ) as channel:
+                stub = DTAServerStub(channel)
+                result = stub.TransformDocument(
+                    DocumentRequest(
+                        service_name=app_name,
+                        document="REGISTER ME - id:59e46078-6ca5-4f0b-9732-e6fdf5f5a49e".encode(),
+                    )
+                )
+                if (
+                    result.trans_document.decode()
+                    == "OK - id:59e46078-6ca5-4f0b-9732-e6fdf5f5a49e"
+                ):
+                    log.info(f"successfully send proxy registration")
 
         server.wait_for_termination()
