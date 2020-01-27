@@ -8,9 +8,9 @@ from services.services import DTAServer
 
 class QDS_ECHO(DTAServer):
     version = "0.0.1"
-    app_name = "QDS.ECHO"
+    app_name = "DE.TU-BERLIN.QDS.ECHO"
 
     def work(self, request, context) -> Tuple[str, Optional[str]]:
         return (request.document.decode(), None)
 
-QDS_ECHO.run(50052)
+QDS_ECHO.run()
