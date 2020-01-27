@@ -1,15 +1,16 @@
 import argparse
 from dataclasses import dataclass
 import py_eureka_client.eureka_client as eureka_client
-import logging as log
+# import logging as log
 import grpc
 import urllib
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(".").resolve()))
+from dtslog import log
 from dtaservice.dtaservice_pb2_grpc import DTAServerStub
-from dtaservice.dtaservice_pb2 import ListServiceRequest
+from dtaservice.dtaservice_pb2 import ListServiceRequest, DocumentRequest
 
 
 parser = argparse.ArgumentParser()
@@ -84,11 +85,13 @@ if __name__ == "__main__":
 
         service = None
         try:
-            service = eureka_client.get_application(config.EurekaURL, config.ServiceName)
+            service = eureka_client.get_application(
+                config.EurekaURL, config.ServiceName
+            )
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 log.info(f"Could not find the service {config.ServiceName} at eureka")
-        
+
         if service is None:
             log.info(f"Looking for a gateway {DTA_GW_ID}")
 
@@ -97,13 +100,31 @@ if __name__ == "__main__":
             except urllib.error.HTTPError as e:
                 if e.code == 404:
                     log.info(f"Could not find a gateway {DTA_GW_ID} at eureka")
-
-        if service:
-            log.info(f"Will contact {config.ServiceAddress} for service for service {config.ServiceName}")
-            config.ServiceAddress = f"{service.instances[0].ipAddr}:{service.instances[0].port.port}"
+                    log.error(
+                        f"Could not connect to service {config.ServiceName} or to gateway {DTA_GW_ID}"
+                    )
+                    exit(1)
         else:
-            log.error(f"Could not connect to service {config.ServiceName} or to gateway {DTA_GW_ID}")
-            exit(1)
+            # check for available proxy
+            #proxy_instances = [instance for instance in service.instances if instance.metadata.get("DTA-Type", "") == "PROXY"]
+            #proxy_found = len(proxy_instances) > 0
+            # use proxy if we found one
+            #if proxy_found:
+            #    service = proxy_instances
+            #    log.info(f"found available proxy")
+            # TODO: maybe use caching so discorcy client 
+            try:
+                service = eureka_client.get_application(config.EurekaURL, config.ServiceName + ".PROXY")
+            except urllib.error.HTTPError as e:
+                if e.code == 404:
+                    log.info(f"no proxy was found for app name {config.ServiceName}")
+            
+            config.ServiceAddress = (
+                f"{service.instances[0].ipAddr}:{service.instances[0].port.port}"
+            )
+            log.info(
+                f"Will contact {config.ServiceAddress} for service for {config.ServiceName}"
+            )
 
     # open grpc connection channel
     channel = grpc.insecure_channel(config.ServiceAddress)
@@ -114,12 +135,14 @@ if __name__ == "__main__":
     stub = DTAServerStub(channel)
 
     # list avialable services
-    response = stub.ListServices(ListServiceRequest(), None)
+    response = stub.ListServices(ListServiceRequest())
+    print(response)
     if response is None:
         log.error("could not list services")
         exit(1)
 
     # read content from file
+    assert config.FileName != ""
     file_path = Path(config.FileName)
     if not file_path.exists():
         log.error(f"Specified file {config.FileName} does not exist")
@@ -128,7 +151,13 @@ if __name__ == "__main__":
     with file_path.open("r") as file:
         document = file.read()
 
-    
+    response = stub.TransformDocument(
+        DocumentRequest(
+            service_name=config.ServiceName,
+            file_name=config.FileName,
+            document=document.encode(),
+        )
+    )
 
-    
+    print(response.trans_document)
 
