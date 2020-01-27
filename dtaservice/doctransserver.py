@@ -12,7 +12,7 @@ APP_NAME = "DE.TU-BERLIN.QDS.ABSTRACT-SERVER"
 
 @dataclass
 class DocTransServer:
-    RegistrarURL: str = ""
+    RegistrarURL: str = "http://localhost:8761/eureka"
     RegistrarUser: str = ""
     TTL: int = 0
 
@@ -22,10 +22,10 @@ class DocTransServer:
     DtaType: str = ""
     IsSSL: bool = False
 
-    LogLevel: int = 0
+    LogLevel: str = ""
     CfgFile: str = "./dts/config.json"
     Init: bool = False
-    Test: bool = False
+    Trace: bool = False
 
     def setup_proxy_connection(self):
         print("hook up proxy connection")
