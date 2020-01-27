@@ -17,6 +17,9 @@ django = "^3.0.2"
 djangorestframework = "^3.11.0"
 django-cors-headers = "^3.2.1"
 psycopg2 = "^2.8.4"
+requests = "^2.22.0"
+doctrans-py-swagger = {git = "https://github.com/B4rtware/doctrans-py-swagger.git"}
+colorama = "^0.4.3"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
