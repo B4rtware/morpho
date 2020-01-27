@@ -13,11 +13,6 @@ from dtaservice.dtaservice_pb2 import TransformDocumentResponse
 from dtaservice.dtaservice_pb2_grpc import DTAServerStub
 from services.services import DTAServer
 
-@dataclass
-class CountResults():
-    Bytes: int
-    Lines: int
-    Words: int
 
 class QDS_PROXY(DTAServer):
     version = "0.0.1"
