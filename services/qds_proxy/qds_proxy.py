@@ -63,6 +63,15 @@ class QDS_PROXY(DTAServer):
         channel = grpc.insecure_channel(f"{instance.ipAddr}:{instance.port.port}")
         stub = DTAServerStub(channel)
         result = stub.TransformDocument(request)
+        # FIXME: implement a observer pattern for proxy calls
+        # FIXME: maybe rename database microservice to trace 
+        database_service = eureka_client.get_application(
+            "http://localhost:8761/eureka", "DE.TU-Berlin.QDS.DATABASE"
+        )
+        db_instance = database_service.instances[0]
+        with grpc.insecure_channel(f"{db_instance.ipAddr}:{db_instance.port.port}") as channel:
+            stub = DTAServerStub(channel)
+            stub.TransformDocument(request)
         return TransformDocumentResponse(
             trans_document=result.trans_document,
             trans_output=result.trans_output,
