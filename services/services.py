@@ -53,10 +53,10 @@ parser.add_argument("--CfgFile", type=str, help="The config file to use")
 parser.add_argument("--Init", help="Create a default config file as defined by cfg-file, if set. If not set ~/.dta/<AppName>/config.json will be created.", action="store_true")
 # fmt: on
 
-
+# TODO: consider remove this
 @dataclass
 class DtaService:
-    service_handler: pb.DocTransServer
+    service_handler: pb.DTAServerConfig
     resolver: eureka_client.RegistryClient
 
 
@@ -87,7 +87,8 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
 
         app_name = getattr(cls, "app_name", "UNKNOWN")
         log.warning("no app name was specified instead using: UNKNOWN!")
-        dts = pb.DocTransServer(
+        # doctrans: dts
+        dtas_config = pb.DTAServerConfig(
             AppName=app_name,
             CfgFile=str(
                 working_home_dir / Path("/.dta/") / app_name / Path("/config.json")
@@ -99,36 +100,37 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         args = parser.parse_args()
         for arg in vars(args).items():
             if arg[1]:
-                setattr(dts, arg[0], arg[1])
+                setattr(dtas_config, arg[0], arg[1])
 
-        log.getLogger().setLevel(log._nameToLevel[dts.LogLevel])
+        log.getLogger().setLevel(log._nameToLevel[dtas_config.LogLevel])
 
-        if dts.Init:
-            dts.new_config_file()
+        # create new config file by saving the default values
+        if dtas_config.Init:
+            dtas_config.save()
 
         # grpc is necessary for internal communication. REST is optional.
         # register at eureka server
         eureka_client.init_registry_client(
-            eureka_server=dts.RegistrarURL,
-            instance_id=dts.HostName,
-            app_name=dts.AppName,
-            instance_port=int(dts.PortToListen),
-            instance_secure_port_enabled=dts.IsSSL,
-            metadata={"DTA-Type": dts.DtaType},
+            eureka_server=dtas_config.RegistrarURL,
+            instance_id=dtas_config.HostName,
+            app_name=dtas_config.AppName,
+            instance_port=int(dtas_config.PortToListen),
+            instance_secure_port_enabled=dtas_config.IsSSL,
+            metadata={"DTA-Type": dtas_config.DtaType},
         )
 
         # create grpc server
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         # TODO: there is currently no case if the port is already in use
-        server.add_insecure_port(f"[::]:{dts.PortToListen}")
+        server.add_insecure_port(f"[::]:{dtas_config.PortToListen}")
 
         cls_instance = cls()
         # bind properties to be used inside the class instance
-        cls.dts = dts
+        cls.dtas_config = dtas_config
         dtaservice_pb2_grpc.add_DTAServerServicer_to_server(cls_instance, server)
         server.start()
 
-        if dts.REST:
+        if dtas_config.REST:
             # TODO: check if rest_thread needs to added to the cls instance
             swagger_server_module_path = Path(doctrans_py_swagger_server.__file__).parent
             swagger_path = swagger_server_module_path / Path("swagger")
@@ -142,7 +144,7 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
             )
 
             # as deamon so that the thread gets also terminated if the parent 
-            rest_thread = Thread(target=waitress.serve, args=(app,), kwargs={"port": int(dts.HTTPPort)}, daemon=True)
+            rest_thread = Thread(target=waitress.serve, args=(app,), kwargs={"port": int(dtas_config.HTTPPort)}, daemon=True)
             rest_thread.start()
 
         # fmt: off
@@ -152,11 +154,11 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
             print(" +-------" + "-" * len(app_name) + "-------+")
             print(f" |       {cr.Back.GREEN + cr.Fore.BLACK + app_name + cr.Back.RESET + cr.Fore.RESET}       |")
             print(" +-------" + "-" * len(app_name) + "-------+")
-            for setting in dataclasses.asdict(dts).items():
+            for setting in dataclasses.asdict(dtas_config).items():
                 print(f" |- {setting[0]:<15} - {setting[1]}")
             print("")
-            print(f" [grpc] -> listening on port {dts.PortToListen}")
-            if dts.REST: print(f" [rest] -> listening on port {dts.HTTPPort}")
+            print(f" [grpc] -> listening on port {dtas_config.PortToListen}")
+            if dtas_config.REST: print(f" [rest] -> listening on port {dtas_config.HTTPPort}")
             print("")
             print(cr.Fore.YELLOW + "     You see this message because __debug__ is true.")
             print("     Use the -O flag to enable optimization `python -O`." + cr.Fore.RESET)

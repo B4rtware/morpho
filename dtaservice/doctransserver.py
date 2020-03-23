@@ -8,11 +8,9 @@ import json
 
 log.basicConfig(level=log.INFO)
 
-APP_NAME = "DE.TU-BERLIN.QDS.ABSTRACT-SERVER"
-
-# TODO: rename to Config or something similar
+# doctrans: DocTransServer
 @dataclass
-class DocTransServer:
+class DTAServerConfig:
     RegistrarURL: str = "http://localhost:8761/eureka"
     RegistrarUser: str = ""
     TTL: int = 0
