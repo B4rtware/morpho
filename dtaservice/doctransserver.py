@@ -40,6 +40,7 @@ class DTAServerConfig:
         exit(0)
         return
 
+    # TODO: implement here grpc and rest server?
     def create_listener(self, max_port_seeks):
         port = int(self.PortToListen)
         log.debug("sajidj")
@@ -58,8 +59,13 @@ class DTAServerConfig:
         s.listen(1)
         conn, addr = s.accept()
 
+    # doctrans: new_doc_trans_from_file
     @classmethod
-    def new_doc_trans_from_file(cls, path):
-        with Path(self.CfgFile).open("r") as file:
-            json.load(file)
-
+    def load(cls, path) -> "DTAServerConfig":
+        dtas_config = cls()
+        with Path(path).open("r") as file:
+            config = json.load(file)
+            for arg in config.items():
+                if arg[1]:
+                    setattr(dtas_config, arg[0], arg[1])
+        return dtas_config
