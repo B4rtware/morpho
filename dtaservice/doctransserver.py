@@ -30,7 +30,8 @@ class DTAServerConfig:
     def setup_proxy_connection(self):
         print("hook up proxy connection")
 
-    def new_config_file(self):
+    # doctrans: new_config_file
+    def save(self):
         path = Path(self.CfgFile)
         path.parent.mkdir(exist_ok=True, parents=True)
         with path.open("w") as cfg:
