@@ -19,10 +19,11 @@ class DocTransServer:
 
     HostName: str = ""
     AppName: str = ""
-    PortToListen: str = ""
+    PortToListen: str = "50000"
     DtaType: str = ""
     IsSSL: bool = False
     REST: bool = False
+    HTTPPort: str = "8080"
 
     LogLevel: str = ""
     CfgFile: str = "./dts/config.json"
