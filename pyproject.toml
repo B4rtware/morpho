@@ -20,6 +20,8 @@ psycopg2 = "^2.8.4"
 requests = "^2.22.0"
 doctrans-py-swagger = {git = "https://github.com/B4rtware/doctrans-py-swagger.git"}
 colorama = "^0.4.3"
+doctrans-py-swagger-server = {git = "git@github.com:B4rtware/doctrans-py-swagger-server.git"}
+connexion = "2.6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

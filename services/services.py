@@ -11,9 +11,15 @@ import py_eureka_client.eureka_client as eureka_client
 from dtaservice.dtaservice_pb2 import DocumentRequest
 import colorama as cr
 import urllib
-
+import waitress
+import connexion
+from threading import Thread
+import importlib.resources as resources
 
 from dtaservice.dtaservice_pb2_grpc import DTAServerStub
+
+import doctrans_py_swagger_server
+from doctrans_py_swagger_server import encoder
 
 sys.path.append(str(Path(".").resolve()))
 from dtslog import log
@@ -81,6 +87,7 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         working_home_dir = Path.home()
 
         app_name = getattr(cls, "app_name", "UNKNOWN")
+        log.warning("no app name was specified instead using: UNKNOWN!")
         dts = pb.DocTransServer(
             AppName=app_name,
             CfgFile=str(
@@ -89,7 +96,7 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
             LogLevel="INFO",
         )
 
-        # parse to fill the configuration
+        # parse arguments to populate the configuration
         args = parser.parse_args()
         for arg in vars(args).items():
             if arg[1]:
@@ -100,6 +107,7 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         if dts.Init:
             dts.new_config_file()
 
+        # grpc is necessary for internal communication. REST is optional.
         # register at eureka server
         eureka_client.init_registry_client(
             eureka_server=dts.RegistrarURL,
@@ -121,6 +129,21 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         dtaservice_pb2_grpc.add_DTAServerServicer_to_server(cls_instance, server)
         server.start()
 
+        swagger_server_module_path = Path(doctrans_py_swagger_server.__file__).parent
+        swagger_path = swagger_server_module_path / Path("swagger")
+
+        app = connexion.App(__name__, specification_dir=swagger_path)
+        app.app.json_ecoder = encoder.JSONEncoder
+        app.add_api(
+            "swagger.yaml",
+            arguments={"title": "dtaservice.proto"},
+            pythonic_params=True,
+        )
+        rest_thread = Thread(target=waitress.serve, args=(app,), daemon=True)
+        rest_thread.start()
+
+        # print(vars(doctrans_py_swagger_server))
+
         # fmt: off
         if __debug__:
             # use -O flag to remove all debug branches out of the bytecode
@@ -137,40 +160,5 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
             print("     Use the -O flag to enable optimization `python -O`." + cr.Fore.RESET)
             print("")
         # fmt: on
-        
-        if dts.Trace:
-            # FIXME: if the client disconnects it the proxy still sends heart beats
-            # Maybe this can be fixed the proxy is looking for the client if it
-            # does not find the application it should delete it.
-            # But then the application proxy is till in the record ...
-            # get proxy instance if its avialable
-            proxy_service = None
-            try:
-                proxy_service = eureka_client.get_application(
-                    dts.RegistrarURL, QDS_PROXY_APP_NAME
-                )
-            except urllib.error.HTTPError as e:
-                if e.code == 404:
-                    log.error("no proxy for capturing traces was found")
-                    exit(1)
-
-            instance = proxy_service.instances[0]
-            # TODO: the docuement request is just a work around events or something similar should be used
-            # send register notification
-            with grpc.insecure_channel(
-                f"{instance.ipAddr}:{instance.port.port}"
-            ) as channel:
-                stub = DTAServerStub(channel)
-                result = stub.TransformDocument(
-                    DocumentRequest(
-                        service_name=app_name,
-                        document="REGISTER ME - id:59e46078-6ca5-4f0b-9732-e6fdf5f5a49e".encode(),
-                    )
-                )
-                if (
-                    result.trans_document.decode()
-                    == "OK - id:59e46078-6ca5-4f0b-9732-e6fdf5f5a49e"
-                ):
-                    log.info(f"successfully send proxy registration")
 
         server.wait_for_termination()
