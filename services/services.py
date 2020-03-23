@@ -128,18 +128,20 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         dtaservice_pb2_grpc.add_DTAServerServicer_to_server(cls_instance, server)
         server.start()
 
-        swagger_server_module_path = Path(doctrans_py_swagger_server.__file__).parent
-        swagger_path = swagger_server_module_path / Path("swagger")
+        if dts.REST:
+            # TODO: check if rest_thread needs to added to the cls instance
+            swagger_server_module_path = Path(doctrans_py_swagger_server.__file__).parent
+            swagger_path = swagger_server_module_path / Path("swagger")
 
-        app = connexion.App(__name__, specification_dir=swagger_path)
-        app.app.json_ecoder = encoder.JSONEncoder
-        app.add_api(
-            "swagger.yaml",
-            arguments={"title": "dtaservice.proto"},
-            pythonic_params=True,
-        )
-        rest_thread = Thread(target=waitress.serve, args=(app,), daemon=True)
-        rest_thread.start()
+            app = connexion.App(__name__, specification_dir=swagger_path)
+            app.app.json_ecoder = encoder.JSONEncoder
+            app.add_api(
+                "swagger.yaml",
+                arguments={"title": "dtaservice.proto"},
+                pythonic_params=True,
+            )
+            rest_thread = Thread(target=waitress.serve, args=(app,), daemon=True)
+            rest_thread.start()
 
         # fmt: off
         if __debug__:
