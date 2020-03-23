@@ -1,7 +1,6 @@
-from dataclasses import dataclass
 from pathlib import Path
 import sys
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 import grpc
 import py_eureka_client.eureka_client as eureka_client
 
@@ -9,7 +8,7 @@ sys.path.append(str(Path(".").resolve()))
 from dtslog import log
 from dtaservice.dtaservice_pb2 import TransformDocumentResponse
 from dtaservice.dtaservice_pb2_grpc import DTAServerStub
-from services.services import DTAServer
+from dtaservice.server import DTAServer
 
 
 class QDS_PROXY(DTAServer):

@@ -8,24 +8,21 @@ import grpc
 import concurrent.futures as futures
 import argparse
 import py_eureka_client.eureka_client as eureka_client
-from dtaservice.dtaservice_pb2 import DocumentRequest
 import colorama as cr
 import urllib
 import waitress
 import connexion
 from threading import Thread
-import importlib.resources as resources
-
-from dtaservice.dtaservice_pb2_grpc import DTAServerStub
 
 import doctrans_py_swagger_server
 from doctrans_py_swagger_server import encoder
 
 sys.path.append(str(Path(".").resolve()))
 from dtslog import log
-import dtaservice.doctransserver as pb
-import dtaservice.dtaservice_pb2_grpc as dtaservice_pb2_grpc
-import dtaservice.dtaservice_pb2 as dtaservice_pb2
+from dtaservice.config import DTAServerConfig
+
+from dtaservice.proto import dtaservice_pb2
+from dtaservice.proto import dtaservice_pb2_grpc
 
 cr.init()
 
@@ -56,7 +53,7 @@ parser.add_argument("--Init", help="Create a default config file as defined by c
 # TODO: consider remove this
 @dataclass
 class DtaService:
-    service_handler: pb.DTAServerConfig
+    service_handler: DTAServerConfig
     resolver: eureka_client.RegistryClient
 
 
@@ -88,7 +85,7 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         app_name = getattr(cls, "app_name", "UNKNOWN")
         log.warning("no app name was specified instead using: UNKNOWN!")
         # doctrans: dts
-        dtas_config = pb.DTAServerConfig(
+        dtas_config = DTAServerConfig(
             AppName=app_name,
             CfgFile=str(
                 working_home_dir / Path("/.dta/") / app_name / Path("/config.json")

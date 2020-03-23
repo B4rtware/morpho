@@ -16,9 +16,9 @@
 from grpc_tools import protoc
 
 protoc.main((
-    'dtaservice',
-    "-ID:/XXXX/Documents/git/github/doctrans-py/dtaservice",
-    '--python_out=./dtaservice',
-    '--grpc_python_out=./dtaservice',
+    '',
+    "-ID:/XXXX/Documents/git/github/doctrans-py/dtaservice/proto",
+    '--python_out=./test',
+    '--grpc_python_out=./test',
     'dtaservice.proto',
 ))

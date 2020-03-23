@@ -2,7 +2,7 @@ from pathlib import Path
 import sys
 
 sys.path.append(str(Path(".").resolve()))
-from services.services import DTAServer
+from dtaservice.server import DTAServer
 
 import doctrans_py_swagger
 

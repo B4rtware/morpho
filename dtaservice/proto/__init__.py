@@ -1,0 +1,2 @@
+import dtaservice.proto.dtaservice_pb2 as dtaservice_pb2
+import dtaservice.proto.dtaservice_pb2_grpc as dtaservice_pb2_grpc

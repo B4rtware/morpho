@@ -1,4 +1,5 @@
 {
     "pythonVersion": "3.8",
-    "strict": ["**/*"]
+    "strict": ["**/*"],
+    "exclude": ["__init__.py", "run_codegen.py"]
 }

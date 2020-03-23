@@ -3,11 +3,11 @@ import dataclasses
 from pathlib import Path
 import sys
 import json
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 sys.path.append(str(Path(".").resolve()))
 
-from services.services import DTAServer
+from dtaservice.server import DTAServer
 
 @dataclass
 class CountResults():
@@ -27,4 +27,4 @@ class QDS_COUNT(DTAServer):
         )
         return (json.dumps(dataclasses.asdict(cr)), None)
 
-QDS_COUNT.run(50050)
+QDS_COUNT.run()

@@ -1,7 +1,6 @@
 from pathlib import Path
 import dataclasses
 from dataclasses import dataclass
-import dtaservice.dtaservice_pb2 as dtaservice_pb2
 import socket
 import logging as log
 import json
@@ -41,23 +40,6 @@ class DTAServerConfig:
         return
 
     # TODO: implement here grpc and rest server?
-    def create_listener(self, max_port_seeks):
-        port = int(self.PortToListen)
-        log.debug("sajidj")
-        print("hello")
-        for i in range(max_port_seeks):
-            log.info("Trying to listen on port {}".format(port))
-            address = ("", port)
-            s = socket.create_server(address)
-            if s:
-                log.info("Using port {} to listen for dta".format(port))
-                break
-            else:
-                log.error("Error while creating socket!")
-                exit(1)
-
-        s.listen(1)
-        conn, addr = s.accept()
 
     # doctrans: new_doc_trans_from_file
     @classmethod

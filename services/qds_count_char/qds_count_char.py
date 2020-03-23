@@ -1,10 +1,10 @@
 from pathlib import Path
 import sys
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 sys.path.append(str(Path(".").resolve()))
 
-from services.services import DTAServer
+from dtaservice.server import DTAServer
 
 class QDS_COUNT_CHAR(DTAServer):
     version = "0.0.1"
