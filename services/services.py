@@ -140,7 +140,9 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
                 arguments={"title": "dtaservice.proto"},
                 pythonic_params=True,
             )
-            rest_thread = Thread(target=waitress.serve, args=(app,), daemon=True)
+
+            # as deamon so that the thread gets also terminated if the parent 
+            rest_thread = Thread(target=waitress.serve, args=(app,), kwargs={"port": int(dts.HTTPPort)}, daemon=True)
             rest_thread.start()
 
         # fmt: off
@@ -153,7 +155,8 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
             for setting in dataclasses.asdict(dts).items():
                 print(f" |- {setting[0]:<15} - {setting[1]}")
             print("")
-            print(f" -> listening on port {dts.PortToListen}")
+            print(f" [grpc] -> listening on port {dts.PortToListen}")
+            if dts.REST: print(f" [rest] -> listening on port {dts.HTTPPort}")
             print("")
             print(cr.Fore.YELLOW + "     You see this message because __debug__ is true.")
             print("     Use the -O flag to enable optimization `python -O`." + cr.Fore.RESET)
