@@ -51,7 +51,6 @@ parser.add_argument_group("Generic")
 parser.add_argument("--LogLevel", type=str, help="Log level, one of panic, fatal, error, warn or warning, info, debug, trace", default="INFO", choices=("CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG", "NOTSET"))
 parser.add_argument("--CfgFile", type=str, help="The config file to use")
 parser.add_argument("--Init", help="Create a default config file as defined by cfg-file, if set. If not set ~/.dta/<AppName>/config.json will be created.", action="store_true")
-parser.add_argument("--Trace", help="Connect Proxy for capturing traces to this microservice", action="store_true")
 # fmt: on
 
 
@@ -141,8 +140,6 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         )
         rest_thread = Thread(target=waitress.serve, args=(app,), daemon=True)
         rest_thread.start()
-
-        # print(vars(doctrans_py_swagger_server))
 
         # fmt: off
         if __debug__:
