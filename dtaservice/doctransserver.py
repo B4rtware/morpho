@@ -10,6 +10,7 @@ log.basicConfig(level=log.INFO)
 
 APP_NAME = "DE.TU-BERLIN.QDS.ABSTRACT-SERVER"
 
+# TODO: rename to Config or something similar
 @dataclass
 class DocTransServer:
     RegistrarURL: str = "http://localhost:8761/eureka"
@@ -21,11 +22,11 @@ class DocTransServer:
     PortToListen: str = ""
     DtaType: str = ""
     IsSSL: bool = False
+    REST: bool = False
 
     LogLevel: str = ""
     CfgFile: str = "./dts/config.json"
     Init: bool = False
-    Trace: bool = False
 
     def setup_proxy_connection(self):
         print("hook up proxy connection")
