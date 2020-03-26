@@ -1,48 +1,28 @@
 import argparse
 from dataclasses import dataclass
+from typing import Optional
 import py_eureka_client.eureka_client as eureka_client
+from py_eureka_client.eureka_client import Application
 # import logging as log
 import grpc
-import urllib
 import sys
 from pathlib import Path
+from urllib.error import HTTPError
 
 sys.path.append(str(Path(".").resolve()))
 from dtslog import log
-from dtaservice.dtaservice_pb2_grpc import DTAServerStub
-from dtaservice.dtaservice_pb2 import ListServiceRequest, DocumentRequest
+from dtaservice.proto.dtaservice_pb2_grpc import DTAServerStub
+from dtaservice.proto.dtaservice_pb2 import DocumentRequest
 
-
+# fmt: off
 parser = argparse.ArgumentParser()
 parser.add_argument("--FileName", type=str, help="the file to be uploaded")
-parser.add_argument(
-    "--EurekaURL",
-    type=str,
-    help="if set the indicated eureka server will be used to find DTA-GW",
-)
+parser.add_argument("--EurekaURL", type=str, help="if set the indicated eureka server will be used to find DTA-GW")
 parser.add_argument("--ServiceName", type=str, help="The service to be used")
-parser.add_argument(
-    "--ServiceAddress", type=str, help="Address and port of the server to connect"
-)
-parser.add_argument(
-    "--ListServices", help="List all the services accessible", action="store_true",
-)
-parser.add_argument(
-    "--LogLevel",
-    type=str,
-    help="Log level, one of panic, fatal, error, warn or warning, info, debug, trace",
-    choices=(
-        "CRITICAL",
-        "FATAL",
-        "ERROR",
-        "WARNING",
-        "WARN",
-        "INFO",
-        "DEBUG",
-        "NOTSET",
-    ),
-    default="INFO",
-)
+parser.add_argument("--ServiceAddress", type=str, help="Address and port of the server to connect")
+parser.add_argument("--ListServices", help="List all the services accessible", action="store_true")
+parser.add_argument("--LogLevel", type=str, help="Log level, one of panic, fatal, error, warn or warning, info, debug, trace", choices=("CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG", "NOTSET"), default="INFO")
+# fmt: on
 
 
 @dataclass
@@ -69,7 +49,7 @@ if __name__ == "__main__":
         if arg[1]:
             setattr(config, arg[0], arg[1])
 
-    log.getLogger().setLevel(log._nameToLevel[config.LogLevel])
+    log.getLogger().setLevel(config.LogLevel)
     log.info(f"Requesting service {config.ServiceName}")
 
     # We have to identify the server to contact
@@ -83,12 +63,12 @@ if __name__ == "__main__":
     if config.ServiceAddress == "":
         log.info(f"Will contact registry at {config.EurekaURL}")
 
-        service = None
+        service: Optional[Application] = None
         try:
             service = eureka_client.get_application(
                 config.EurekaURL, config.ServiceName
             )
-        except urllib.error.HTTPError as e:
+        except HTTPError as e:
             if e.code == 404:
                 log.info(f"Could not find the service {config.ServiceName} at eureka")
 
@@ -97,7 +77,7 @@ if __name__ == "__main__":
 
             try:
                 service = eureka_client.get_application(config.EurekaURL, DTA_GW_ID)
-            except urllib.error.HTTPError as e:
+            except HTTPError as e:
                 if e.code == 404:
                     log.info(f"Could not find a gateway {DTA_GW_ID} at eureka")
                     log.error(
@@ -115,7 +95,7 @@ if __name__ == "__main__":
             # TODO: maybe use caching so discorcy client 
             try:
                 service = eureka_client.get_application(config.EurekaURL, config.ServiceName + ".PROXY")
-            except urllib.error.HTTPError as e:
+            except HTTPError as e:
                 if e.code == 404:
                     log.info(f"no proxy was found for app name {config.ServiceName}")
             
@@ -135,11 +115,11 @@ if __name__ == "__main__":
     stub = DTAServerStub(channel)
 
     # list avialable services
-    response = stub.ListServices(ListServiceRequest())
-    print(response)
-    if response is None:
-        log.error("could not list services")
-        exit(1)
+    # response = stub.ListServices(ListServiceRequest())
+    # print(response)
+    # if response is None:
+    #     log.error("could not list services")
+    #     exit(1)
 
     # read content from file
     assert config.FileName != ""
