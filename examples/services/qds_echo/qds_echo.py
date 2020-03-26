@@ -16,10 +16,7 @@ class QDS_ECHO(DTAServer):
     def work(
         self, request: DocumentRequest, context: ServicerContext
     ) -> Tuple[str, Optional[str]]:
-        return
-
-    # def work(self, request, context) -> Tuple[str, Optional[str]]:
-    #     return (request.document.decode(), None)
+        return (request.document.decode(), None)
 
 
 QDS_ECHO.run()
