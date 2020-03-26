@@ -1,5 +1,12 @@
 {
     "pythonVersion": "3.8",
-    "strict": ["**/*"],
-    "exclude": ["__init__.py", "run_codegen.py"]
+    "strict": [
+        "**/*"
+    ],
+    "exclude": [
+        "**/run_codegen.py",
+        "./client/grpc/client.py",
+        "./typings"
+    ],
+    "ignore": ["./service/proto"]
 }
