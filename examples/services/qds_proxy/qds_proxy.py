@@ -2,13 +2,15 @@ from pathlib import Path
 import sys
 from typing import Optional, Tuple
 import grpc
+from grpc import Channel, ServicerContext
 import py_eureka_client.eureka_client as eureka_client
 
 sys.path.append(str(Path(".").resolve()))
+
 from dtslog import log
-from dtaservice.dtaservice_pb2 import TransformDocumentResponse
-from dtaservice.dtaservice_pb2_grpc import DTAServerStub
-from dtaservice.server import DTAServer
+from service.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
+from service.proto.dtaservice_pb2_grpc import DTAServerStub
+from service.server import DTAServer
 
 
 class QDS_PROXY(DTAServer):
@@ -20,11 +22,12 @@ class QDS_PROXY(DTAServer):
 
         self.registered_proxy_app_instances = []
 
-    def work(self, request, context) -> Tuple[str, Optional[str]]:
+    def work(self, request: DocumentRequest, context: ServicerContext) -> Tuple[str, Optional[str]]:
         # TODO: database call here
-        pass
+        return ("", None)
 
-    def TransformDocument(self, request, context):
+
+    def TransformDocument(self, request: DocumentRequest, context: ServicerContext) -> TransformDocumentResponse:
         # TODO: implement internal service communication protocol using grpc (sendEvent("register_proxy", "..."))
         # let services be registed by the proxy to route to it self
         if (
@@ -33,17 +36,19 @@ class QDS_PROXY(DTAServer):
         ):
             self.registered_proxy_app_instances.append(
                 eureka_client.init_registry_client(
-                    eureka_server=self.dts.RegistrarURL,
-                    instance_id=self.dts.HostName,
+                    eureka_server=self.dtas_config.RegistrarURL,
+                    instance_id=self.dtas_config.HostName,
                     app_name=request.service_name + ".PROXY",
-                    instance_port=int(self.dts.PortToListen),
-                    instance_secure_port_enabled=self.dts.IsSSL,
+                    instance_port=int(self.dtas_config.PortToListen),
+                    instance_secure_port_enabled=self.dtas_config.IsSSL,
                     metadata={"DTA-Type": "PROXY_SERVICE"},
                 )
             )
             log.info(f"registered {request.service_name + '.PROXY'}")
             return TransformDocumentResponse(
-                trans_document="OK - id:59e46078-6ca5-4f0b-9732-e6fdf5f5a49e".encode()
+                trans_document="OK - id:59e46078-6ca5-4f0b-9732-e6fdf5f5a49e".encode(),
+                trans_output=[],
+                error=None
             )
 
         # TODO: consider using discovery client for caching
@@ -68,6 +73,7 @@ class QDS_PROXY(DTAServer):
             "http://localhost:8761/eureka", "DE.TU-Berlin.QDS.DATABASE"
         )
         db_instance = database_service.instances[0]
+
         with grpc.insecure_channel(f"{db_instance.ipAddr}:{db_instance.port.port}") as channel:
             stub = DTAServerStub(channel)
             stub.TransformDocument(request)
