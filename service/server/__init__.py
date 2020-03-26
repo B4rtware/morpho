@@ -4,12 +4,13 @@ import dataclasses
 from pathlib import Path
 import sys
 from typing import Optional, Tuple
+from connexion.apps.flask_app import FlaskApp
 import grpc
 import concurrent.futures as futures
 import argparse
+from grpc import ServicerContext
 import py_eureka_client.eureka_client as eureka_client
 import colorama as cr
-import urllib
 import waitress
 import connexion
 from threading import Thread
@@ -18,11 +19,14 @@ import doctrans_py_swagger_server
 from doctrans_py_swagger_server import encoder
 
 sys.path.append(str(Path(".").resolve()))
-from dtslog import log
-from dtaservice.config import DTAServerConfig
+from service.log import log
+from service.config import DTAServerConfig
 
-from dtaservice.proto import dtaservice_pb2
-from dtaservice.proto import dtaservice_pb2_grpc
+from service.proto.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
+from service.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
+from service.proto.dtaservice_pb2 import ListServicesResponse
+from service.proto.dtaservice_pb2 import ListServiceRequest
+from service.proto.dtaservice_pb2_grpc import DTAServerServicer
 
 cr.init()
 
@@ -60,23 +64,29 @@ class DtaService:
 QDS_PROXY_APP_NAME = "DE.TU-Berlin.QDS.PROXY"
 
 
-class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
+class DTAServer(ABC, DTAServerServicer):
     @abstractmethod
-    def work(self, request, context) -> Tuple[str, Optional[str]]:
+    def work(
+        self, request: DocumentRequest, context: ServicerContext
+    ) -> Tuple[str, Optional[str]]:
         pass
 
-    def TransformDocument(self, request, context):
+    def TransformDocument(
+        self, request: DocumentRequest, context: ServicerContext
+    ) -> TransformDocumentResponse:
         document, error = self.work(request, context)
-        return dtaservice_pb2.TransformDocumentResponse(
+        return TransformDocumentResponse(
             # TODO: error needs to be implemented
             trans_document=document.encode(),
             trans_output=document,
             error=error,
         )
 
-    def ListServices(self, request: dtaservice_pb2.ListServiceRequest, context):
+    def ListServices(
+        self, request: ListServiceRequest, context
+    ) -> ListServicesResponse:
         services = []
-        return dtaservice_pb2.ListServicesResponse(services=services)
+        return ListServicesResponse(services=services)
 
     @classmethod
     def run(cls):
@@ -99,11 +109,18 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
             if arg[1]:
                 setattr(dtas_config, arg[0], arg[1])
 
-        log.getLogger().setLevel(log._nameToLevel[dtas_config.LogLevel])
+        log.getLogger().setLevel(dtas_config.LogLevel)
 
         # create new config file by saving the default values
         if dtas_config.Init:
             dtas_config.save()
+            log.info(
+                "Wrote example configuration file to {}. Exiting".format(
+                    dtas_config.CfgFile
+                )
+            )
+            exit(0)
+            return
 
         # grpc is necessary for internal communication. REST is optional.
         # register at eureka server
@@ -124,12 +141,14 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
         cls_instance = cls()
         # bind properties to be used inside the class instance
         cls.dtas_config = dtas_config
-        dtaservice_pb2_grpc.add_DTAServerServicer_to_server(cls_instance, server)
+        add_DTAServerServicer_to_server(cls_instance, server)
         server.start()
 
         if dtas_config.REST:
             # TODO: check if rest_thread needs to added to the cls instance
-            swagger_server_module_path = Path(doctrans_py_swagger_server.__file__).parent
+            swagger_server_module_path = Path(
+                doctrans_py_swagger_server.__file__
+            ).parent
             swagger_path = swagger_server_module_path / Path("swagger")
 
             app = connexion.App(__name__, specification_dir=swagger_path)
@@ -140,8 +159,13 @@ class DTAServer(ABC, dtaservice_pb2_grpc.DTAServerServicer):
                 pythonic_params=True,
             )
 
-            # as deamon so that the thread gets also terminated if the parent 
-            rest_thread = Thread(target=waitress.serve, args=(app,), kwargs={"port": int(dtas_config.HTTPPort)}, daemon=True)
+            # as deamon so that the thread gets also terminated if the parent
+            rest_thread = Thread(
+                target=waitress.serve,
+                args=(app,),
+                kwargs={"port": int(dtas_config.HTTPPort)},
+                daemon=True,
+            )
             rest_thread.start()
 
         # fmt: off

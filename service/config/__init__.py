@@ -1,9 +1,9 @@
-from pathlib import Path
 import dataclasses
 from dataclasses import dataclass
-import socket
-import logging as log
 import json
+import logging as log
+from pathlib import Path
+from typing import Union
 
 log.basicConfig(level=log.INFO)
 
@@ -26,24 +26,23 @@ class DTAServerConfig:
     CfgFile: str = "./dts/config.json"
     Init: bool = False
 
-    def setup_proxy_connection(self):
+    def setup_proxy_connection(self) -> None:
         print("hook up proxy connection")
 
     # doctrans: new_config_file
-    def save(self):
+    def save(self) -> None:
         path = Path(self.CfgFile)
         path.parent.mkdir(exist_ok=True, parents=True)
-        with path.open("w") as cfg:
-            json.dump(dataclasses.asdict(self), cfg, indent=4)
-        log.info("Wrote example configuration file to {}. Exiting".format(self.CfgFile))
-        exit(0)
-        return
+        with path.open("w") as f:
+            json.dump(dataclasses.asdict(self), f, indent=4)
 
     # TODO: implement here grpc and rest server?
 
     # doctrans: new_doc_trans_from_file
     @classmethod
-    def load(cls, path) -> "DTAServerConfig":
+    def load(cls, path: Union[Path, str]) -> "DTAServerConfig":
+        if not isinstance(path, str):
+            path = Path(path)
         dtas_config = cls()
         with Path(path).open("r") as file:
             config = json.load(file)
