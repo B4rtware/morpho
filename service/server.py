@@ -4,7 +4,6 @@ import dataclasses
 from pathlib import Path
 import sys
 from typing import Optional, Tuple
-from connexion.apps.flask_app import FlaskApp
 import grpc
 import concurrent.futures as futures
 import argparse
@@ -83,7 +82,7 @@ class DTAServer(ABC, DTAServerServicer):
         )
 
     def ListServices(
-        self, request: ListServiceRequest, context
+        self, request: ListServiceRequest, context: ServicerContext
     ) -> ListServicesResponse:
         services = []
         return ListServicesResponse(services=services)
