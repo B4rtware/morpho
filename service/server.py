@@ -92,7 +92,8 @@ class DTAServer(ABC, DTAServerServicer):
         working_home_dir = Path.home()
 
         app_name = getattr(cls, "app_name", "UNKNOWN")
-        log.warning("no app name was specified instead using: UNKNOWN!")
+        if app_name == "UNKNOWN":
+            log.warning("no app name was specified instead using: UNKNOWN!")
         # doctrans: dts
         dtas_config = DTAServerConfig(
             AppName=app_name,
