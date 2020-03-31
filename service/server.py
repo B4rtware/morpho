@@ -126,6 +126,7 @@ class DTAServer(ABC, DTAServerServicer):
 
         # grpc is necessary for internal communication. REST is optional.
         # register at eureka server
+        if dtas_config.Register:
         eureka_client.init_registry_client(
             eureka_server=dtas_config.RegistrarURL,
             instance_id=dtas_config.HostName,
