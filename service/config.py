@@ -10,6 +10,7 @@ log.basicConfig(level=log.INFO)
 # doctrans: DocTransServer
 @dataclass
 class DTAServerConfig:
+    Register: bool = False
     RegistrarURL: str = "http://localhost:8761/eureka"
     RegistrarUser: str = ""
     TTL: int = 0
