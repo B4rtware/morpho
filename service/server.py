@@ -29,6 +29,7 @@ from service.proto.dtaservice_pb2_grpc import DTAServerServicer
 
 cr.init()
 
+# TODO: verify that all options are used or at least output a warning
 parser = argparse.ArgumentParser()
 # fmt: off
 parser.add_argument_group("Registrar")
@@ -91,6 +92,7 @@ class DTAServer(ABC, DTAServerServicer):
     def run(cls):
         working_home_dir = Path.home()
 
+        # TODO: rename app_name to name
         app_name = getattr(cls, "app_name", "UNKNOWN")
         if app_name == "UNKNOWN":
             log.warning("no app name was specified instead using: UNKNOWN!")
@@ -130,6 +132,7 @@ class DTAServer(ABC, DTAServerServicer):
             app_name=dtas_config.AppName,
             instance_port=int(dtas_config.PortToListen),
             instance_secure_port_enabled=dtas_config.IsSSL,
+                # TODO: change dta type name to use the same from the rest specification
             metadata={"DTA-Type": dtas_config.DtaType},
         )
 
