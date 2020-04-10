@@ -190,7 +190,7 @@ class DTAServer(ABC):
         working_home_dir = Path.home()
 
         # TODO: rename app_name to name
-        app_name = getattr(cls, "app_name", "UNKNOWN")
+        app_name = getattr(cls, "name", "UNKNOWN")
         if app_name == "UNKNOWN":
             log.warning("no app name was specified instead using: UNKNOWN!")
         # doctrans: dts
