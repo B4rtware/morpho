@@ -384,17 +384,23 @@ class DTARestWorkConsumer(object):
         thread.start()
         return thread
 
-class DTAGrpcWorkConsumer(DTAServerServicer):
-    def __init__(self, work) -> None:
-        self._work = work
 
-    def TransformDocument(self, request: DocumentRequest, context: ServicerContext) -> TransformDocumentResponse:
-        trans_document = "sdsd" #self._work("LOOOL")
+class DTAGrpcWorkConsumer(DTAServerServicer):
+    def __init__(self, work, config) -> None:
+        self._work = work
+        self.config = config
+        self.server = None
+        super().__init__()
+
+    def TransformDocument(
+        self, request: DocumentRequest, context: ServicerContext
+    ) -> TransformDocumentResponse:
+        trans_document = self._work(request.document.decode())
         return TransformDocumentResponse(
             # TODO: error needs to be implemented
-            trans_document=trans_document,
-            trans_output=document,
-            error=error,
+            trans_document=trans_document.encode("utf-8"),
+            trans_output=[],
+            error=[],
         )
 
     def ListServices(
@@ -404,17 +410,19 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
         return ListServicesResponse(services=services)
 
     def start(self):
-        print("starting grpc")
+        # create grpc server
+        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        # TODO: there is currently no case if the port is already in use
+        self.server.add_insecure_port(f"[::]:{self.config.PortToListen}")
+        # bind properties to be used inside the class instance
+        add_DTAServerServicer_to_server(self, self.server)
+        self.server.start()
 
-protocols = {
-    "rest": DTARestWorkConsumer,
-    "grpc": DTAGrpcWorkConsumer
-}
+
+protocols = {"rest": DTARestWorkConsumer, "grpc": DTAGrpcWorkConsumer}
+
 
 class DTAServer(ABC):
-    def __init__(self) -> None:
-        print("init dtaserver")
-        # self.config = config
 
     @abstractmethod
     def work(self, document: str) -> str:
@@ -467,6 +475,16 @@ class DTAServer(ABC):
                 metadata={"DTA-Type": config.DtaType},
             )
 
+        # # create grpc server
+        # server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        # # TODO: there is currently no case if the port is already in use
+        # server.add_insecure_port("[::]:50000")
+
+        # # bind properties to be used inside the class instance
+        # add_DTAServerServicer_to_server(DTAGrpcWorkConsumer(lambda x: x, config), server)
+        # server.start()
+        # print(server)
+
         # TODO: add flag to not use grpc
         # create grpc server
         # server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -475,12 +493,12 @@ class DTAServer(ABC):
 
         cls_instance = cls()
         # bind properties to be used inside the class instance
-        #add_DTAServerServicer_to_server(cls_instance, server)
-        #server.start()
+        # add_DTAServerServicer_to_server(cls_instance, server)
+        # server.start()
 
         # start protocol consumer
         for protocol in args.Protocols:
-            instance = protocols[protocol](cls_instance.work)
+            instance = protocols[protocol](cls_instance.work, config)
             instance.start()
 
         # fmt: off
