@@ -8,5 +8,8 @@
         "./client/grpc/client.py",
         "./typings"
     ],
-    "ignore": ["./service/proto"]
+    "ignore": [
+        "./typings",
+        "./service/proto"
+    ]
 }
