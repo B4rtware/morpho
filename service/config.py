@@ -10,7 +10,11 @@ log.basicConfig(level=log.INFO)
 # doctrans: DocTransServer
 @dataclass
 class DTAServerConfig:
-    """Configuration class for a DTA server."""
+    """Configuration class for a DTA server.
+
+    It is a direct mapping for a given configuration file. Which should only contain
+    options which are also supported by this class.
+    """
 
     register: bool = False
     registrar_url: str = "http://localhost:8761/eureka"
