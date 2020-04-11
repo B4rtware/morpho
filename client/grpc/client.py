@@ -11,8 +11,8 @@ from urllib.error import HTTPError
 
 sys.path.append(str(Path(".").resolve()))
 from dtslog import log
-from dtaservice.proto.dtaservice_pb2_grpc import DTAServerStub
-from dtaservice.proto.dtaservice_pb2 import DocumentRequest
+from service.proto.dtaservice_pb2_grpc import DTAServerStub
+from service.proto.dtaservice_pb2 import DocumentRequest
 
 # fmt: off
 parser = argparse.ArgumentParser()
@@ -50,7 +50,7 @@ if __name__ == "__main__":
             setattr(config, arg[0], arg[1])
 
     log.getLogger().setLevel(config.LogLevel)
-    log.info(f"Requesting service {config.ServiceName}")
+    # log.info(f"Requesting service {config.ServiceName}")
 
     # We have to identify the server to contact
     # We have to possibilities
@@ -60,54 +60,54 @@ if __name__ == "__main__":
     #  a) via resolver is assumed if no server is given
     #  - contact the well-known resolver
 
-    if config.ServiceAddress == "":
-        log.info(f"Will contact registry at {config.EurekaURL}")
+    # if config.ServiceAddress == "":
+    #     log.info(f"Will contact registry at {config.EurekaURL}")
 
-        service: Optional[Application] = None
-        try:
-            service = eureka_client.get_application(
-                config.EurekaURL, config.ServiceName
-            )
-        except HTTPError as e:
-            if e.code == 404:
-                log.info(f"Could not find the service {config.ServiceName} at eureka")
+    #     service: Optional[Application] = None
+    #     try:
+    #         service = eureka_client.get_application(
+    #             config.EurekaURL, config.ServiceName
+    #         )
+    #     except HTTPError as e:
+    #         if e.code == 404:
+    #             log.info(f"Could not find the service {config.ServiceName} at eureka")
 
-        if service is None:
-            log.info(f"Looking for a gateway {DTA_GW_ID}")
+    #     if service is None:
+    #         log.info(f"Looking for a gateway {DTA_GW_ID}")
 
-            try:
-                service = eureka_client.get_application(config.EurekaURL, DTA_GW_ID)
-            except HTTPError as e:
-                if e.code == 404:
-                    log.info(f"Could not find a gateway {DTA_GW_ID} at eureka")
-                    log.error(
-                        f"Could not connect to service {config.ServiceName} or to gateway {DTA_GW_ID}"
-                    )
-                    exit(1)
-        else:
-            # check for available proxy
-            #proxy_instances = [instance for instance in service.instances if instance.metadata.get("DTA-Type", "") == "PROXY"]
-            #proxy_found = len(proxy_instances) > 0
-            # use proxy if we found one
-            #if proxy_found:
-            #    service = proxy_instances
-            #    log.info(f"found available proxy")
-            # TODO: maybe use caching so discorcy client 
-            try:
-                service = eureka_client.get_application(config.EurekaURL, config.ServiceName + ".PROXY")
-            except HTTPError as e:
-                if e.code == 404:
-                    log.info(f"no proxy was found for app name {config.ServiceName}")
+    #         try:
+    #             service = eureka_client.get_application(config.EurekaURL, DTA_GW_ID)
+    #         except HTTPError as e:
+    #             if e.code == 404:
+    #                 log.info(f"Could not find a gateway {DTA_GW_ID} at eureka")
+    #                 log.error(
+    #                     f"Could not connect to service {config.ServiceName} or to gateway {DTA_GW_ID}"
+    #                 )
+    #                 exit(1)
+    #     else:
+    #         # check for available proxy
+    #         #proxy_instances = [instance for instance in service.instances if instance.metadata.get("DTA-Type", "") == "PROXY"]
+    #         #proxy_found = len(proxy_instances) > 0
+    #         # use proxy if we found one
+    #         #if proxy_found:
+    #         #    service = proxy_instances
+    #         #    log.info(f"found available proxy")
+    #         # TODO: maybe use caching so discorcy client 
+    #         try:
+    #             service = eureka_client.get_application(config.EurekaURL, config.ServiceName + ".PROXY")
+    #         except HTTPError as e:
+    #             if e.code == 404:
+    #                 log.info(f"no proxy was found for app name {config.ServiceName}")
             
-            config.ServiceAddress = (
-                f"{service.instances[0].ipAddr}:{service.instances[0].port.port}"
-            )
-            log.info(
-                f"Will contact {config.ServiceAddress} for service for {config.ServiceName}"
-            )
+    #         config.ServiceAddress = (
+    #             f"{service.instances[0].ipAddr}:{service.instances[0].port.port}"
+    #         )
+    #         log.info(
+    #             f"Will contact {config.ServiceAddress} for service for {config.ServiceName}"
+    #         )
 
     # open grpc connection channel
-    channel = grpc.insecure_channel(config.ServiceAddress)
+    channel = grpc.insecure_channel("localhost:50001")
     if not channel:
         log.error(f"Did not connect to {config.ServiceName}")
         channel.close()
