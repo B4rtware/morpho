@@ -10,41 +10,46 @@ log.basicConfig(level=log.INFO)
 # doctrans: DocTransServer
 @dataclass
 class DTAServerConfig:
-    Register: bool = False
-    RegistrarURL: str = "http://localhost:8761/eureka"
-    RegistrarUser: str = ""
-    TTL: int = 0
+    """Configuration class for a DTA server."""
 
-    HostName: str = ""
-    AppName: str = ""
-    PortToListen: str = "50000"
-    DtaType: str = ""
-    IsSSL: bool = False
-    REST: bool = False
-    HTTPPort: str = "8080"
+    register: bool = False
+    registrar_url: str = "http://localhost:8761/eureka"
+    registrar_user: str = ""
+    ttl: int = 0
 
-    LogLevel: str = ""
-    CfgFile: str = "./dts/config.json"
-    Init: bool = False
+    host_name: str = ""
+    app_name: str = ""
+    port_to_listen: str = "50000"
+    dta_type: str = ""
+    is_ssl: bool = False
+    rest: bool = False
+    http_port: str = "8080"
 
-    def setup_proxy_connection(self) -> None:
-        print("hook up proxy connection")
+    log_level: str = ""
+    config_file: str = "./dts/config.json"
+    init: bool = False
 
     # doctrans: new_config_file
     def save(self) -> None:
-        path = Path(self.CfgFile)
+        """Save the DTA configuration to the path specified in the DTA configuration.
+        """
+        path = Path(self.config_file)
         path.parent.mkdir(exist_ok=True, parents=True)
-        with path.open("w") as f:
-            json.dump(dataclasses.asdict(self), f, indent=4)
-
-    # TODO: implement here grpc and rest server?
+        with path.open("w") as configuration:
+            json.dump(dataclasses.asdict(self), configuration, indent=4)
 
     # doctrans: new_doc_trans_from_file
     @classmethod
     def load(cls, path: Union[Path, str]) -> "DTAServerConfig":
+        """Load a DTA configuration file from a given path.
+
+        Returns:
+            DTAServerConfig -- A new DTAServerConfig with provided options.
+        """
         if not isinstance(path, str):
             path = Path(path)
         dtas_config = cls()
+        # open file and add each option to the created configuration instance
         with Path(path).open("r") as file:
             config = json.load(file)
             for arg in config.items():
