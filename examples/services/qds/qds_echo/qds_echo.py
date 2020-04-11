@@ -5,7 +5,6 @@ sys.path.append(str(Path(".").resolve()))
 
 from service.server import DTAServer
 
-
 class QDS_ECHO(DTAServer):
     version = "0.0.1"
     name = "DE.TU-BERLIN.QDS.ECHO"

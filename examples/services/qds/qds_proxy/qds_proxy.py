@@ -74,7 +74,9 @@ class QDS_PROXY(DTAServer):
         )
         db_instance = database_service.instances[0]
 
+        channel: Channel
         with grpc.insecure_channel(f"{db_instance.ipAddr}:{db_instance.port.port}") as channel:
+            channel: Channel
             stub = DTAServerStub(channel)
             stub.TransformDocument(request)
         return TransformDocumentResponse(
