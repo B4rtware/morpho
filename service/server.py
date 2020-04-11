@@ -21,7 +21,7 @@ import waitress
 import connexion
 from threading import Thread
 from connexion import RestyResolver
-from flask import Flask
+from flask import Flask, request
 from contextlib import redirect_stdout, redirect_stderr
 import io
 import traceback
@@ -55,7 +55,6 @@ Options = NewType("Options", Dict[str, str])
 
 
 # class Status(Enum)
-
 
 # TODO: verify that all options are used or at least output a warning
 parser = argparse.ArgumentParser()
@@ -91,12 +90,13 @@ class DtaService:
 
 class DTARestWorkConsumer(object):
     def __init__(self, work, config):
+        log.info("initializing DTARestWorkConsumer")
         self._work = work
         self.config = config
         self.app = Flask(__name__)
         # TODO: try to use decorator
         # fmt: off
-        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self._transform)
+        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self._transform, methods=["POST"])
         self.app.add_url_rule("/v1/qds/dta/service/list", "list", self._list)
         self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self._transform_pipe)
         # fmt: on
@@ -108,7 +108,7 @@ class DTARestWorkConsumer(object):
         with redirect_stderr(captured_stderr):
             with redirect_stdout(captured_stdout):
                 try:
-                    trans_document = self._work("work")
+                    trans_document = self._work(request.json.document)
                 except BaseException:
                     traceback.print_exc()
         error = captured_stderr.getvalue().split("\n")
@@ -131,6 +131,7 @@ class DTARestWorkConsumer(object):
         pass
 
     def start(self):
+        log.info("starting rest thread...")
         thread = Thread(
             daemon=True,
             target=waitress.serve,
@@ -283,23 +284,19 @@ class DTAServer(ABC):
         # server.wait_for_termination()
 
 
-class QDS_TEST(DTAServer):
-    def work(self, document: str) -> str:
-        return "Work done"
+# if __name__ == "__main__":
+#     print("main LOOL")
 
+#     def work():
+#         return "work"
 
-if __name__ == "__main__":
+#     # a = DTARestServer(work)
+#     # app.run()
+#     # a = DTARestServerThread(work)
+#     # thread = a.run()
+#     # thread.join()
+#     # a = QDS_TEST()
+#     # a.run()
 
-    def work():
-        return "work"
-
-    # a = DTARestServer(work)
-    # app.run()
-    # a = DTARestServerThread(work)
-    # thread = a.run()
-    # thread.join()
-    # a = QDS_TEST()
-    # a.run()
-
-    a = DTAGrpcWorkConsumer(work, None)
-    a.start()
+#     a = DTAGrpcWorkConsumer(work, None)
+#     a.start()
