@@ -1,0 +1,126 @@
+openapi: 3.0.0
+info:
+  title: Doctrans API v1
+  description: The Document Transformation Application (DTA) is a microservice based
+    web service application provided by the research group QDS of the TU Berlin.
+  version: 0.1.0
+servers:
+- url: https://virtserver.swaggerhub.com/restlife/doctrans/0.1.0
+  description: SwaggerHub API Auto Mocking
+paths:
+  /service/list:
+    get:
+      summary: Lists all available services.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListServiceResponse'
+  /document/transform:
+    post:
+      summary: Transform a plain document.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransformDocumentRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformDocumentResponse'
+  /document/transform/pipe:
+    post:
+      summary: Executes a given sequence of transforms on a plain document.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransformDocumentRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformDocumentPipeResponse'
+components:
+  schemas:
+    ListServiceResponse:
+      properties:
+        services:
+          type: array
+          example:
+          - qds.dta.dts.encryption.caeser
+          - qds.dta.dts.encryption.permutation
+          - qds.dta.dts.converters.tokenizer
+          items:
+            type: string
+    TransformDocumentResponse:
+      properties:
+        document:
+          type: string
+          description: Transformed document in base64 encoding.
+          format: byte
+        output:
+          type: array
+          description: Standard output from the specified service.
+          example:
+          - transforming document <simpletext.txt> ...
+          - '[OK] succesfully transformed document.'
+          items:
+            type: string
+        error:
+          type: array
+          description: Standard error from the specified service.
+          example:
+          - 'wrong offset specfied: 20'
+          items:
+            type: string
+    TransformDocumentRequest:
+      required:
+      - document
+      properties:
+        document:
+          type: string
+          description: A base64 encoded document.
+          format: byte
+        file_name:
+          type: string
+          description: The filename of the content from the document.
+          example: simpletext.txt
+        service_name:
+          type: string
+          description: The name of the service on which the transform is beeing requested.
+          example: qds.dta.dts.encryption.caeser
+        options:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            offset: 5
+            debug: true
+    TransformDocumentPipeResponse:
+      required:
+      - result
+      - services
+      properties:
+        services:
+          type: array
+          description: Services on which the transformation successfully passed through.
+          example:
+          - qds.dta.dts.encryption.caeser
+          - qds.dta.dts.encryption.permutation
+          - qds.dta.dts.share.email
+          items:
+            type: string
+        result:
+          $ref: '#/components/schemas/TransformDocumentResponse'
