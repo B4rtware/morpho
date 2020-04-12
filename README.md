@@ -5,7 +5,7 @@
 <div align="center">
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square"></a>
 <a href=""><img alt="License: MIT" src="https://img.shields.io/badge/License%3A-MIT-green?style=flat-square">
-</a><a href=""><img src="https://img.shields.io/badge/Python%3A-%5E3.6-yellow?style=flat-square"></a>
+</a><a href=""><img src="https://img.shields.io/badge/Python%3A-%5E3.6-green?style=flat-square"></a>
 </div>
 
 # Install
