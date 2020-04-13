@@ -266,6 +266,17 @@ dotenv = ["python-dotenv"]
 
 [[package]]
 category = "main"
+description = "Swagger UI blueprint for Flask"
+name = "flask-swagger-ui"
+optional = false
+python-versions = "*"
+version = "3.25.0"
+
+[package.dependencies]
+flask = "*"
+
+[[package]]
+category = "main"
 description = "Common protobufs used in Google APIs"
 name = "googleapis-common-protos"
 optional = false
@@ -668,6 +679,18 @@ version = "0.0.6"
 Jinja2 = ">=2.0"
 
 [[package]]
+category = "main"
+description = "Swagger UI for Python web framework, such Tornado, Flask, Quart, Sanic and Falcon."
+name = "swagger-ui-py"
+optional = false
+python-versions = "*"
+version = "0.2.1"
+
+[package.dependencies]
+PyYaml = ">=5.0"
+jinja2 = ">=2.0"
+
+[[package]]
 category = "dev"
 description = "Python Library for Tom's Obvious, Minimal Language"
 name = "toml"
@@ -757,7 +780,7 @@ python-versions = "*"
 version = "1.11.2"
 
 [metadata]
-content-hash = "615bf78cf3204fc4a58d32946adf9ded9ebab0266f59865237673adcac59ca03"
+content-hash = "de2a57fb81b7c30fadf309c961d7d12ee847e9be92c42fac90e86df13bb0fd3d"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -846,6 +869,9 @@ falcon = [
 flask = [
     {file = "Flask-1.1.1-py2.py3-none-any.whl", hash = "sha256:45eb5a6fd193d6cf7e0cf5d8a5b31f83d5faae0293695626f539a823e93b13f6"},
     {file = "Flask-1.1.1.tar.gz", hash = "sha256:13f9f196f330c7c2c5d7a5cf91af894110ca0215ac051b5844701f2bfd934d52"},
+]
+flask-swagger-ui = [
+    {file = "flask-swagger-ui-3.25.0.tar.gz", hash = "sha256:42d098997e06b04f992609c4945cc990738b269c153d8388fc59a91a5dfcee9e"},
 ]
 googleapis-common-protos = [
     {file = "googleapis-common-protos-1.51.0.tar.gz", hash = "sha256:013c91704279119150e44ef770086fdbba158c1f978a6402167d47d5409e226e"},
@@ -1182,6 +1208,9 @@ swagger-ui-bundle = [
     {file = "swagger_ui_bundle-0.0.6-py2-none-any.whl", hash = "sha256:49d2e12d60a6499e9d37ea37953b5d700f4e114edc7520fe918bae5eb693a20e"},
     {file = "swagger_ui_bundle-0.0.6-py3-none-any.whl", hash = "sha256:f776811855092c086dbb08216c8810a84accef8c76c796a135caa13645c5cc68"},
     {file = "swagger_ui_bundle-0.0.6.tar.gz", hash = "sha256:c5373b683487b1b914dccd23bcd9a3016afa2c2d1cda10f8713c0a9af0f91dd3"},
+]
+swagger-ui-py = [
+    {file = "swagger_ui_py-0.2.1-py3-none-any.whl", hash = "sha256:c06db4967a067e5df0e0b80416a2eb7c0573219713cba0b4b98f1146b181913b"},
 ]
 toml = [
     {file = "toml-0.10.0-py2.7.egg", hash = "sha256:f1db651f9657708513243e61e6cc67d101a39bad662eaa9b5546f789338e07a3"},
