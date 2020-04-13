@@ -45,11 +45,11 @@ class RawTransformDocumentResponse(TypedDict):
 Options = NewType("Options", Dict[str, str])
 
 
-# class Status(Enum)
-
 # TODO: verify that all options are used or at least output a warning
-parser = argparse.ArgumentParser()
 # fmt: off
+# pylint: disable=line-too-long
+parser = argparse.ArgumentParser() # pylint: disable=invalid-name
+
 parser.add_argument_group("Registrar")
 parser.add_argument("--register", action="store_true", help="Register service with EUREKA, if set")
 parser.add_argument("--registrar-url", type=str, help="Registry URL")
@@ -71,7 +71,9 @@ parser.add_argument_group("Generic")
 parser.add_argument("--log-level", type=str, help="Log level, one of panic, fatal, error, warn or warning, info, debug, trace", default="INFO", choices=("CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG", "NOTSET"))
 parser.add_argument("--config-file", type=str, help="The config file to use")
 parser.add_argument("--init", help="Create a default config file as defined by cfg-file, if set. If not set ~/.dta/<AppName>/config.json will be created.", action="store_true")
+# pylint: enable=line-too-long
 # fmt: on
+
 
 # TODO: consider remove this
 @dataclass
@@ -79,7 +81,8 @@ class DtaService:
     service_handler: DTAServerConfig
     resolver: eureka_client.RegistryClient
 
-class DTARestWorkConsumer(object):
+
+class DTARestWorkConsumer:
     def __init__(self, work, config):
         log.info("initializing DTARestWorkConsumer")
         self._work = work
@@ -87,16 +90,20 @@ class DTARestWorkConsumer(object):
         self.app = Flask(__name__)
         # TODO: try to use decorator
         # fmt: off
+        # pylint: disable: line-too-long
         working_dir = Path.cwd()
         config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
         api_doc(self.app, config_path=config_path, url_prefix="/info")
         self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self.transform_document, methods=["POST"])
         self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list_services)
         self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self.transform_document_pipe)
+        # pylint: enable: line-too-long
         # fmt: on
 
     # TODO: rename to list services / transform document and transform document pipe
-    def transform_document(self) -> Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]:
+    def transform_document(
+        self,
+    ) -> Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]:
         trans_document = None
         captured_stdout = io.StringIO()
         captured_stderr = io.StringIO()
@@ -104,7 +111,7 @@ class DTARestWorkConsumer(object):
             with redirect_stdout(captured_stdout):
                 try:
                     trans_document = self._work(request.json.document)
-                except BaseException:
+                except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
         error = captured_stderr.getvalue().split("\n")
         trans_output = captured_stdout.getvalue().split("\n")
