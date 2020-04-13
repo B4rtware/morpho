@@ -1,7 +1,11 @@
 from enum import IntEnum
 
 # codes are from https://httpstatuses.com/
+
+
 class Status(IntEnum):
+    """HTTP status codes which can be used instead of the integer codes"""
+
     CONTINUE = 100
     SWITCHING_PROTOCOLS = 101
     PROCESSING = 102
