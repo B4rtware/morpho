@@ -12,7 +12,8 @@ import traceback
 from typing import Dict, List, NewType, Optional, Tuple, TypedDict
 
 import colorama as cr
-from flask import Flask, request
+import flask
+from flask import Flask
 
 # from flask_swagger_ui import get_swaggerui_blueprint
 from swagger_ui import api_doc
@@ -110,7 +111,7 @@ class DTARestWorkConsumer:
         with redirect_stderr(captured_stderr):
             with redirect_stdout(captured_stdout):
                 try:
-                    trans_document = self._work(request.json.document)
+                    trans_document = self._work(flask.request.json.document)
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
         error = captured_stderr.getvalue().split("\n")
