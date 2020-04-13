@@ -90,12 +90,13 @@ class DTARestWorkConsumer(object):
         working_dir = Path.cwd()
         config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
         api_doc(self.app, config_path=config_path, url_prefix="/info")
-        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self.transform, methods=["POST"])
-        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list)
-        self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self.transform_pipe)
+        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self.transform_document, methods=["POST"])
+        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list_services)
+        self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self.transform_document_pipe)
         # fmt: on
 
-    def _transform(self) -> Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]:
+    # TODO: rename to list services / transform document and transform document pipe
+    def transform_document(self) -> Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]:
         trans_document = None
         captured_stdout = io.StringIO()
         captured_stderr = io.StringIO()
@@ -118,10 +119,10 @@ class DTARestWorkConsumer(object):
             {"Content-Type": "application/json"},
         )
 
-    def _list(self, request, response):
+    def list_services(self, request, response):
         pass
 
-    def _transform_pipe(self, request, response):
+    def transform_document_pipe(self, request, response):
         pass
 
     def start(self):
