@@ -1,43 +1,34 @@
 from abc import ABC, abstractmethod
+import argparse
+import concurrent.futures as futures
+from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 import dataclasses
+import io
 from pathlib import Path
 import sys
-from typing import (
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    TypedDict,
-    NewType,
-)
-import grpc
-import concurrent.futures as futures
-import argparse
-from grpc import ServicerContext
-import py_eureka_client.eureka_client as eureka_client
-import colorama as cr
-import waitress
-import connexion
 from threading import Thread
-from connexion import RestyResolver
-from flask import Flask, request
-from contextlib import redirect_stdout, redirect_stderr
-import io
 import traceback
+from typing import Dict, List, NewType, Optional, Tuple, TypedDict
 
-import doctrans_py_swagger_server
-from doctrans_py_swagger_server.models import DtaserviceTransformDocumentResponse
+import colorama as cr
+from flask import Flask, request
 
+# from flask_swagger_ui import get_swaggerui_blueprint
+from swagger_ui import api_doc
+import grpc
+from grpc import ServicerContext
+import waitress
+import py_eureka_client.eureka_client as eureka_client
 
 sys.path.append(str(Path(".").resolve()))
-from service.log import log
-from service.config import DTAServerConfig
 
-from service.proto.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
+from service.config import DTAServerConfig
+from service.log import log
 from service.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
 from service.proto.dtaservice_pb2 import ListServicesResponse
 from service.proto.dtaservice_pb2 import ListServiceRequest
+from service.proto.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
 from service.proto.dtaservice_pb2_grpc import DTAServerServicer
 from service.rest import Status
 
@@ -96,9 +87,12 @@ class DTARestWorkConsumer(object):
         self.app = Flask(__name__)
         # TODO: try to use decorator
         # fmt: off
-        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self._transform, methods=["POST"])
-        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self._list)
-        self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self._transform_pipe)
+        working_dir = Path.cwd()
+        config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
+        api_doc(self.app, config_path=config_path, url_prefix="/info")
+        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self.transform, methods=["POST"])
+        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list)
+        self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self.transform_pipe)
         # fmt: on
 
     def _transform(self) -> Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]:
@@ -180,7 +174,6 @@ protocols = {"rest": DTARestWorkConsumer, "grpc": DTAGrpcWorkConsumer}
 
 
 class DTAServer(ABC):
-
     @abstractmethod
     def work(self, document: str) -> str:
         pass
