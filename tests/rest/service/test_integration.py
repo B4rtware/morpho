@@ -14,6 +14,8 @@ class QDS_TEST(DTAServer):
          
 
 def test_integration_rest():
+    # TODO: use a client to interact with the server to use more than one component?
+    # remove all other program arguments and add the rest protocol
     sys.argv = [sys.argv[0], "--Protocols=rest"]
 
     # app = QDS_TEST
