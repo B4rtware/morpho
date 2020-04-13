@@ -60,26 +60,26 @@ Options = NewType("Options", Dict[str, str])
 parser = argparse.ArgumentParser()
 # fmt: off
 parser.add_argument_group("Registrar")
-parser.add_argument("--Register", action="store_true", help="Register service with EUREKA, if set")
-parser.add_argument("--RegistrarURL", type=str, help="Registry URL")
-parser.add_argument("--RegistrarUser", type=str, help="Registry User, no user used if not provided")
-parser.add_argument("--RegistrarPwd",  type=str, help="Registry User Password, no password used if not provided")
-parser.add_argument("--TTL", type=int, help="Time in seconds to reregister at Registrar.")
+parser.add_argument("--register", action="store_true", help="Register service with EUREKA, if set")
+parser.add_argument("--registrar-url", type=str, help="Registry URL")
+parser.add_argument("--registrar-user", type=str, help="Registry User, no user used if not provided")
+parser.add_argument("--registrar-password", type=str, help="Registry User Password, no password used if not provided")
+parser.add_argument("--ttl", type=int, help="Time in seconds to reregister at Registrar.")
 
 parser.add_argument_group("Service")
-parser.add_argument("--HostName", type=str, help="If provided will be used as hostname, else automatically derived.")
-parser.add_argument("--AppName", type=str, help="ID of the service as e.g. 'DOC.TXT.COUNT.'")
-parser.add_argument("--PortToListen", type=str, help="On which port to listen for this service.")
-parser.add_argument("--DtaType", type=str, help="One of Gateway or Service. Service is assumed if not provided.")
-parser.add_argument("--IsSSL", type=str, help="Can the service be reached via SSL.")
-parser.add_argument("--REST", action="store_true", help="REST-API enabled on port 80, if set.")
-parser.add_argument("--HTTPPort", type=str, help="On which httpPort to listen for REST, if enableREST is set. Ignored otherwise.")
-parser.add_argument("--Protocols", type=str, nargs='+', help="Which protocoly should be used by the server.", default=["rest"], choices=("rest", "grpc"))
+parser.add_argument("--host-name", type=str, help="If provided will be used as hostname, else automatically derived.")
+parser.add_argument("--app-name", type=str, help="ID of the service as e.g. 'DOC.TXT.COUNT.'")
+parser.add_argument("--port-to-listen", type=str, help="On which port to listen for this service.")
+parser.add_argument("--dta-type", type=str, help="One of Gateway or Service. Service is assumed if not provided.")
+parser.add_argument("--is-ssl", type=str, help="Can the service be reached via SSL.")
+parser.add_argument("--rest", action="store_true", help="REST-API enabled on port 80, if set.")
+parser.add_argument("--http-port", type=str, help="On which httpPort to listen for REST, if enableREST is set. Ignored otherwise.")
+parser.add_argument("--protocols", type=str, nargs='+', help="Which protocol should be used by the server.", default=["rest"], choices=("rest", "grpc"))
 
 parser.add_argument_group("Generic")
-parser.add_argument("--LogLevel", type=str, help="Log level, one of panic, fatal, error, warn or warning, info, debug, trace", default="INFO", choices=("CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG", "NOTSET"))
-parser.add_argument("--CfgFile", type=str, help="The config file to use")
-parser.add_argument("--Init", help="Create a default config file as defined by cfg-file, if set. If not set ~/.dta/<AppName>/config.json will be created.", action="store_true")
+parser.add_argument("--log-level", type=str, help="Log level, one of panic, fatal, error, warn or warning, info, debug, trace", default="INFO", choices=("CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG", "NOTSET"))
+parser.add_argument("--config-file", type=str, help="The config file to use")
+parser.add_argument("--init", help="Create a default config file as defined by cfg-file, if set. If not set ~/.dta/<AppName>/config.json will be created.", action="store_true")
 # fmt: on
 
 # TODO: consider remove this
@@ -196,11 +196,11 @@ class DTAServer(ABC):
             log.warning("no app name was specified instead using: UNKNOWN!")
         # doctrans: dts
         config = DTAServerConfig(
-            AppName=app_name,
-            CfgFile=str(
+            app_name=app_name,
+            config_file=str(
                 working_home_dir / Path("/.dta/") / app_name / Path("/config.json")
             ),
-            LogLevel="INFO",
+            log_level="INFO",
         )
 
         # parse arguments to populate the configuration
@@ -209,52 +209,34 @@ class DTAServer(ABC):
             if arg[1]:
                 setattr(config, arg[0], arg[1])
 
-        log.getLogger().setLevel(config.LogLevel)
+        log.getLogger().setLevel(config.log_level)
 
         # create new config file by saving the default values
-        if config.Init:
+        if config.init:
             config.save()
             log.info(
-                "Wrote example configuration file to {}. Exiting".format(config.CfgFile)
+                "Wrote example configuration file to {}. Exiting".format(
+                    config.config_file
+                )
             )
             exit(0)
             return
 
         # register at eureka server
-        if config.Register:
+        if config.register:
             eureka_client.init_registry_client(
-                eureka_server=config.RegistrarURL,
-                instance_id=config.HostName,
-                app_name=config.AppName,
-                instance_port=int(config.PortToListen),
-                instance_secure_port_enabled=config.IsSSL,
+                eureka_server=config.registrar_url,
+                instance_id=config.host_name,
+                app_name=config.app_name,
+                instance_port=int(config.port_to_listen),
+                instance_secure_port_enabled=config.is_ssl,
                 # TODO: change dta type name to use the same from the rest specification
-                metadata={"DTA-Type": config.DtaType},
+                metadata={"DTA-Type": config.dta_type},
             )
 
-        # # create grpc server
-        # server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        # # TODO: there is currently no case if the port is already in use
-        # server.add_insecure_port("[::]:50000")
-
-        # # bind properties to be used inside the class instance
-        # add_DTAServerServicer_to_server(DTAGrpcWorkConsumer(lambda x: x, config), server)
-        # server.start()
-        # print(server)
-
-        # TODO: add flag to not use grpc
-        # create grpc server
-        # server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        # TODO: there is currently no case if the port is already in use
-        # server.add_insecure_port(f"[::]:{config.PortToListen}")
-
         cls_instance = cls()
-        # bind properties to be used inside the class instance
-        # add_DTAServerServicer_to_server(cls_instance, server)
-        # server.start()
-
         # start protocol consumer
-        for protocol in args.Protocols:
+        for protocol in args.protocols:
             instance = protocols[protocol](cls_instance.work, config)
             instance.start()
 
@@ -268,8 +250,8 @@ class DTAServer(ABC):
             for setting in dataclasses.asdict(config).items():
                 print(f" |- {setting[0]:<15} - {setting[1]}")
             print("")
-            print(f" [grpc] -> listening on port {config.PortToListen}")
-            if config.REST: print(f" [rest] -> listening on port {config.HTTPPort}")
+            print(f" [grpc] -> listening on port {config.port_to_listen}")
+            if config.rest: print(f" [rest] -> listening on port {config.http_port}")
             print("")
             print(cr.Fore.YELLOW + "     You see this message because __debug__ is true.")
             print("     Use the -O flag to enable optimization `python -O`." + cr.Fore.RESET)
@@ -280,23 +262,3 @@ class DTAServer(ABC):
             input()
         except KeyboardInterrupt:
             pass
-
-        # server.wait_for_termination()
-
-
-# if __name__ == "__main__":
-#     print("main LOOL")
-
-#     def work():
-#         return "work"
-
-#     # a = DTARestServer(work)
-#     # app.run()
-#     # a = DTARestServerThread(work)
-#     # thread = a.run()
-#     # thread.join()
-#     # a = QDS_TEST()
-#     # a.run()
-
-#     a = DTAGrpcWorkConsumer(work, None)
-#     a.start()
