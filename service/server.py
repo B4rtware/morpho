@@ -189,7 +189,6 @@ class DTAServer(ABC):
 
     @classmethod
     def run(cls):
-        print("execute run")
         working_home_dir = Path.home()
 
         # TODO: rename app_name to name
