@@ -264,3 +264,8 @@ class DTAServer(ABC):
             input()
         except KeyboardInterrupt:
             pass
+
+
+def run_app(cls: DTAServer):
+    """decorator to apply on the microservice app class which will be then automatically run"""
+    cls.run()
