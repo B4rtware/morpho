@@ -139,7 +139,7 @@ class DTARestWorkConsumer:
             daemon=True,
             target=waitress.serve,
             args=(self.app,),
-            kwargs={"port": 8080, "_quiet": True},
+            kwargs={"port": self.config.port_to_listen, "_quiet": True},
         )
         thread.start()
         return thread
@@ -173,7 +173,7 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
         # create grpc server
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         # TODO: there is currently no case if the port is already in use
-        self.server.add_insecure_port(f"[::]:{self.config.PortToListen}")
+        self.server.add_insecure_port(f"[::]:{self.config.port_to_listen}")
         # bind properties to be used inside the class instance
         add_DTAServerServicer_to_server(self, self.server)
         self.server.start()
