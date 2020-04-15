@@ -10,6 +10,7 @@ import sys
 from threading import Thread
 import traceback
 from typing import Callable, Dict, List, NewType, Optional, Tuple, TypedDict, Protocol
+from urllib.error import HTTPError, URLError
 
 
 import colorama as cr
@@ -20,6 +21,7 @@ from flask import Flask
 from swagger_ui import api_doc
 import grpc
 from grpc import ServicerContext
+from py_eureka_client.eureka_client import Application, Applications
 import waitress
 import py_eureka_client.eureka_client as eureka_client
 
@@ -43,7 +45,12 @@ class RawTransformDocumentResponse(TypedDict):
     trans_output: List[str]
     error: List[str]
 
+class RawListResponse(TypedDict):
+    services: List[str]
+
+
 Options = NewType("Options", Dict[str, str])
+Headers = NewType("Headers", Dict[str, str])
 
 
 # TODO: verify that all options are used or at least output a warning
@@ -82,7 +89,7 @@ class DtaService:
     service_handler: DTAServerConfig
     resolver: eureka_client.RegistryClient
 
-
+# TODO: rename to Base prefix or suffix
 class WorkConsumer(ABC):
     """An abstract class which must be implemented by each ``work`` consumer.
 
@@ -99,6 +106,24 @@ class WorkConsumer(ABC):
     def __init__(self, work: Callable[[str], str], config: DTAServerConfig) -> None:
         self._work = work
         self.config = config
+
+    def get_services(self) -> List[str]:
+        """Lists all services names from the eureka server of the provided ``DTAServerConfig``.
+        
+        Returns:
+            List[str]: List of applications.
+        """
+        applications = []
+        if self.config.register:
+            try:
+                for application in eureka_client.get_applications(self.config.registrar_url).applications:
+                    applications.append(application.instances[0].app)
+            except URLError:
+                log.error("no eureka instance is running at: {}".format(self.config.registrar_url))
+        # the service always knows itsself
+        if not applications:
+            applications.append(self.config.app_name)
+        return applications
 
     @abstractmethod
     def start(self) -> None:
@@ -140,7 +165,7 @@ class DTARestWorkConsumer(WorkConsumer):
         config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
         api_doc(self.app, config_path=config_path, url_prefix="/info")
         self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self.transform_document, methods=["POST"])
-        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list_services)
+        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list_services, methods=["GET"])
         self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self.transform_document_pipe)
         # pylint: enable: line-too-long
         # fmt: on
@@ -148,11 +173,11 @@ class DTARestWorkConsumer(WorkConsumer):
     # TODO: rename to list services / transform document and transform document pipe
     def transform_document(
         self,
-    ) -> Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]:
+    ) -> Tuple[RawTransformDocumentResponse, Status, Headers]:
         """Callback function which gets invoked by flask if a transform request is received.
 
         Returns:
-            Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]: [description]
+            Tuple[RawTransformDocumentResponse, Status, Headers: [description]
 
         Note:
             It captures the stdandard output and standard error of the :func:`_work` function
@@ -179,12 +204,19 @@ class DTARestWorkConsumer(WorkConsumer):
                 "error": error,
             },
             Status.OK if not error else Status.INTERNAL_SERVER_ERROR,
-            {"Content-Type": "application/json"},
+            Headers({"Content-Type": "application/json"}),
         )
 
-    # TODO: create a wrapper for this function because internally it is always the same
-    def list_services(self, request, response):
-        pass
+    def list_services(self) -> Tuple[RawListResponse, Status, Headers]:
+        services = self.get_services()
+        return (
+            {
+                "services": services
+            },
+            Status.OK,
+            Headers({"Content-Type": "application/json"})
+        )
+
 
     # TODO: create a wrapper for this function because internally it is always the same
     def transform_document_pipe(self, request, response):
@@ -205,7 +237,7 @@ class DTARestWorkConsumer(WorkConsumer):
 
 class DTAGrpcWorkConsumer(DTAServerServicer):
     """Implements a grpc work consumer server.
-    
+
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
