@@ -9,7 +9,8 @@ from pathlib import Path
 import sys
 from threading import Thread
 import traceback
-from typing import Dict, List, NewType, Optional, Tuple, TypedDict
+from typing import Callable, Dict, List, NewType, Optional, Tuple, TypedDict, Protocol
+
 
 import colorama as cr
 import flask
@@ -41,7 +42,6 @@ class RawTransformDocumentResponse(TypedDict):
     trans_document: Optional[str]
     trans_output: List[str]
     error: List[str]
-
 
 Options = NewType("Options", Dict[str, str])
 
@@ -83,13 +83,57 @@ class DtaService:
     resolver: eureka_client.RegistryClient
 
 
-class DTARestWorkConsumer:
-    def __init__(self, work, config):
+class WorkConsumer(ABC):
+    """An abstract class which must be implemented by each ``work`` consumer.
+
+    Attributes:
+        work (Callable[[str], str]): Worker function which will executed to get the
+                                     transformed document.
+        config (DTAServerConfig): Configuration for the given DTAServer.
+
+    Note:
+        The ``work`` callback should be called once on a implemented work consumer after the
+        server received the request. After receiving the request the document should be already
+        be correctly marshalled.
+    """
+    def __init__(self, work: Callable[[str], str], config: DTAServerConfig) -> None:
+        self._work = work
+        self.config = config
+
+    @abstractmethod
+    def start(self) -> None:
+        """starts the implemented server instance.
+
+        Raises:
+            NotImplementedError: Must be implemented on the derived class.
+
+        Hint:
+            Can be used to instantiate a new ``Thread`` for the listening server of the DTAServer.
+            Creating a new Thread with ``daemon=True`` helps the thread to destroy its self 
+            which will then gracefully shutdown if the DTAServer gets terminated
+            (preventing zombie threads).
+
+        Important:
+            This function should not block.
+        """
+        raise NotImplementedError
+
+class DTARestWorkConsumer(WorkConsumer):
+    """Implements a rest work consumer server.
+    
+    Attributes:
+        work (Callable[[str], str]): Worker function which will executed to get the
+                                     transformed document.
+        config (DTAServerConfig): Configuration for the given DTAServer.
+    """
+    def __init__(self, work: Callable[[str], str], config: DTAServerConfig):
+        super().__init__(work, config)
         log.info("initializing DTARestWorkConsumer")
         self._work = work
         self.config = config
+        self.thread: Optional[Thread] = None
         self.app = Flask(__name__)
-        # TODO: try to use decorator
+        # TODO: try to use decorator route
         # fmt: off
         # pylint: disable: line-too-long
         working_dir = Path.cwd()
@@ -105,7 +149,18 @@ class DTARestWorkConsumer:
     def transform_document(
         self,
     ) -> Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]:
+        """Callback function which gets invoked by flask if a transform request is received.
+
+        Returns:
+            Tuple[RawTransformDocumentResponse, Status, Dict[str, str]]: [description]
+
+        Note:
+            It captures the stdandard output and standard error of the :func:`_work` function
+            therefore the stdout and stderr any exception and print output can only be seen
+            inside the rest response object.
+        """
         trans_document = None
+        # TODO: create a decorator for capturing stdout and stderr
         captured_stdout = io.StringIO()
         captured_stderr = io.StringIO()
         with redirect_stderr(captured_stderr):
@@ -127,26 +182,36 @@ class DTARestWorkConsumer:
             {"Content-Type": "application/json"},
         )
 
+    # TODO: create a wrapper for this function because internally it is always the same
     def list_services(self, request, response):
         pass
 
+    # TODO: create a wrapper for this function because internally it is always the same
     def transform_document_pipe(self, request, response):
         pass
 
-    def start(self):
+    def start(self) -> None:
+        """Implements the start function to start a rest server instance.
+        """
         log.info("starting rest thread...")
-        thread = Thread(
+        self.thread = Thread(
             daemon=True,
             target=waitress.serve,
             args=(self.app,),
             kwargs={"port": self.config.port_to_listen, "_quiet": True},
         )
-        thread.start()
-        return thread
+        self.thread.start()
 
 
 class DTAGrpcWorkConsumer(DTAServerServicer):
-    def __init__(self, work, config) -> None:
+    """Implements a grpc work consumer server.
+    
+    Attributes:
+        work (Callable[[str], str]): Worker function which will executed to get the
+                                     transformed document.
+        config (DTAServerConfig): Configuration for the given DTAServer.
+    """
+    def __init__(self, work: Callable[[str], str], config: DTAServerConfig) -> None:
         self._work = work
         self.config = config
         self.server = None
@@ -155,6 +220,16 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
     def TransformDocument(
         self, request: DocumentRequest, context: ServicerContext
     ) -> TransformDocumentResponse:
+        """Implements the protobuf message handler.
+        
+        Args:
+            request (DocumentRequest): Protobuf DocumentRequest request object.
+            context (ServicerContext): Protobuf ServicerContext.
+        
+        Returns:
+            TransformDocumentResponse: Protobuf response object.
+        """
+        # TODO: use decorator for stdout and stderr
         trans_document = self._work(request.document.decode())
         return TransformDocumentResponse(
             # TODO: error needs to be implemented
@@ -163,13 +238,17 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
             error=[],
         )
 
+    # TODO: create a wrapper for this function because internally it is always the same
     def ListServices(
         self, request: ListServiceRequest, context: ServicerContext
     ) -> ListServicesResponse:
         services = []
         return ListServicesResponse(services=services)
 
+    # TODO: create a wrapper for this function because internally it is always the same
     def start(self):
+        """Implements the start function to start a grpc server instance.
+        """
         # create grpc server
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         # TODO: there is currently no case if the port is already in use
@@ -179,16 +258,52 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
         self.server.start()
 
 
+# TODO: create base class consumer to reflect the interface
 protocols = {"rest": DTARestWorkConsumer, "grpc": DTAGrpcWorkConsumer}
 
 
 class DTAServer(ABC):
+    """DtaServer isjdiajsdo
+    """
+    def __init__(self) -> None:
+        self._protocols = {}
+
+    def register_consumer(self, name: str, work_consumer: WorkConsumer):
+        """Registers a work consumer.
+
+        Args:
+            name (str): The name of the consumer.
+            work_consumer (WorkConsumer): A class which implements :class:`WorkConsumer`.
+        """
+        self._protocols[name] = work_consumer
+
+    def remove_consumer(self, name: str):
+        """Removes a work consumer.
+
+        Args:
+            name (str): The name of the consumer which will be removed.
+        """
+        del self._protocols[name]
+
     @abstractmethod
     def work(self, document: str) -> str:
-        pass
+        """This is an abstract worker function which must be implemented on its derived class.
+
+        Args:
+            document (str): The document in plain text.
+
+        Returns:
+            str: The transformed document in plain text.
+
+        Raises:
+            NotImplementedError: Must be implemented in derived class.
+        """
+        raise NotImplementedError()
 
     @classmethod
     def run(cls):
+        """Class method which is used to invoke the server.
+        """
         working_home_dir = Path.home()
 
         # TODO: rename app_name to name
@@ -236,6 +351,7 @@ class DTAServer(ABC):
             )
 
         cls_instance = cls()
+        assert cls_instance._protocols, "Have you called super() on your DTAServer implemenation?"
         # start protocol consumer
         for protocol in args.protocols:
             instance = protocols[protocol](cls_instance.work, config)
@@ -266,5 +382,9 @@ class DTAServer(ABC):
 
 
 def run_app(cls: DTAServer):
-    """decorator to apply on the microservice app class which will be then automatically run"""
+    """Decorator to apply on the microservice app class which will be then automatically run.
+
+    Args:
+        cls (DTAServer): Class object of the decorated DTAServer implementation.
+    """
     cls.run()
