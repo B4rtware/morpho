@@ -11,8 +11,8 @@ from urllib.error import HTTPError
 
 sys.path.append(str(Path(".").resolve()))
 from dtslog import log
-from dtaservice.proto.dtaservice_pb2_grpc import DTAServerStub
-from dtaservice.proto.dtaservice_pb2 import DocumentRequest
+from service.proto.dtaservice_pb2_grpc import DTAServerStub
+from service.proto.dtaservice_pb2 import DocumentRequest
 
 # fmt: off
 parser = argparse.ArgumentParser()
@@ -92,7 +92,7 @@ if __name__ == "__main__":
             #if proxy_found:
             #    service = proxy_instances
             #    log.info(f"found available proxy")
-            # TODO: maybe use caching so discorcy client 
+            # TODO: maybe use caching so discorcy client
             try:
                 service = eureka_client.get_application(config.EurekaURL, config.ServiceName + ".PROXY")
             except HTTPError as e:
@@ -105,6 +105,8 @@ if __name__ == "__main__":
             log.info(
                 f"Will contact {config.ServiceAddress} for service for {config.ServiceName}"
             )
+
+    requests.post(config.ServiceAddress, json={"document": "dijfiosjdfoi", "ijsidjsda": sjdiajfisdjf})
 
     # open grpc connection channel
     channel = grpc.insecure_channel(config.ServiceAddress)
