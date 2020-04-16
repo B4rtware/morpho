@@ -180,7 +180,7 @@ class DTARestWorkConsumer(WorkConsumer):
             Tuple[RawTransformDocumentResponse, Status, Headers: [description]
 
         Note:
-            It captures the stdandard output and standard error of the :func:`_work` function
+            It captures the standard output and standard error of the :func:`_work` function
             therefore the stdout and stderr any exception and print output can only be seen
             inside the rest response object.
         """
@@ -295,7 +295,11 @@ protocols = {"rest": DTARestWorkConsumer, "grpc": DTAGrpcWorkConsumer}
 
 
 class DTAServer(ABC):
-    """DtaServer isjdiajsdo
+    """DtaServer
+
+    Note:
+        Ideally every Server should implement a debug option.
+        Which will sets the log level to debug if true.
     """
     def __init__(self) -> None:
         self._protocols = {}
