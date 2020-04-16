@@ -191,7 +191,7 @@ class DTARestWorkConsumer(WorkConsumer):
         with redirect_stderr(captured_stderr):
             with redirect_stdout(captured_stdout):
                 try:
-                    trans_document = self._work(flask.request.json.document)
+                    trans_document = self._work(flask.request.json["document"])
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
         error = captured_stderr.getvalue().split("\n")
