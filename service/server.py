@@ -39,18 +39,33 @@ from service.rest import Status
 
 cr.init()
 
+Options = NewType("Options", Dict[str, Any])
+Headers = NewType("Headers", Dict[str, str])
+
 
 class RawTransformDocumentResponse(TypedDict):
     trans_document: Optional[str]
-    trans_output: List[str]
-    error: List[str]
+    trans_output: Optional[List[str]]
+    error: Optional[List[str]]
+
+
+class RawTransformDocumentRequest(TypedDict):
+    document: str
+    service_name: str
+    file_name: Optional[str]
+    options: Optional[Options]
+
 
 class RawListResponse(TypedDict):
     services: List[str]
 
 
-Options = NewType("Options", Dict[str, str])
-Headers = NewType("Headers", Dict[str, str])
+class RawTransformDocumentPipeRequest(RawTransformDocumentRequest):
+    services: List[Dict[str, Any]]
+
+
+class RawTransformDocumentPipeResponse(RawTransformDocumentResponse):
+    sender: str
 
 
 # TODO: verify that all options are used or at least output a warning
