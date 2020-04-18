@@ -5,7 +5,7 @@ description = ""
 authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
 
 [tool.black]
-line-lengt = 88
+line-length = 88
 target-version = ["py38"]
 exclude = """
     /typings
