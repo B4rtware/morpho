@@ -2,7 +2,7 @@
 name = "doctrans-py"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
