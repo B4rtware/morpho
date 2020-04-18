@@ -39,6 +39,7 @@ swagger-ui-py = "^0.2.1"
 black = "^19.10b0"
 pylint = "^2.4.4"
 pyenchant = "^3.0.1"
+invoke = "^1.4.1"
 
 [build-system]
 requires = ["poetry>=0.12"]
