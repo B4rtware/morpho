@@ -9,7 +9,17 @@ from pathlib import Path
 import sys
 from threading import Thread
 import traceback
-from typing import Callable, Dict, List, NewType, Optional, Tuple, TypedDict, Protocol
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    NewType,
+    Optional,
+    Tuple,
+    TypedDict,
+    Protocol,
+)
 from urllib.error import HTTPError, URLError
 
 
@@ -104,6 +114,7 @@ class DtaService:
     service_handler: DTAServerConfig
     resolver: eureka_client.RegistryClient
 
+
 # TODO: rename to Base prefix or suffix
 class WorkConsumer(ABC):
     """An abstract class which must be implemented by each ``work`` consumer.
@@ -118,6 +129,7 @@ class WorkConsumer(ABC):
         server received the request. After receiving the request the document should be already
         be correctly marshalled.
     """
+
     def __init__(self, work: Callable[[str], str], config: DTAServerConfig) -> None:
         self._work = work
         self.config = config
@@ -131,10 +143,16 @@ class WorkConsumer(ABC):
         applications = []
         if self.config.register:
             try:
-                for application in eureka_client.get_applications(self.config.registrar_url).applications:
+                for application in eureka_client.get_applications(
+                    self.config.registrar_url
+                ).applications:
                     applications.append(application.instances[0].app)
             except URLError:
-                log.error("no eureka instance is running at: {}".format(self.config.registrar_url))
+                log.error(
+                    "no eureka instance is running at: {}".format(
+                        self.config.registrar_url
+                    )
+                )
         # the service always knows itsself
         if not applications:
             applications.append(self.config.app_name)
@@ -158,6 +176,7 @@ class WorkConsumer(ABC):
         """
         raise NotImplementedError
 
+
 class DTARestWorkConsumer(WorkConsumer):
     """Implements a rest work consumer server.
     
@@ -166,6 +185,7 @@ class DTARestWorkConsumer(WorkConsumer):
                                      transformed document.
         config (DTAServerConfig): Configuration for the given DTAServer.
     """
+
     def __init__(self, work: Callable[[str], str], config: DTAServerConfig):
         super().__init__(work, config)
         log.info("initializing DTARestWorkConsumer")
@@ -225,13 +245,10 @@ class DTARestWorkConsumer(WorkConsumer):
     def list_services(self) -> Tuple[RawListResponse, Status, Headers]:
         services = self.get_services()
         return (
-            {
-                "services": services
-            },
+            {"services": services},
             Status.OK,
-            Headers({"Content-Type": "application/json"})
+            Headers({"Content-Type": "application/json"}),
         )
-
 
     # TODO: create a wrapper for this function because internally it is always the same
     def transform_document_pipe(self, request, response):
@@ -258,6 +275,7 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
                                      transformed document.
         config (DTAServerConfig): Configuration for the given DTAServer.
     """
+
     def __init__(self, work: Callable[[str], str], config: DTAServerConfig) -> None:
         self._work = work
         self.config = config
@@ -316,6 +334,7 @@ class DTAServer(ABC):
         Ideally every Server should implement a debug option.
         Which will sets the log level to debug if true.
     """
+
     def __init__(self) -> None:
         self._protocols = {}
 
@@ -402,7 +421,9 @@ class DTAServer(ABC):
             )
 
         cls_instance = cls()
-        assert cls_instance._protocols, "Have you called super() on your DTAServer implemenation?"
+        assert (
+            cls_instance._protocols
+        ), "Have you called super() on your DTAServer implemenation?"
         # start protocol consumer
         for protocol in args.protocols:
             instance = protocols[protocol](cls_instance.work, config)
