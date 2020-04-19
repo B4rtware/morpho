@@ -19,43 +19,7 @@ from service.server import (
 # TODO: consider to create a warning if the document is empty
 
 # TODO: consider to use a normal class here insteat of dataclasses because of the weird issure with intellisense
-# @dataclass
-# class TransformDocumentRequest():
-#     service_name: str
-#     document: str
-#     _document: str = field(init=False, repr=False)
-#     file_name: Optional[str] = None
-#     options: Optional[Options] = None
-
-#     @property
-#     def document(self) -> str:
-#         return self._document
-
-#     @document.setter
-#     def document(self, document: str):
-#         # validate base64
-#         try:
-#             b64decode(document, validate=True)
-#             self._document = document
-#         except binascii.Error:
-#             # TODO: log this error
-#             raise binascii.Error("Please make sure your document string is base64 encoded!")
-
-#     def as_dict(self) -> RawTransformDocumentRequest:
-#         """Creates a dict of the object instance.
-
-#         Returns:
-#             RawTransformDocumentResponse: TransformDocumentResponse as dict.
-#         """
-#         return cast(RawTransformDocumentRequest, asdict(self))
-
-#     def serialize(self) -> str:
-#         """Creates a serialized json string from the object instance.
-
-#         Returns:
-#             str: A json string.
-#         """
-#         return json.dumps(self.as_dict())
+# TODO: consider to use a dataclasses if the problem is solved with having a dataclass and properties
 
 
 class BaseModel(ABC):
