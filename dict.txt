@@ -8,3 +8,12 @@ config
 marshalled
 Args
 json
+stdout
+stderr
+bytecode
+RawTransformDocumentResponse
+protobuf
+Protobuf
+cls
+dataclass
+dataclasses
