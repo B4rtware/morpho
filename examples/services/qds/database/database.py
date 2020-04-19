@@ -10,14 +10,18 @@ import doctrans_py_swagger_client
 
 from typing import Tuple, Optional
 
-api_instance = doctrans_py_swagger_client.TracesApi(doctrans_py_swagger_client.ApiClient())
+api_instance = doctrans_py_swagger_client.TracesApi(
+    doctrans_py_swagger_client.ApiClient()
+)
 
 
 class QDS_DATABASE(DTAServer):
     version = "0.0.1"
     app_name = "DE.TU-Berlin.QDS.DATABASE"
 
-    def work(self, request: DocumentRequest, context: ServicerContext) -> Tuple[str, Optional[str]]:
+    def work(
+        self, request: DocumentRequest, context: ServicerContext
+    ) -> Tuple[str, Optional[str]]:
         trace = doctrans_py_swagger_client.Trace(service_name="")
 
         try:

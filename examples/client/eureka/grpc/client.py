@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 import py_eureka_client.eureka_client as eureka_client
 from py_eureka_client.eureka_client import Application
+
 # import logging as log
 import grpc
 import sys
@@ -86,19 +87,21 @@ if __name__ == "__main__":
                     exit(1)
         else:
             # check for available proxy
-            #proxy_instances = [instance for instance in service.instances if instance.metadata.get("DTA-Type", "") == "PROXY"]
-            #proxy_found = len(proxy_instances) > 0
+            # proxy_instances = [instance for instance in service.instances if instance.metadata.get("DTA-Type", "") == "PROXY"]
+            # proxy_found = len(proxy_instances) > 0
             # use proxy if we found one
-            #if proxy_found:
+            # if proxy_found:
             #    service = proxy_instances
             #    log.info(f"found available proxy")
             # TODO: maybe use caching so discorcy client
             try:
-                service = eureka_client.get_application(config.EurekaURL, config.ServiceName + ".PROXY")
+                service = eureka_client.get_application(
+                    config.EurekaURL, config.ServiceName + ".PROXY"
+                )
             except HTTPError as e:
                 if e.code == 404:
                     log.info(f"no proxy was found for app name {config.ServiceName}")
-            
+
             config.ServiceAddress = (
                 f"{service.instances[0].ipAddr}:{service.instances[0].port.port}"
             )
@@ -106,7 +109,10 @@ if __name__ == "__main__":
                 f"Will contact {config.ServiceAddress} for service for {config.ServiceName}"
             )
 
-    requests.post(config.ServiceAddress, json={"document": "dijfiosjdfoi", "ijsidjsda": sjdiajfisdjf})
+    requests.post(
+        config.ServiceAddress,
+        json={"document": "dijfiosjdfoi", "ijsidjsda": sjdiajfisdjf},
+    )
 
     # open grpc connection channel
     channel = grpc.insecure_channel(config.ServiceAddress)
@@ -142,4 +148,3 @@ if __name__ == "__main__":
     )
 
     print(response.trans_document)
-

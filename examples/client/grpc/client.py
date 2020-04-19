@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 import py_eureka_client.eureka_client as eureka_client
 from py_eureka_client.eureka_client import Application
+
 # import logging as log
 import grpc
 import sys
@@ -92,13 +93,13 @@ if __name__ == "__main__":
     #         #if proxy_found:
     #         #    service = proxy_instances
     #         #    log.info(f"found available proxy")
-    #         # TODO: maybe use caching so discorcy client 
+    #         # TODO: maybe use caching so discorcy client
     #         try:
     #             service = eureka_client.get_application(config.EurekaURL, config.ServiceName + ".PROXY")
     #         except HTTPError as e:
     #             if e.code == 404:
     #                 log.info(f"no proxy was found for app name {config.ServiceName}")
-            
+
     #         config.ServiceAddress = (
     #             f"{service.instances[0].ipAddr}:{service.instances[0].port.port}"
     #         )
@@ -140,4 +141,3 @@ if __name__ == "__main__":
     )
 
     print(response.trans_document)
-

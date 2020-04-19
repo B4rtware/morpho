@@ -22,12 +22,15 @@ class QDS_PROXY(DTAServer):
 
         self.registered_proxy_app_instances = []
 
-    def work(self, request: DocumentRequest, context: ServicerContext) -> Tuple[str, Optional[str]]:
+    def work(
+        self, request: DocumentRequest, context: ServicerContext
+    ) -> Tuple[str, Optional[str]]:
         # TODO: database call here
         return ("", None)
 
-
-    def TransformDocument(self, request: DocumentRequest, context: ServicerContext) -> TransformDocumentResponse:
+    def TransformDocument(
+        self, request: DocumentRequest, context: ServicerContext
+    ) -> TransformDocumentResponse:
         # TODO: implement internal service communication protocol using grpc (sendEvent("register_proxy", "..."))
         # let services be registed by the proxy to route to it self
         if (
@@ -48,7 +51,7 @@ class QDS_PROXY(DTAServer):
             return TransformDocumentResponse(
                 trans_document="OK - id:59e46078-6ca5-4f0b-9732-e6fdf5f5a49e".encode(),
                 trans_output=[],
-                error=None
+                error=None,
             )
 
         # TODO: consider using discovery client for caching
@@ -68,14 +71,16 @@ class QDS_PROXY(DTAServer):
         stub = DTAServerStub(channel)
         result = stub.TransformDocument(request)
         # FIXME: implement a observer pattern for proxy calls
-        # FIXME: maybe rename database microservice to trace 
+        # FIXME: maybe rename database microservice to trace
         database_service = eureka_client.get_application(
             "http://localhost:8761/eureka", "DE.TU-Berlin.QDS.DATABASE"
         )
         db_instance = database_service.instances[0]
 
         channel: Channel
-        with grpc.insecure_channel(f"{db_instance.ipAddr}:{db_instance.port.port}") as channel:
+        with grpc.insecure_channel(
+            f"{db_instance.ipAddr}:{db_instance.port.port}"
+        ) as channel:
             channel: Channel
             stub = DTAServerStub(channel)
             stub.TransformDocument(request)
