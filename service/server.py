@@ -72,10 +72,13 @@ class RawTransformDocumentRequest(TypedDict):
     file_name: Optional[str]
     options: Optional[Options]
 
+class RawListService(TypedDict):
+    """Raw ListService dict type"""
+    name: str
 
 class RawListResponse(TypedDict):
     """Raw ListResponse dict type"""
-    services: List[str]
+    services: List[RawListService]
 
 
 class RawTransformDocumentPipeRequest(RawTransformDocumentRequest):

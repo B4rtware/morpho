@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 from service.server import (
     Options,
-    RawListResponse,
+    RawListResponse, RawListService,
     RawTransformDocumentPipeRequest,
     RawTransformDocumentRequest,
     RawTransformDocumentResponse,
@@ -131,7 +131,7 @@ class ListServicesResponse(BaseModel):
         Returns:
             RawListResponse: ListServicesResponse as dict.
         """
-        return RawListResponse(services=self.services)
+        return RawListResponse(services=[RawListService({"name": service}) for service in self.services])
 
 
 class TransformDocumentPipeRequest(TransformDocumentRequest):
