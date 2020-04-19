@@ -25,9 +25,8 @@ from typing import (
     Optional,
     Tuple,
     TypedDict,
-    Protocol,
 )
-from urllib.error import HTTPError, URLError
+from urllib.error import URLError
 
 
 import colorama as cr
@@ -38,7 +37,6 @@ from flask import Flask
 from swagger_ui import api_doc
 import grpc
 from grpc import ServicerContext
-from py_eureka_client.eureka_client import Application, Applications
 import waitress
 import py_eureka_client.eureka_client as eureka_client
 
