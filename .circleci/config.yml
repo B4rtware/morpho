@@ -8,6 +8,24 @@ jobs:
       - run:
           name: Install Poetry
           command: pip install poetry
+
       - run:
           name: Install Dependencies
           command: poetry install
+
+      - run:
+          name: Run Tests
+          command: |
+            mkdir test_results
+            poetry run python -m pytest --junitxml=test-results/junit.xml
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+
+      - run:
+          name: Run Coverage
+          command: |
+            poetry run python -m pytest --cov=. tests/
