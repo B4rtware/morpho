@@ -163,7 +163,7 @@ class WorkConsumer(ABC):
                         self.config.registrar_url
                     )
                 )
-        # the service always knows itsself
+        # the service always knows its self
         if not applications:
             applications.append(self.config.app_name)
         return applications
