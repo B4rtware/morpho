@@ -5,6 +5,9 @@ from invoke import task
 def build(c):
     c.run("poetry run sphinx-apidoc -o docs/sphinx ./service/")
 
+@task
+def lint(c):
+    c.run("poetry run python -m pylint --rcfile=.pylintrc service")
 
 @task
 def test(c):
