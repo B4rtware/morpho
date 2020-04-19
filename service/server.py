@@ -1,3 +1,10 @@
+""" This module contains the server which implements the base functionality for a service.
+
+It also contains the raw responses and request types.
+
+Warning:
+    This might change in future versions.
+"""
 from abc import ABC, abstractmethod
 import argparse
 import concurrent.futures as futures
@@ -54,12 +61,14 @@ Headers = NewType("Headers", Dict[str, str])
 
 
 class RawTransformDocumentResponse(TypedDict):
+    """Raw TransformDocumentResponse dict type"""
     trans_document: Optional[str]
     trans_output: Optional[List[str]]
     error: Optional[List[str]]
 
 
 class RawTransformDocumentRequest(TypedDict):
+    """Raw TransformDocumentRequest dict type"""
     document: str
     service_name: str
     file_name: Optional[str]
@@ -67,14 +76,17 @@ class RawTransformDocumentRequest(TypedDict):
 
 
 class RawListResponse(TypedDict):
+    """Raw ListResponse dict type"""
     services: List[str]
 
 
 class RawTransformDocumentPipeRequest(RawTransformDocumentRequest):
+    """Raw TransformDocumentPipeRequest dict type"""
     services: List[Dict[str, Any]]
 
 
 class RawTransformDocumentPipeResponse(RawTransformDocumentResponse):
+    """Raw TransformDocumentPipeResponse dict type"""
     sender: str
 
 
