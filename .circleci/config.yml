@@ -6,5 +6,8 @@ jobs:
     steps:
       - checkout
       - run:
-          command: pytest --color=yes
-          name: pytest
+          name: Install Poetry
+          command: pip install poetry
+      - run:
+          name: Install Dependencies
+          command: poetry install
