@@ -221,41 +221,6 @@ django = ">=1.11"
 
 [[package]]
 category = "main"
-description = "Snippets API"
-name = "doctrans-py-swagger-client"
-optional = false
-python-versions = "*"
-version = "0.0.6"
-
-[package.dependencies]
-certifi = "*"
-python-dateutil = "*"
-six = ">=1.10"
-urllib3 = ">=1.15"
-
-[package.source]
-reference = "a7ace99fef135c3505edf332051e693c279ce054"
-type = "git"
-url = "git@github.com:B4rtware/doctrans-py-swagger-client.git"
-[[package]]
-category = "main"
-description = ""
-name = "doctrans-py-swagger-server"
-optional = false
-python-versions = "^3.8"
-version = "0.1.0"
-
-[package.dependencies]
-connexion = "2.6.0"
-python_dateutil = "2.6.0"
-setuptools = "21.0.0"
-
-[package.source]
-reference = "48256067180e08bd22da4853dd2faea39c42ec22"
-type = "git"
-url = "git@github.com:B4rtware/doctrans-py-swagger-server.git"
-[[package]]
-category = "main"
 description = "Docutils -- Python Documentation Utilities"
 name = "docutils"
 optional = false
@@ -641,17 +606,6 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 category = "main"
-description = "Extensions to the standard Python datetime module"
-name = "python-dateutil"
-optional = false
-python-versions = "*"
-version = "2.6.0"
-
-[package.dependencies]
-six = ">=1.5"
-
-[[package]]
-category = "main"
 description = "World timezone definitions, modern and historical"
 name = "pytz"
 optional = false
@@ -714,7 +668,7 @@ description = "Python documentation generator"
 name = "sphinx"
 optional = false
 python-versions = ">=3.5"
-version = "3.0.1"
+version = "3.0.2"
 
 [package.dependencies]
 Jinja2 = ">=2.3"
@@ -951,7 +905,7 @@ python-versions = "*"
 version = "1.11.2"
 
 [metadata]
-content-hash = "8b1ac8b68cf8822302a4972162a83fc635cfcd495097aaef4499ffef7b721931"
+content-hash = "1ff9ce850f1b5719985df6b0d59f51be2d022ebd17620d2029b797cf1de2b0a3"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1027,8 +981,6 @@ djangorestframework = [
     {file = "djangorestframework-3.11.0-py3-none-any.whl", hash = "sha256:05809fc66e1c997fd9a32ea5730d9f4ba28b109b9da71fccfa5ff241201fd0a4"},
     {file = "djangorestframework-3.11.0.tar.gz", hash = "sha256:e782087823c47a26826ee5b6fa0c542968219263fb3976ec3c31edab23a4001f"},
 ]
-doctrans-py-swagger-client = []
-doctrans-py-swagger-server = []
 docutils = [
     {file = "docutils-0.16-py2.py3-none-any.whl", hash = "sha256:0c5b78adfbf7762415433f5515cd5c9e762339e23369dbe8000d84a4bf4ab3af"},
     {file = "docutils-0.16.tar.gz", hash = "sha256:c2de3a60e9e7d07be26b7f2b00ca0309c207e06c100f9cc2a94931fc75a478fc"},
@@ -1317,11 +1269,6 @@ pytest = [
     {file = "pytest-5.4.1-py3-none-any.whl", hash = "sha256:0e5b30f5cb04e887b91b1ee519fa3d89049595f428c1db76e73bd7f17b09b172"},
     {file = "pytest-5.4.1.tar.gz", hash = "sha256:84dde37075b8805f3d1f392cc47e38a0e59518fb46a431cfdaf7cf1ce805f970"},
 ]
-python-dateutil = [
-    {file = "python-dateutil-2.6.0.tar.gz", hash = "sha256:62a2f8df3d66f878373fd0072eacf4ee52194ba302e00082828e0d263b0418d2"},
-    {file = "python-dateutil-2.6.0.zip", hash = "sha256:3acbef017340600e9ff8f2994d8f7afd6eacb295383f286466a6df3961e486f0"},
-    {file = "python_dateutil-2.6.0-py2.py3-none-any.whl", hash = "sha256:537bf2a8f8ce6f6862ad705cd68f9e405c0b5db014aa40fa29eab4335d4b1716"},
-]
 pytz = [
     {file = "pytz-2019.3-py2.py3-none-any.whl", hash = "sha256:1c557d7d0e871de1f5ccd5833f60fb2550652da6be2693c1e02300743d21500d"},
     {file = "pytz-2019.3.tar.gz", hash = "sha256:b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be"},
@@ -1375,8 +1322,8 @@ snowballstemmer = [
     {file = "snowballstemmer-2.0.0.tar.gz", hash = "sha256:df3bac3df4c2c01363f3dd2cfa78cce2840a79b9f1c2d2de9ce8d31683992f52"},
 ]
 sphinx = [
-    {file = "Sphinx-3.0.1-py3-none-any.whl", hash = "sha256:8411878f4768ec2a8896b844d68070204f9354a831b37937989c2e559d29dffc"},
-    {file = "Sphinx-3.0.1.tar.gz", hash = "sha256:50972d83b78990fd61d0d3fe8620814cae53db29443e92c13661bc43dff46ec8"},
+    {file = "Sphinx-3.0.2-py3-none-any.whl", hash = "sha256:3145d87d0962366d4c5264c39094eae3f5788d01d4b1a12294051bfe4271d91b"},
+    {file = "Sphinx-3.0.2.tar.gz", hash = "sha256:d7c6e72c6aa229caf96af82f60a0d286a1521d42496c226fe37f5a75dcfe2941"},
 ]
 sphinx-rtd-theme = [
     {file = "sphinx_rtd_theme-0.4.3-py2.py3-none-any.whl", hash = "sha256:00cf895504a7895ee433807c62094cf1e95f065843bf3acd17037c3e9a2becd4"},
