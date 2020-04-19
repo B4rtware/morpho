@@ -47,8 +47,8 @@ from service.log import log
 from service.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
 from service.proto.dtaservice_pb2 import ListServicesResponse
 from service.proto.dtaservice_pb2 import ListServiceRequest
-from service.proto.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
-from service.proto.dtaservice_pb2_grpc import DTAServerServicer
+from service.proto.grpc.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
+from service.proto.grpc.dtaservice_pb2_grpc import DTAServerServicer
 from service.rest import Status
 
 
