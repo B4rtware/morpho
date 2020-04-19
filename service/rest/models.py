@@ -211,4 +211,9 @@ class TransformDocumentPipeResponse(TransformDocumentResponse):
         self.sender = sender
 
     def as_dict(self) -> RawTransformDocumentPipeResponse:
-        return RawTransformDocumentPipeResponse(trans_document=self.trans_document)
+        return RawTransformDocumentPipeResponse(
+            trans_document=self.trans_document,
+            sender=self.sender,
+            trans_output=self.trans_output,
+            error=self.error,
+        )
