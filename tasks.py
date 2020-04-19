@@ -8,6 +8,7 @@ PROTO_OUT_PATH = PROTO_PATH
 GRPC_PROTO_OUT_PATH = PROTO_PATH / Path("./grpc/")
 PROTO_FILE = PROTO_PATH / Path("./dtaservice.proto")
 
+
 @task
 def build(c):
     c.run("poetry run sphinx-apidoc -o docs/sphinx ./service/")
@@ -26,9 +27,6 @@ def test(c):
 @task
 def format(c):
     c.run("poetry run python -m black --config=pyproject.toml --check .")
-
-@task
-def deps(c)
 
 
 @task
