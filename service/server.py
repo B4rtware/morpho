@@ -242,8 +242,9 @@ class DTARestWorkConsumer(WorkConsumer):
                     trans_document = self._work(flask.request.json["document"])
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
-        error = captured_stderr.getvalue().split("\n")
-        trans_output = captured_stdout.getvalue().split("\n")
+                    
+        error = captured_stderr.readlines()
+        trans_output = captured_stdout.readlines()
 
         return (
             {
@@ -255,6 +256,7 @@ class DTARestWorkConsumer(WorkConsumer):
             Headers({"Content-Type": "application/json"}),
         )
 
+    # TODO: add options to the list reponse for each application maybe on /options or so
     def list_services(self) -> Tuple[RawListResponse, Status, Headers]:
         services = self.get_services()
         return (
