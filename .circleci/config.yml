@@ -14,10 +14,16 @@ jobs:
           command: poetry install
 
       - run:
-          name: Run Tests
+          name: Run Unit Tests
           command: |
             mkdir test_results
-            poetry run python -m pytest --junitxml=test-results/junit.xml
+            poetry run python -m pytest --junitxml=test-results/junit.xml tests/unit
+
+      - run:
+          name: Run Integration Tests
+          command: |
+            mkdir test_results
+            poetry run python -m pytest --junitxml=test-results/junit-integration.xml -s tests/integration
 
       - store_test_results:
           path: test-results
