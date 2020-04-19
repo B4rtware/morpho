@@ -7,6 +7,8 @@ from typing import Union
 
 log.basicConfig(level=log.INFO)
 
+# TODO:: consider to move the parser logic into this module e.g init() / parse()
+
 # doctrans: DocTransServer
 @dataclass
 class DTAServerConfig:
