@@ -14,7 +14,7 @@ import dataclasses
 import io
 from pathlib import Path
 import sys
-from threading import Thread
+from threading import Event, Thread
 import traceback
 from typing import (
     Any,
@@ -352,6 +352,7 @@ class DTAServer(ABC):
 
     def __init__(self) -> None:
         self._protocols = {}
+        self.should_stop = Event()
 
     def register_consumer(self, name: str, work_consumer: WorkConsumer):
         """Registers a work consumer.
@@ -463,9 +464,10 @@ class DTAServer(ABC):
         # fmt: on
 
         try:
-            input()
+            while not cls_instance.should_stop.is_set():
+                cls_instance.should_stop.wait(0.5)
         except KeyboardInterrupt:
-            pass
+            sys.exit(0)
 
 
 def run_app(cls: DTAServer):
