@@ -34,7 +34,7 @@ import flask
 from flask import Flask
 
 # from flask_swagger_ui import get_swaggerui_blueprint
-from swagger_ui import api_doc
+# from swagger_ui import api_doc
 import grpc
 from grpc import ServicerContext
 import waitress
@@ -209,9 +209,9 @@ class DTARestWorkConsumer(WorkConsumer):
         # TODO: try to use decorator route
         # fmt: off
         # pylint: disable: line-too-long
-        working_dir = Path.cwd()
-        config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
-        api_doc(self.app, config_path=config_path, url_prefix="/info")
+        # working_dir = Path.cwd()
+        # config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
+        # api_doc(self.app, config_path=config_path, url_prefix="/info")
         self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self.transform_document, methods=["POST"])
         self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list_services, methods=["GET"])
         self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self.transform_document_pipe)

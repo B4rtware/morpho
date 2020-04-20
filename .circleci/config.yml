@@ -34,12 +34,6 @@ jobs:
           command: |
             poetry run python -m pytest --junitxml=test-results/junit-integration.xml -s tests/integration
 
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts:
-          path: test-results
-
       - run:
           name: Run Coverage
           command: |
@@ -50,3 +44,9 @@ jobs:
           command: poetry run python -m codecov
           when:
             on_success
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
