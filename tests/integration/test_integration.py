@@ -25,10 +25,10 @@ def test_integration_rest():
     sys.argv = [sys.argv[0], "--protocols=rest"]
 
     # app = QDS_TEST
-    app_thread = Thread(target=QDS_TEST.run, daemon=True)
+    app_thread = Thread(target=QDS_TEST.run)
     app_thread.start()
 
-    app_thread.join(timeout=5)
+    app_thread.join(timeout=10)
     assert app_thread.is_alive()
 
     result = r.post("http://127.0.0.1:50000/v1/qds/dta/document/transform", json={ "document": "Hello World!" })
