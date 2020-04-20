@@ -5,9 +5,42 @@ jobs:
       - image: circleci/python:3.8.2-buster
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
+
+      - restore_cache:
+          keys: 
+            - deps-{{ checksum "poetry.lock" }}
+
       - run:
-          command: pytest --color=yes
-          name: pytest
+          name: Install Poetry
+          command: pip install poetry
+
+      - run:
+          name: Install Dependencies
+          command: poetry install
+
+      - save_cache:
+          key: deps-{{ checksum "poetry.lock" }}
+          paths: 
+            - /home/circleci/.cache/pypoetry/virtualenvs
+
+      - run:
+          name: Run Unit Tests
+          command: |
+            mkdir test_results
+            poetry run python -m pytest --junitxml=test-results/junit.xml tests/unit
+
+      - run:
+          name: Run Integration Tests
+          command: |
+            poetry run python -m pytest --junitxml=test-results/junit-integration.xml -s tests/integration
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+
+      - run:
+          name: Run Coverage
+          command: |
+            poetry run python -m pytest --cov=. tests/

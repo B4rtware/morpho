@@ -47,8 +47,8 @@ from service.log import log
 from service.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
 from service.proto.dtaservice_pb2 import ListServicesResponse
 from service.proto.dtaservice_pb2 import ListServiceRequest
-from service.proto.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
-from service.proto.dtaservice_pb2_grpc import DTAServerServicer
+from service.proto.grpc.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
+from service.proto.grpc.dtaservice_pb2_grpc import DTAServerServicer
 from service.rest import Status
 
 
@@ -72,10 +72,13 @@ class RawTransformDocumentRequest(TypedDict):
     file_name: Optional[str]
     options: Optional[Options]
 
+class RawListService(TypedDict):
+    """Raw ListService dict type"""
+    name: str
 
 class RawListResponse(TypedDict):
     """Raw ListResponse dict type"""
-    services: List[str]
+    services: List[RawListService]
 
 
 class RawTransformDocumentPipeRequest(RawTransformDocumentRequest):
@@ -239,8 +242,9 @@ class DTARestWorkConsumer(WorkConsumer):
                     trans_document = self._work(flask.request.json["document"])
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
-        error = captured_stderr.getvalue().split("\n")
-        trans_output = captured_stdout.getvalue().split("\n")
+                    
+        error = captured_stderr.readlines()
+        trans_output = captured_stdout.readlines()
 
         return (
             {
@@ -252,6 +256,7 @@ class DTARestWorkConsumer(WorkConsumer):
             Headers({"Content-Type": "application/json"}),
         )
 
+    # TODO: add options to the list reponse for each application maybe on /options or so
     def list_services(self) -> Tuple[RawListResponse, Status, Headers]:
         services = self.get_services()
         return (
