@@ -25,7 +25,7 @@ def test_integration_rest():
     sys.argv = [sys.argv[0], "--protocols=rest"]
 
     # app = QDS_TEST
-    app_thread = Thread(target=QDS_TEST.run)
+    app_thread = Thread(target=QDS_TEST.run, daemon=True)
     app_thread.start()
 
     app_thread.join(timeout=10)

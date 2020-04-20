@@ -22,7 +22,7 @@ def lint(c):
 @task
 def tests(c):
     c.run("python -m pytest --color=yes tests/unit")
-    c.run("python -m pytest --color=yes -s tests/integration")
+    c.run("python -m pytest --color=yes -s -vvv tests/integration")
 
 @task
 def format(c):
