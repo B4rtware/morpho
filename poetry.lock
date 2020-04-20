@@ -129,6 +129,18 @@ PyYAML = ">=3.11"
 click = ">=4.0"
 
 [[package]]
+category = "dev"
+description = "Hosted coverage reports for GitHub, Bitbucket and Gitlab"
+name = "codecov"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "2.0.22"
+
+[package.dependencies]
+coverage = "*"
+requests = ">=2.7.9"
+
+[[package]]
 category = "main"
 description = "Cross-platform colored terminal text."
 name = "colorama"
@@ -931,7 +943,7 @@ python-versions = "*"
 version = "1.11.2"
 
 [metadata]
-content-hash = "feb11f8b4aaf1e14b2dd94a3b3a2439f1d3dfc5d5c8cf226cd95c20c92af23dd"
+content-hash = "2d6710306dcb191661665a1864b1787c6953cf52062af2a96c32b47af2991dca"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -982,6 +994,10 @@ click = [
 clickclick = [
     {file = "clickclick-1.2.2-py2.py3-none-any.whl", hash = "sha256:ab8f229fb9906a86634bdfc6fabfc2b665f44804170720db4f6e1d98f8a58f3d"},
     {file = "clickclick-1.2.2.tar.gz", hash = "sha256:4a890aaa9c3990cfabd446294eb34e3dc89701101ac7b41c1bff85fc210f6d23"},
+]
+codecov = [
+    {file = "codecov-2.0.22-py2.py3-none-any.whl", hash = "sha256:09fb045eb044a619cd2b9dacd7789ae8e322cb7f18196378579fd8d883e6b665"},
+    {file = "codecov-2.0.22.tar.gz", hash = "sha256:aeeefa3a03cac8a78e4f988e935b51a4689bb1f17f20d4e827807ee11135f845"},
 ]
 colorama = [
     {file = "colorama-0.4.3-py2.py3-none-any.whl", hash = "sha256:7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff"},

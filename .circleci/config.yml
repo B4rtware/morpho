@@ -43,4 +43,10 @@ jobs:
       - run:
           name: Run Coverage
           command: |
-            poetry run python -m pytest --cov=. tests/
+            poetry run python -m pytest --cov=. tests/unit
+
+      - run:
+          name: Send to Codecov
+          command: poetry run python -m codecov
+          when:
+            on_success
