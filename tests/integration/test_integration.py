@@ -49,7 +49,7 @@ def test_rest_list():
     assert result.status_code == 200
     assert result.text
     document_response = result.json()
-    assert document_response["services"] == [{"name": "TEST", "options": {}, "version": "1.0.0"}]
+    assert document_response["services"] == [{"name": "TEST", "options": None, "version": "0.0.1"}]
 
 
 

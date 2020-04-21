@@ -88,7 +88,7 @@ class RawServiceInfo(TypedDict):
 
     name: str
     version: str
-    options: Dict[str, Any]
+    options: Optional[Dict[str, Any]]
 
 
 class RawListResponse(TypedDict):
@@ -189,7 +189,7 @@ class WorkConsumer(ABC):
             applications.append(RawServiceInfo(
                 name=self.config.app_name,
                 version=self.config.version,
-                options=self.config.options.as_dict()
+                options=self.config.options.as_dict() if self.config.options else None
             ))
         return applications
 
