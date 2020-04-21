@@ -8,13 +8,10 @@ from typing import List, Optional
 from urllib.error import HTTPError
 from py_eureka_client.eureka_client import Application
 from service.server import Options
+from service.error import ServiceNotFoundError
 from py_eureka_client import eureka_client
 from base64 import b64encode, b64decode
 import requests
-
-
-class ServiceNotFoundError(Exception):
-    pass
 
 
 @dataclass
