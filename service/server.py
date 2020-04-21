@@ -11,6 +11,7 @@ import concurrent.futures as futures
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 import dataclasses
+from enum import Enum
 import io
 from pathlib import Path
 import sys
@@ -42,7 +43,7 @@ import py_eureka_client.eureka_client as eureka_client
 
 sys.path.append(str(Path(".").resolve()))
 
-from service.config import DTAServerConfig
+from service.config import ServerConfig
 from service.log import log
 from service.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
 from service.proto.dtaservice_pb2 import ListServicesResponse
@@ -60,6 +61,7 @@ Headers = NewType("Headers", Dict[str, str])
 
 class RawTransformDocumentResponse(TypedDict):
     """Raw TransformDocumentResponse dict type"""
+
     trans_document: Optional[str]
     trans_output: Optional[List[str]]
     error: Optional[List[str]]
@@ -67,28 +69,50 @@ class RawTransformDocumentResponse(TypedDict):
 
 class RawTransformDocumentRequest(TypedDict):
     """Raw TransformDocumentRequest dict type"""
+
     document: str
     service_name: str
     file_name: Optional[str]
     options: Optional[Options]
 
+
 class RawListService(TypedDict):
     """Raw ListService dict type"""
+
     name: str
+    options: Dict[str, Any]
+
+
+class RawServiceInfo(TypedDict):
+    """Raw ServiceInfo dict type"""
+
+    name: str
+    version: str
+    options: Dict[str, Any]
+
 
 class RawListResponse(TypedDict):
     """Raw ListResponse dict type"""
+
     services: List[RawListService]
 
 
 class RawTransformDocumentPipeRequest(RawTransformDocumentRequest):
     """Raw TransformDocumentPipeRequest dict type"""
+
     services: List[Dict[str, Any]]
 
 
 class RawTransformDocumentPipeResponse(RawTransformDocumentResponse):
     """Raw TransformDocumentPipeResponse dict type"""
+
     sender: str
+
+
+class ServiceType(Enum):
+    SERVICE = ("service",)
+    PROXY = ("proxy",)
+    GATEWAY = "gateway"
 
 
 # TODO: verify that all options are used or at least output a warning
@@ -143,11 +167,11 @@ class WorkConsumer(ABC):
         be correctly marshalled.
     """
 
-    def __init__(self, work: Callable[[str], str], config: DTAServerConfig) -> None:
+    def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
         self._work = work
         self.config = config
 
-    def get_services(self) -> List[str]:
+    def get_services(self) -> List[RawServiceInfo]:
         """Lists all services names from the eureka server of the provided ``DTAServerConfig``.
         
         Returns:
@@ -168,7 +192,11 @@ class WorkConsumer(ABC):
                 )
         # the service always knows its self
         if not applications:
-            applications.append(self.config.app_name)
+            applications.append(RawServiceInfo(
+                name=self.config.app_name,
+                version=self.config.version,
+                options=self.config.options.as_dict()
+            ))
         return applications
 
     @abstractmethod
@@ -242,7 +270,7 @@ class DTARestWorkConsumer(WorkConsumer):
                     trans_document = self._work(flask.request.json["document"])
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
-                    
+
         error = captured_stderr.readlines()
         trans_output = captured_stdout.readlines()
 
@@ -277,7 +305,11 @@ class DTARestWorkConsumer(WorkConsumer):
             daemon=True,
             target=waitress.serve,
             args=(self.app,),
-            kwargs={"port": self.config.port_to_listen, "_quiet": True},
+            kwargs={
+                "port": self.config.port_to_listen,
+                "_quiet": True,
+                "clear_untrusted_proxy_headers": True,
+            },
         )
         self.thread.start()
 
@@ -393,12 +425,17 @@ class DTAServer(ABC):
         working_home_dir = Path.home()
 
         # TODO: rename app_name to name
+        version = getattr(cls, "version", None)
         app_name = getattr(cls, "name", "UNKNOWN")
+        options = getattr(cls, "options", None)
+
         if app_name == "UNKNOWN":
-            log.warning("no app name was specified instead using: UNKNOWN!")
+            log.warning("no application name was specified instead using: UNKNOWN!")
         # doctrans: dts
-        config = DTAServerConfig(
+        config = ServerConfig(
             app_name=app_name,
+            version=version,
+            options=options,
             config_file=str(
                 working_home_dir / Path("/.dta/") / app_name / Path("/config.json")
             ),
@@ -433,7 +470,11 @@ class DTAServer(ABC):
                 instance_port=int(config.port_to_listen),
                 instance_secure_port_enabled=config.is_ssl,
                 # TODO: change dta type name to use the same from the rest specification
-                metadata={"DTA-Type": config.dta_type},
+                metadata={
+                    "morpho.version": config.version,
+                    "morpho.type": config.service_type,
+                    "morpho.options": config.options.as_dict() if config.options else {},
+                },
             )
 
         cls_instance = cls()
