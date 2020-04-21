@@ -3,37 +3,25 @@ from dataclasses import dataclass
 import json
 import logging as log
 from pathlib import Path
-from typing import Union
+from service.server import ServiceType
+from typing import Dict, Optional, Union, cast
 
 log.basicConfig(level=log.INFO)
 
 # TODO:: consider to move the parser logic into this module e.g init() / parse()
 
-# doctrans: DocTransServer
+
 @dataclass
-class DTAServerConfig:
-    """Configuration class for a DTA server.
+class BaseConfig:
+    """Base Configuration class for a DTA server."""
 
-    It is a direct mapping for a given configuration file. Which should only contain
-    options which are also supported by this class.
-    """
-
-    register: bool = False
-    registrar_url: str = "http://localhost:8761/eureka"
-    registrar_user: str = ""
-    ttl: int = 0
-
-    host_name: str = ""
-    app_name: str = ""
-    port_to_listen: str = "50000"
-    dta_type: str = ""
-    is_ssl: bool = False
-    rest: bool = False
-    http_port: str = "8080"
-
-    log_level: str = ""
     config_file: str = "./dts/config.json"
-    init: bool = False
+
+    def as_json(self, indent: Optional[int] = None) -> str:
+        return json.dumps(dataclasses.asdict(self), indent=indent)
+
+    def as_dict(self) -> Dict[str, Any]:
+        return dataclasses.asdict(self)
 
     # doctrans: new_config_file
     def save(self) -> None:
@@ -46,7 +34,7 @@ class DTAServerConfig:
 
     # doctrans: new_doc_trans_from_file
     @classmethod
-    def load(cls, path: Union[Path, str]) -> "DTAServerConfig":
+    def load(cls, path: Union[Path, str]) -> "ServerConfig":
         """Load a DTA configuration file from a given path.
 
         Returns:
@@ -62,3 +50,32 @@ class DTAServerConfig:
                 if arg[1]:
                     setattr(dtas_config, arg[0], arg[1])
         return dtas_config
+
+
+# doctrans: DocTransServer
+@dataclass
+class ServerConfig(BaseConfig):
+    """Configuration class for a DTA server.
+
+    It is a direct mapping for a given configuration file. Which should only contain
+    options which are also supported by this class.
+    """
+
+    app_name: str = ""
+    version: str = ""
+    options: Optional[BaseConfig] = None
+
+    register: bool = False
+    registrar_url: str = "http://localhost:8761/eureka"
+    registrar_user: str = ""
+    ttl: int = 0
+
+    host_name: str = ""
+    port_to_listen: str = "50000"
+    service_type: ServiceType = ServiceType.SERVICE
+    is_ssl: bool = False
+    rest: bool = False
+    http_port: str = "8080"
+
+    log_level: str = ""
+    init: bool = False
