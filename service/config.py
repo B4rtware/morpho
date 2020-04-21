@@ -3,12 +3,12 @@ from dataclasses import dataclass
 import json
 import logging as log
 from pathlib import Path
-from service.server import ServiceType
-from typing import Dict, Optional, Union, cast
+from service.types import ServiceType
+from typing import Any, Dict, IO, Optional, Union
 
 log.basicConfig(level=log.INFO)
 
-# TODO:: consider to move the parser logic into this module e.g init() / parse()
+# TODO: consider to move the parser logic into this module e.g init() / parse()
 
 
 @dataclass
@@ -18,19 +18,37 @@ class BaseConfig:
     config_file: str = "./dts/config.json"
 
     def as_json(self, indent: Optional[int] = None) -> str:
+        """[summary]
+        
+        Args:
+            indent (Optional[int], optional): [description]. Defaults to None.
+        
+        Returns:
+            str: [description]
+        """
         return json.dumps(dataclasses.asdict(self), indent=indent)
 
     def as_dict(self) -> Dict[str, Any]:
         return dataclasses.asdict(self)
 
     # doctrans: new_config_file
-    def save(self) -> None:
+    def save(self, file: Optional[IO]) -> None:
         """Save the DTA configuration to the path specified in the DTA configuration.
+        
+        If not provided it will saves the configuration file to the specified path in the
+        configuration object.
+
+        Args:
+            file (Optional[IO]): A IO descriptor. Defaults to None.
         """
-        path = Path(self.config_file)
-        path.parent.mkdir(exist_ok=True, parents=True)
-        with path.open("w") as configuration:
-            json.dump(dataclasses.asdict(self), configuration, indent=4)
+        if not file:
+            path = Path(self.config_file)
+            path.parent.mkdir(exist_ok=True, parents=True)
+            with path.open("w") as configuration:
+                json.dump(dataclasses.asdict(self), configuration, indent=4)
+        else:
+            out = json.dumps(dataclasses.asdict(self), indent=4)
+            file.write(out)
 
     # doctrans: new_doc_trans_from_file
     @classmethod
@@ -38,7 +56,7 @@ class BaseConfig:
         """Load a DTA configuration file from a given path.
 
         Returns:
-            DTAServerConfig -- A new DTAServerConfig with provided options.
+            ServerConfig -- A new ServerConfig with provided options.
         """
         if not isinstance(path, str):
             path = Path(path)

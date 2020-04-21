@@ -109,12 +109,6 @@ class RawTransformDocumentPipeResponse(RawTransformDocumentResponse):
     sender: str
 
 
-class ServiceType(Enum):
-    SERVICE = ("service",)
-    PROXY = ("proxy",)
-    GATEWAY = "gateway"
-
-
 # TODO: verify that all options are used or at least output a warning
 # fmt: off
 # pylint: disable=line-too-long
@@ -148,7 +142,7 @@ parser.add_argument("--init", help="Create a default config file as defined by c
 # TODO: consider remove this
 @dataclass
 class DtaService:
-    service_handler: DTAServerConfig
+    service_handler: ServerConfig
     resolver: eureka_client.RegistryClient
 
 
@@ -159,7 +153,7 @@ class WorkConsumer(ABC):
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (DTAServerConfig): Configuration for the given DTAServer.
+        config (ServerConfig): Configuration for the given DTAServer.
 
     Note:
         The ``work`` callback should be called once on a implemented work consumer after the
@@ -172,7 +166,7 @@ class WorkConsumer(ABC):
         self.config = config
 
     def get_services(self) -> List[RawServiceInfo]:
-        """Lists all services names from the eureka server of the provided ``DTAServerConfig``.
+        """Lists all services names from the eureka server of the provided ``ServerConfig``.
         
         Returns:
             List[str]: List of applications.
@@ -224,10 +218,10 @@ class DTARestWorkConsumer(WorkConsumer):
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (DTAServerConfig): Configuration for the given DTAServer.
+        config (ServerConfig): Configuration for the given DTAServer.
     """
 
-    def __init__(self, work: Callable[[str], str], config: DTAServerConfig):
+    def __init__(self, work: Callable[[str], str], config: ServerConfig):
         super().__init__(work, config)
         log.info("initializing DTARestWorkConsumer")
         self._work = work
@@ -320,10 +314,10 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (DTAServerConfig): Configuration for the given DTAServer.
+        config (ServerConfig): Configuration for the given DTAServer.
     """
 
-    def __init__(self, work: Callable[[str], str], config: DTAServerConfig) -> None:
+    def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
         self._work = work
         self.config = config
         self.server = None
