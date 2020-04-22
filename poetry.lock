@@ -815,6 +815,23 @@ lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
 
 [[package]]
+category = "dev"
+description = "Sphinx spelling extension"
+name = "sphinxcontrib-spelling"
+optional = false
+python-versions = "*"
+version = "5.0.0"
+
+[package.dependencies]
+PyEnchant = ">=1.6.5"
+Sphinx = ">=2.0.0"
+six = "*"
+
+[package.extras]
+linter = ["flake8 (3.5.0)"]
+test = ["fixtures (>=3.0.0)", "python-subunit (>=0.0.18)", "testrepository (>=0.0.18)", "testscenarios (>=0.4)", "testtools (>=1.4.0)", "coverage (>=4.0,<4.4 || >4.4)"]
+
+[[package]]
 category = "main"
 description = "Non-validating SQL parser"
 name = "sqlparse"
@@ -854,7 +871,7 @@ PyYaml = ">=5.0"
 jinja2 = ">=2.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python Library for Tom's Obvious, Minimal Language"
 name = "toml"
 optional = false
@@ -943,7 +960,7 @@ python-versions = "*"
 version = "1.11.2"
 
 [metadata]
-content-hash = "2d6710306dcb191661665a1864b1787c6953cf52062af2a96c32b47af2991dca"
+content-hash = "bc3253306d37ba8baca1a5bc1293c105c2ae1bf12579983c1811a6cbc431da9b"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1431,6 +1448,10 @@ sphinxcontrib-qthelp = [
 sphinxcontrib-serializinghtml = [
     {file = "sphinxcontrib-serializinghtml-1.1.4.tar.gz", hash = "sha256:eaa0eccc86e982a9b939b2b82d12cc5d013385ba5eadcc7e4fed23f4405f77bc"},
     {file = "sphinxcontrib_serializinghtml-1.1.4-py2.py3-none-any.whl", hash = "sha256:f242a81d423f59617a8e5cf16f5d4d74e28ee9a66f9e5b637a18082991db5a9a"},
+]
+sphinxcontrib-spelling = [
+    {file = "sphinxcontrib-spelling-5.0.0.tar.gz", hash = "sha256:a1070b74d8509f4d02c74cb1c187bbde95b0178338aff88fedea3c672b099f4e"},
+    {file = "sphinxcontrib_spelling-5.0.0-py3-none-any.whl", hash = "sha256:a89abbd82443eb1159f334593c383438440b30d9d71676af6b1c2d9499152ce7"},
 ]
 sqlparse = [
     {file = "sqlparse-0.3.1-py2.py3-none-any.whl", hash = "sha256:022fb9c87b524d1f7862b3037e541f68597a730a8843245c349fc93e1643dc4e"},
