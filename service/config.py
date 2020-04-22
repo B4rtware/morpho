@@ -9,6 +9,7 @@ from typing import Any, Dict, IO, Optional, Union
 log.basicConfig(level=log.INFO)
 
 # TODO: consider to move the parser logic into this module e.g init() / parse()
+# TODO: use loads load dump dumps
 
 
 @dataclass
