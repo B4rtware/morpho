@@ -228,6 +228,7 @@ class DTARestWorkConsumer(WorkConsumer):
         self.config = config
         self.thread: Optional[Thread] = None
         self.app = Flask(__name__)
+        self.app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
         # TODO: try to use decorator route
         # fmt: off
         # pylint: disable: line-too-long
