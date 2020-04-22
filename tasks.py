@@ -11,8 +11,17 @@ PROTO_FILE = PROTO_PATH / Path("./dtaservice.proto")
 
 @task
 def build(c):
-    c.run("poetry run sphinx-apidoc -o docs/sphinx ./service/")
+    """Run this if new modules where added"""
+    c.run("poetry run sphinx-apidoc -o docs/sphinx/api ./service/")
 
+@task
+def docs(c):
+    """Run if docstrings have changed"""
+    c.run("poetry run sphinx-build -M html ./docs/sphinx ./docs/sphinx/_build -v")
+
+@task
+def check(c):
+    c.run("poetry run sphinx-build -M spelling ./docs/sphinx ./docs/sphinx/_build -v -W")
 
 @task
 def lint(c):
