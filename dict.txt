@@ -1,8 +1,5 @@
 fmt
 grpc
-doctrans
-DTA
-dta
 microservice
 config
 marshalled
@@ -17,3 +14,4 @@ Protobuf
 cls
 dataclass
 dataclasses
+morpho
