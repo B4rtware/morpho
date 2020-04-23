@@ -1,6 +1,8 @@
 
 .vscode
-docs
+docs/api
+docs/sphinx
+docs/readme.md
 google
 
 # Created by https://www.gitignore.io/api/python,visualstudiocode
