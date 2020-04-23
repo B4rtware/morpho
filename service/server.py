@@ -465,11 +465,7 @@ class DTAServer(ABC):
                 instance_port=int(config.port_to_listen),
                 instance_secure_port_enabled=config.is_ssl,
                 # TODO: change dta type name to use the same from the rest specification
-                metadata={
-                    "morpho.version": config.version,
-                    "morpho.type": config.service_type,
-                    "morpho.options": config.options.as_dict() if config.options else {},
-                },
+                metadata={},
             )
 
         cls_instance = cls()
