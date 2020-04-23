@@ -1,16 +1,18 @@
 from abc import ABC, abstractmethod
 from base64 import b64decode
 import binascii
-import json
 from dataclasses import dataclass
+import json
 from typing import Any, Dict, List, Optional
-from service.server import (
+
+from morpho.server import (
     Options,
-    RawListResponse, RawListService,
+    RawListResponse,
+    RawListService,
     RawTransformDocumentPipeRequest,
+    RawTransformDocumentPipeResponse,
     RawTransformDocumentRequest,
     RawTransformDocumentResponse,
-    RawTransformDocumentPipeResponse,
 )
 
 # its models raw responses
@@ -131,7 +133,9 @@ class ListServicesResponse(BaseModel):
         Returns:
             RawListResponse: ListServicesResponse as dict.
         """
-        return RawListResponse(services=[RawListService({"name": service}) for service in self.services])
+        return RawListResponse(
+            services=[RawListService({"name": service}) for service in self.services]
+        )
 
 
 class TransformDocumentPipeRequest(TransformDocumentRequest):

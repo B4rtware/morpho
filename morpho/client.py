@@ -1,17 +1,14 @@
-from pathlib import Path
-import sys
-
-sys.path.append(str(Path(".").resolve()))
-
+from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from typing import List, Optional
 from urllib.error import HTTPError
-from py_eureka_client.eureka_client import Application
-from service.server import Options
-from service.error import ServiceNotFoundError
+
 from py_eureka_client import eureka_client
-from base64 import b64encode, b64decode
+from py_eureka_client.eureka_client import Application
 import requests
+
+from morpho.error import ServiceNotFoundError
+from morpho.server import Options
 
 
 @dataclass

@@ -17,40 +17,25 @@ from pathlib import Path
 import sys
 from threading import Event, Thread
 import traceback
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    NewType,
-    Optional,
-    Tuple,
-    TypedDict,
-)
+from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, TypedDict
 from urllib.error import URLError
-
 
 import colorama as cr
 import flask
 from flask import Flask
-
-# from flask_swagger_ui import get_swaggerui_blueprint
-# from swagger_ui import api_doc
 import grpc
 from grpc import ServicerContext
-import waitress
 import py_eureka_client.eureka_client as eureka_client
+import waitress
 
-sys.path.append(str(Path(".").resolve()))
-
-from service.config import ServerConfig
-from service.log import log
-from service.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
-from service.proto.dtaservice_pb2 import ListServicesResponse
-from service.proto.dtaservice_pb2 import ListServiceRequest
-from service.proto.grpc.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
-from service.proto.grpc.dtaservice_pb2_grpc import DTAServerServicer
-from service.rest import Status
+from morpho.config import ServerConfig
+from morpho.log import log
+from morpho.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
+from morpho.proto.dtaservice_pb2 import ListServicesResponse
+from morpho.proto.dtaservice_pb2 import ListServiceRequest
+from morpho.proto.grpc.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
+from morpho.proto.grpc.dtaservice_pb2_grpc import DTAServerServicer
+from morpho.rest import Status
 
 
 cr.init()
@@ -125,7 +110,7 @@ parser.add_argument_group("Service")
 parser.add_argument("--host-name", type=str, help="If provided will be used as hostname, else automatically derived.")
 parser.add_argument("--app-name", type=str, help="ID of the service as e.g. 'DOC.TXT.COUNT.'")
 parser.add_argument("--port-to-listen", type=str, help="On which port to listen for this service.")
-parser.add_argument("--dta-type", type=str, help="One of Gateway or Service. Service is assumed if not provided.")
+parser.add_argument("--type", type=str, help="One of Gateway or Service. Service is assumed if not provided.")
 parser.add_argument("--is-ssl", type=str, help="Can the service be reached via SSL.")
 parser.add_argument("--rest", action="store_true", help="REST-API enabled on port 80, if set.")
 parser.add_argument("--http-port", type=str, help="On which httpPort to listen for REST, if enableREST is set. Ignored otherwise.")
@@ -134,16 +119,9 @@ parser.add_argument("--protocols", type=str, nargs='+', help="Which protocol sho
 parser.add_argument_group("Generic")
 parser.add_argument("--log-level", type=str, help="Log level, one of panic, fatal, error, warn or warning, info, debug, trace", default="INFO", choices=("CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG", "NOTSET"))
 parser.add_argument("--config-file", type=str, help="The config file to use")
-parser.add_argument("--init", help="Create a default config file as defined by cfg-file, if set. If not set ~/.dta/<AppName>/config.json will be created.", action="store_true")
+parser.add_argument("--init", help="Create a default config file as defined by cfg-file, if set. If not set ~/.morpho/<AppName>/config.json will be created.", action="store_true")
 # pylint: enable=line-too-long
 # fmt: on
-
-
-# TODO: consider remove this
-@dataclass
-class DtaService:
-    service_handler: ServerConfig
-    resolver: eureka_client.RegistryClient
 
 
 # TODO: rename to Base prefix or suffix
@@ -153,7 +131,7 @@ class WorkConsumer(ABC):
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (ServerConfig): Configuration for the given DTAServer.
+        config (ServerConfig): Configuration for the given Server.
 
     Note:
         The ``work`` callback should be called once on a implemented work consumer after the
@@ -186,11 +164,15 @@ class WorkConsumer(ABC):
                 )
         # the service always knows its self
         if not applications:
-            applications.append(RawServiceInfo(
-                name=self.config.app_name,
-                version=self.config.version,
-                options=self.config.options.as_dict() if self.config.options else None
-            ))
+            applications.append(
+                RawServiceInfo(
+                    name=self.config.app_name,
+                    version=self.config.version,
+                    options=self.config.options.as_dict()
+                    if self.config.options
+                    else None,
+                )
+            )
         return applications
 
     @abstractmethod
@@ -201,9 +183,9 @@ class WorkConsumer(ABC):
             NotImplementedError: Must be implemented on the derived class.
 
         Hint:
-            Can be used to instantiate a new ``Thread`` for the listening server of the DTAServer.
+            Can be used to instantiate a new ``Thread`` for the listening server of the Server.
             Creating a new Thread with ``daemon=True`` helps the thread to destroy its self 
-            which will then gracefully shutdown if the DTAServer gets terminated
+            which will then gracefully shutdown if the Server gets terminated
             (preventing zombie threads).
 
         Important:
@@ -212,18 +194,17 @@ class WorkConsumer(ABC):
         raise NotImplementedError
 
 
-class DTARestWorkConsumer(WorkConsumer):
+class RestWorkConsumer(WorkConsumer):
     """Implements a rest work consumer server.
     
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (ServerConfig): Configuration for the given DTAServer.
+        config (ServerConfig): Configuration for the given Server.
     """
 
     def __init__(self, work: Callable[[str], str], config: ServerConfig):
         super().__init__(work, config)
-        log.info("initializing DTARestWorkConsumer")
         self._work = work
         self.config = config
         self.thread: Optional[Thread] = None
@@ -309,13 +290,13 @@ class DTARestWorkConsumer(WorkConsumer):
         self.thread.start()
 
 
-class DTAGrpcWorkConsumer(DTAServerServicer):
+class GrpcWorkConsumer(DTAServerServicer):
     """Implements a grpc work consumer server.
 
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (ServerConfig): Configuration for the given DTAServer.
+        config (ServerConfig): Configuration for the given Server.
     """
 
     def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
@@ -366,11 +347,11 @@ class DTAGrpcWorkConsumer(DTAServerServicer):
 
 
 # TODO: create base class consumer to reflect the interface
-protocols = {"rest": DTARestWorkConsumer, "grpc": DTAGrpcWorkConsumer}
+protocols = {"rest": RestWorkConsumer, "grpc": GrpcWorkConsumer}
 
 
-class DTAServer(ABC):
-    """DtaServer
+class Server(ABC):
+    """Server
 
     Note:
         Ideally every Server should implement a debug option.
@@ -432,7 +413,7 @@ class DTAServer(ABC):
             version=version,
             options=options,
             config_file=str(
-                working_home_dir / Path("/.dta/") / app_name / Path("/config.json")
+                working_home_dir / Path("/.morpho/") / app_name / Path("/config.json")
             ),
             log_level="INFO",
         )
@@ -464,14 +445,14 @@ class DTAServer(ABC):
                 app_name=config.app_name,
                 instance_port=int(config.port_to_listen),
                 instance_secure_port_enabled=config.is_ssl,
-                # TODO: change dta type name to use the same from the rest specification
+                # TODO: change morpho type name to use the same from the rest specification
                 metadata={},
             )
 
         cls_instance = cls()
         assert (
             cls_instance._protocols
-        ), "Have you called super() on your DTAServer implemenation?"
+        ), "Have you called super() on your Server implemenation?"
         # start protocol consumer
         for protocol in args.protocols:
             instance = protocols[protocol](cls_instance.work, config)
@@ -502,10 +483,10 @@ class DTAServer(ABC):
             sys.exit(0)
 
 
-def run_app(cls: DTAServer):
+def run_app(cls: Server):
     """Decorator to apply on the microservice app class which will be then automatically run.
 
     Args:
-        cls (DTAServer): Class object of the decorated DTAServer implementation.
+        cls (Server): Class object of the decorated Server implementation.
     """
     cls.run()
