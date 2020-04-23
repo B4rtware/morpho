@@ -1,4 +1,4 @@
-from service.config import BaseConfig
+from morpho.config import BaseConfig
 import io
 
 # TODO: test on false parameter types?

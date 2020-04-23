@@ -1,5 +1,5 @@
-from service.server import Options, RawTransformDocumentPipeRequest, RawTransformDocumentRequest, RawTransformDocumentPipeResponse
-from service.rest.models import ListServicesResponse, TransformDocumentPipeRequest, TransformDocumentPipeResponse, TransformDocumentRequest, TransformDocumentResponse
+from morpho.server import Options, RawTransformDocumentPipeRequest, RawTransformDocumentRequest, RawTransformDocumentPipeResponse
+from morpho.rest.models import ListServicesResponse, TransformDocumentPipeRequest, TransformDocumentPipeResponse, TransformDocumentRequest, TransformDocumentResponse
 from base64 import b64encode
 import pytest
 import binascii
