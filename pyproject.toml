@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "doctrans-py"
+name = "morpho"
 version = "0.1.0"
 description = ""
 authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
