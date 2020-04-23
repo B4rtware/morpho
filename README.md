@@ -3,9 +3,15 @@
 > Python port for the go written doctrans
 
 <div align="center">
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
+</a>
 <a href=""><img alt="License: MIT" src="https://img.shields.io/badge/License%3A-MIT-green?style=flat-square">
-</a><a href=""><img src="https://img.shields.io/badge/Python%3A-%5E3.6-green?style=flat-square"></a>
+</a>
+<a href=""><img src="https://img.shields.io/badge/Python%3A-%5E3.6-green?style=flat-square"></a><br>
+<a href=""><img src="https://circleci.com/gh/B4rtware/doctrans-py.svg?style=shield&circle-token=5cd58aa7f458d098a3b9a82e861d87d64ec4a181"></a>
+<a href="https://codecov.io/gh/B4rtware/doctrans-py">
+  <img src="https://codecov.io/gh/B4rtware/doctrans-py/branch/master/graph/badge.svg?token=14BJUE5PY5" />
+</a>
 </div>
 
 # proto from: https://github.com/googleapis/googleapis/tree/master/google/api
