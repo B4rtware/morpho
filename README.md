@@ -1,4 +1,4 @@
-![alt text](docs\images\morpho.png "Logo Title Text 1")
+![morpho logo](docs/images/morpho.png "Morpho Logo")
 
 > Python port for the go written doctrans
 
