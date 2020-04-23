@@ -1,4 +1,4 @@
-![morpho logo](docs/images/morpho.png "Morpho Logo")
+<img src="docs/images/morpho.png" width="100%" alt="Morpho Logo">
 
 > Python port for the go written doctrans
 
