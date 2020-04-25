@@ -21,7 +21,7 @@ class Testsuite():
     timestamp: str
 
 bot = Bot(token=os.environ["TELEGRAM_TOKEN"], chat_id=int(os.environ["TELEGRAM_CHAT_ID"]))
-home = os.environ["HOME"]
+home = os.environ["CIRCLE_WORKING_DIRECTORY"]
 
 
 
