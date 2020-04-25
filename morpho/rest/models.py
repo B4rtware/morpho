@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import json
 from typing import Any, Dict, List, Optional
 
-from morpho.server import (
+from morpho.types import (
     Options,
     RawListResponse,
     RawListService,
