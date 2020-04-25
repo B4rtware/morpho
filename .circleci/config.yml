@@ -8,7 +8,7 @@ jobs:
 
       - restore_cache:
           keys: 
-            - deps-{{ checksum "poetry.lock" }}
+            - morpho-{{ checksum "poetry.lock" }}
 
       - run:
           name: Install Poetry
@@ -19,7 +19,7 @@ jobs:
           command: poetry install
 
       - save_cache:
-          key: deps-{{ checksum "poetry.lock" }}
+          key: morpho-{{ checksum "poetry.lock" }}
           paths: 
             - /home/circleci/.cache/pypoetry/virtualenvs
 
@@ -50,3 +50,7 @@ jobs:
 
       - store_artifacts:
           path: test-results
+
+      - run:
+          name: Send to Telegram
+          command: poetry run python -m notifier.py
