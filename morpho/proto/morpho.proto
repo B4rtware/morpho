@@ -22,59 +22,88 @@
 
 syntax = "proto3";
 
-option java_multiple_files = true;
-option java_package = "de.tu-berlin.qds.dta";
-option java_outer_classname = "DTAProto";
-
-package dtaservice;
+package morpho;
 
 import "google/api/annotations.proto";
 // import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
 
 // The DTA service definition.
-service DTAServer {
+service MorphoService {
   // Request to transform a plain text document
-  rpc TransformDocument (DocumentRequest) returns (TransformDocumentResponse) {
+  rpc TransformDocument (TransformDocumentRequest) returns (TransformDocumentResponse) {
        option (google.api.http) = {
-        post: "/v1/dta/document/transform"
+        post: "/v1/document/transform"
         body: "*"
       };
   }
-  rpc ListServices(ListServiceRequest) returns (ListServicesResponse) {
+  rpc ListServices (google.protobuf.Empty) returns (ListServicesResponse) {
     option (google.api.http) = {
-      get: "/v1/dta/service/list"
+      get: "/v1/service/list"
     };
   }
-  rpc TransformPipe(TransformPipeRequest) returns (TransformDocumentResponse) {
+  rpc TransformDocumentPipe (TransformDocumentPipeRequest) returns (TransformDocumentResponse) {
     option (google.api.http) = {
-      post: "/v1/dta/document/transform-pipe"
+      post: "/v1/document/transform-pipe"
       body: "*"
     };
   }
 }
 
-// The request message containing the document to be transformed
-message DocumentRequest {
-  string file_name = 1;
-  bytes document = 2;
-  string service_name = 3;
-  repeated string options = 4;
-}
 
-// The response message containing the transformed message
+
 message TransformDocumentResponse {
-  bytes trans_document = 1;
-  repeated string trans_output = 2;
+  bytes document = 1;
+  repeated string output = 2;
   repeated string error = 3;
 }
 
-message ListServiceRequest {
+// The request message containing the document to be transformed
+message TransformDocumentRequest {
+  bytes document = 1;
+  string service_name = 2;
+  string file_name = 3;
+  google.protobuf.Struct options = 4;
+}
+
+// The response message containing the transformed message
+
+
+message ListServiceResponse {
+  message ListServiceInfo {
+    string name = 1;
+    string version = 2;
+    google.protobuf.Struct options = 3;
+  }
+  repeated ListServiceInfo services = 1;
 }
 
 message ListServicesResponse {
+  message ServiceInfo {
+    string name = 1;
+    string version = 2;
+    google.protobuf.Struct options = 3;    
+  }
   repeated string services = 1;
 }
 
-message TransformPipeRequest {
-  repeated DocumentRequest pipe = 1;
+message PipeService {
+  string name = 1;
+  google.protobuf.Struct options = 2;
+}
+
+message TransformDocumentPipeRequest {
+  string document = 1;
+  string service_name = 2;
+  string file_name = 3;
+  google.protobuf.Struct options = 4;
+  repeated PipeService services = 5;
+}
+
+message TransformDocumentPipeResponse {
+  string document = 1;
+  string output = 2;
+  string error = 3;
+  string sender = 4;
 }
