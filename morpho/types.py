@@ -1,6 +1,5 @@
 from enum import Enum
-from morpho.server import Options
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, Dict, List, NewType, Optional, TypedDict
 
 
 # must resides here because otherwise circular import
@@ -11,6 +10,10 @@ class ServiceType(Enum):
     PROXY = "proxy"
     GATEWAY = "gateway"
 
+# TODO consider to use dicttypes
+Options = NewType("Options", Dict[str, Any])
+Headers = NewType("Headers", Dict[str, str])
+
 
 # +-------------------------------------------------------------------------------------+
 # |                                  Raw Dict Types                                     |
@@ -20,8 +23,8 @@ class ServiceType(Enum):
 class RawTransformDocumentResponse(TypedDict):
     """Raw TransformDocumentResponse dict type"""
 
-    trans_document: Optional[str]
-    trans_output: Optional[List[str]]
+    document: str
+    output: Optional[List[str]]
     error: Optional[List[str]]
 
 
@@ -38,6 +41,7 @@ class RawListService(TypedDict):
     """Raw ListService dict type"""
 
     name: str
+    version: str
     options: Dict[str, Any]
 
 
