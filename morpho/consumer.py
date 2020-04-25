@@ -1,9 +1,26 @@
-# TODO: rename to Base prefix or suffix
-from abc import ABC
+from abc import ABC, abstractmethod
+from contextlib import redirect_stderr, redirect_stdout
+import io
+from threading import Thread
+import traceback
+from typing import Callable, List, Optional, Tuple
+from urllib.error import URLError
+
+from flask import Flask
+import flask
+import waitress
+
 from morpho.config import ServerConfig
-from typing import Callable
+from morpho.log import log
+from morpho.rest import Status
+from morpho.types import (
+    Headers,
+    RawListResponse,
+    RawServiceInfo,
+    RawTransformDocumentResponse,
+)
 
-
+# TODO: rename to Base prefix or suffix
 class WorkConsumer(ABC):
     """An abstract class which must be implemented by each ``work`` consumer.
 
@@ -35,6 +52,7 @@ class WorkConsumer(ABC):
                     self.config.registrar_url
                 ).applications:
                     applications.append(application.instances[0].app)
+            # TODO: add custom eureka not found error
             except URLError:
                 log.error(
                     "no eureka instance is running at: {}".format(
@@ -126,9 +144,10 @@ class RestWorkConsumer(WorkConsumer):
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
 
-        error = captured_stderr.readlines()
-        trans_output = captured_stdout.readlines()
-
+        error = captured_stderr.getvalue().splitlines()
+        trans_output = captured_stdout.getvalue().splitlines()
+        captured_stderr.close()
+        captured_stdout.close()
         return (
             {
                 "trans_document": trans_document,
@@ -169,57 +188,57 @@ class RestWorkConsumer(WorkConsumer):
         self.thread.start()
 
 
-class GrpcWorkConsumer(DTAServerServicer):
-    """Implements a grpc work consumer server.
+# class GrpcWorkConsumer(DTAServerServicer):
+#     """Implements a grpc work consumer server.
 
-    Attributes:
-        work (Callable[[str], str]): Worker function which will executed to get the
-                                     transformed document.
-        config (ServerConfig): Configuration for the given Server.
-    """
+#     Attributes:
+#         work (Callable[[str], str]): Worker function which will executed to get the
+#                                      transformed document.
+#         config (ServerConfig): Configuration for the given Server.
+#     """
 
-    def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
-        self._work = work
-        self.config = config
-        self.server = None
-        super().__init__()
+#     def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
+#         self._work = work
+#         self.config = config
+#         self.server = None
+#         super().__init__()
 
-    def TransformDocument(
-        self, request: DocumentRequest, context: ServicerContext
-    ) -> TransformDocumentResponse:
-        """Implements the protobuf message handler.
-        
-        Args:
-            request (DocumentRequest): Protobuf DocumentRequest request object.
-            context (ServicerContext): Protobuf ServicerContext.
-        
-        Returns:
-            TransformDocumentResponse: Protobuf response object.
-        """
-        # TODO: use decorator for stdout and stderr
-        trans_document = self._work(request.document.decode())
-        return TransformDocumentResponse(
-            # TODO: error needs to be implemented
-            trans_document=trans_document.encode("utf-8"),
-            trans_output=[],
-            error=[],
-        )
+#     def TransformDocument(
+#         self, request: DocumentRequest, context: ServicerContext
+#     ) -> TransformDocumentResponse:
+#         """Implements the protobuf message handler.
 
-    # TODO: create a wrapper for this function because internally it is always the same
-    def ListServices(
-        self, request: ListServiceRequest, context: ServicerContext
-    ) -> ListServicesResponse:
-        services = []
-        return ListServicesResponse(services=services)
+#         Args:
+#             request (DocumentRequest): Protobuf DocumentRequest request object.
+#             context (ServicerContext): Protobuf ServicerContext.
 
-    # TODO: create a wrapper for this function because internally it is always the same
-    def start(self):
-        """Implements the start function to start a grpc server instance.
-        """
-        # create grpc server
-        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        # TODO: there is currently no case if the port is already in use
-        self.server.add_insecure_port(f"[::]:{self.config.port_to_listen}")
-        # bind properties to be used inside the class instance
-        add_DTAServerServicer_to_server(self, self.server)
-        self.server.start()
+#         Returns:
+#             TransformDocumentResponse: Protobuf response object.
+#         """
+#         # TODO: use decorator for stdout and stderr
+#         trans_document = self._work(request.document.decode())
+#         return TransformDocumentResponse(
+#             # TODO: error needs to be implemented
+#             trans_document=trans_document.encode("utf-8"),
+#             trans_output=[],
+#             error=[],
+#         )
+
+#     # TODO: create a wrapper for this function because internally it is always the same
+#     def ListServices(
+#         self, request: ListServiceRequest, context: ServicerContext
+#     ) -> ListServicesResponse:
+#         services = []
+#         return ListServicesResponse(services=services)
+
+#     # TODO: create a wrapper for this function because internally it is always the same
+#     def start(self):
+#         """Implements the start function to start a grpc server instance.
+#         """
+#         # create grpc server
+#         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+#         # TODO: there is currently no case if the port is already in use
+#         self.server.add_insecure_port(f"[::]:{self.config.port_to_listen}")
+#         # bind properties to be used inside the class instance
+#         add_DTAServerServicer_to_server(self, self.server)
+#         self.server.start()
