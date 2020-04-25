@@ -16,13 +16,11 @@ import io
 from pathlib import Path
 import sys
 from threading import Event, Thread
-import traceback
 from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, TypedDict
 from urllib.error import URLError
 
 import colorama as cr
 import flask
-from flask import Flask
 import grpc
 from grpc import ServicerContext
 import py_eureka_client.eureka_client as eureka_client
@@ -30,18 +28,11 @@ import waitress
 
 from morpho.config import ServerConfig
 from morpho.log import log
-from morpho.proto.dtaservice_pb2 import DocumentRequest, TransformDocumentResponse
-from morpho.proto.dtaservice_pb2 import ListServicesResponse
-from morpho.proto.dtaservice_pb2 import ListServiceRequest
-from morpho.proto.grpc.dtaservice_pb2_grpc import add_DTAServerServicer_to_server
-from morpho.proto.grpc.dtaservice_pb2_grpc import DTAServerServicer
-from morpho.rest import Status
+from morpho.consumer import RestWorkConsumer, WorkConsumer
+
 
 
 cr.init()
-
-Options = NewType("Options", Dict[str, Any])
-Headers = NewType("Headers", Dict[str, str])
 
 
 # TODO: verify that all options are used or at least output a warning
@@ -74,10 +65,6 @@ parser.add_argument("--init", help="Create a default config file as defined by c
 # fmt: on
 
 
-# TODO: create base class consumer to reflect the interface
-protocols = {"rest": RestWorkConsumer, "grpc": GrpcWorkConsumer}
-
-
 class Server(ABC):
     """Server
 
@@ -87,7 +74,8 @@ class Server(ABC):
     """
 
     def __init__(self) -> None:
-        self._protocols = {}
+        # add default protocols
+        self.protocols = {"rest": RestWorkConsumer}
         self.should_stop = Event()
 
     def register_consumer(self, name: str, work_consumer: WorkConsumer):
@@ -97,7 +85,7 @@ class Server(ABC):
             name (str): The name of the consumer.
             work_consumer (WorkConsumer): A class which implements :class:`WorkConsumer`.
         """
-        self._protocols[name] = work_consumer
+        self.protocols[name] = work_consumer
 
     def remove_consumer(self, name: str):
         """Removes a work consumer.
@@ -105,7 +93,7 @@ class Server(ABC):
         Args:
             name (str): The name of the consumer which will be removed.
         """
-        del self._protocols[name]
+        del self.protocols[name]
 
     @abstractmethod
     def work(self, document: str) -> str:
@@ -179,11 +167,11 @@ class Server(ABC):
 
         cls_instance = cls()
         assert (
-            cls_instance._protocols
+            cls_instance.protocols
         ), "Have you called super() on your Server implemenation?"
         # start protocol consumer
         for protocol in args.protocols:
-            instance = protocols[protocol](cls_instance.work, config)
+            instance = cls_instance.protocols[protocol](cls_instance.work, config)
             instance.start()
 
         # fmt: off
