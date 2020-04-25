@@ -1,12 +1,43 @@
 from invoke import task
 
+
 from grpc_tools import protoc
 from pathlib import Path
+import requests
 
-PROTO_PATH = Path("./service/proto/")
+PROTO_PATH = Path("./morpho/proto/")
 PROTO_OUT_PATH = PROTO_PATH
 GRPC_PROTO_OUT_PATH = PROTO_PATH / Path("./grpc/")
-PROTO_FILE = PROTO_PATH / Path("./dtaservice.proto")
+PROTO_FILE = PROTO_PATH / Path("./morpho.proto")
+
+PROTO_VENDOR_PATH = PROTO_OUT_PATH / Path("vendor/")
+
+REQUIRED_PROTO_FILES = {
+    "google/protobuf/": [
+        "https://raw.githubusercontent.com/protocolbuffers/protobuf/master/src/google/protobuf/descriptor.proto",
+        "https://raw.githubusercontent.com/protocolbuffers/protobuf/master/src/google/protobuf/empty.proto",
+        "https://raw.githubusercontent.com/protocolbuffers/protobuf/master/src/google/protobuf/struct.proto"
+    ],
+    "google/api/": [
+        "https://raw.githubusercontent.com/googleapis/googleapis/master/google/api/http.proto",
+        "https://raw.githubusercontent.com/googleapis/googleapis/master/google/api/annotations.proto"
+    ]
+}
+
+# TODO: submodule?
+@task
+def deps(c):
+    """Pull dependencies (proto files) from git"""
+    for path, files in REQUIRED_PROTO_FILES.items():
+        for proto in files:
+            file_path = Path(PROTO_VENDOR_PATH / Path(path + proto.split("/")[-1])).resolve()
+            file_path.parent.mkdir(exist_ok=True, parents=True)
+            with (file_path / Path()) .open("wb") as protofile:
+                response = requests.get(proto)
+                if response.status_code == 200:
+                    protofile.write(response.content)
+                else:
+                    print("error while downloading: {}".format(proto))
 
 
 @task
@@ -27,6 +58,10 @@ def check(c):
 def lint(c):
     c.run("poetry run python -m pylint --rcfile=.pylintrc service")
 
+# @task
+# def deps(c):
+#     c.run("")
+
 
 @task
 def tests(c):
@@ -45,9 +80,10 @@ def proto(c):
     protoc.main(
         (
             "",
-            f"-I{PROTO_PATH.absolute()}",
+            f"-I{PROTO_VENDOR_PATH.absolute()}",
             f"--python_out={PROTO_OUT_PATH.absolute()}",
             f"--grpc_python_out={GRPC_PROTO_OUT_PATH.absolute()}",
+            f"--proto_path={PROTO_PATH}",
             str(PROTO_FILE.name),
         )
     )
