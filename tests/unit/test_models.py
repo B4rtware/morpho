@@ -1,4 +1,4 @@
-from morpho.server import Options, RawTransformDocumentPipeRequest, RawTransformDocumentRequest, RawTransformDocumentPipeResponse
+from morpho.types import Options
 from morpho.rest.models import ListServicesResponse, TransformDocumentPipeRequest, TransformDocumentPipeResponse, TransformDocumentRequest, TransformDocumentResponse
 from base64 import b64encode
 import pytest
