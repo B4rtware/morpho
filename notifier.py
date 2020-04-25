@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 import requests
 import os
+import sys
 import urllib.parse as urlencoder
 
 @dataclass
@@ -48,6 +49,7 @@ def send_test_report(subject: str, path: str):
 send_test_report("unit", "/test-results/junit.xml")
 send_test_report("integration", "/test-results/junit-integration.xml")
 
+sys.exit(0)
 
 
     
