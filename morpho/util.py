@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Tuple
+import regex
 
 # TODO: complete the example
-def explode_dict(dictionary: Dict[str, Any]):
+def flatten_dict(dictionary: Dict[str, Any], prefix: str = ""):
     """Transforms a given dictionary into a flattened key value dictionary.
 
     Example:
@@ -18,16 +19,53 @@ def explode_dict(dictionary: Dict[str, Any]):
         >>> pprint(explode_dict(options))
     """
     exploded_options = {}
-    stack: List[Tuple[str, List[Any]]] = [("morpho.option", list(dictionary.items()))]
-    while stack:
-        cur = stack[0][1].pop(0)
+    stack: List[Tuple[str, List[Any]]] = [(prefix, list(dictionary.items()))]
+    while stack[0][1] != []:
+        prefix, value = stack[0][1].pop(0)
 
-        if isinstance(cur[1], dict):
-            stack.insert(0, (cur[0], list(cur[1].items())))
+        if isinstance(value, dict):
+            stack.insert(0, (prefix, list(value.items())))
         else:
-            prefix = ".".join([elem[0] for elem in reversed(stack)]) + "." + cur[0]
-            exploded_options[prefix] = cur[1]
+            prefixes = [elem[0] for elem in reversed(stack) if elem[0]]
+            prefixes.append(prefix)
+            prefix_str = ".".join(prefixes)
+            exploded_options[prefix_str] = value
 
-        if stack[0][1] == []:
-            stack.pop(0)
     return exploded_options
+
+# TODO: remove any its everything except another dict
+def unflatten_dict(dictionary: Dict[str, Any]):
+    keys = list(dictionary.keys())
+    # get prefix
+    prefix = None
+
+    index = 0
+    for char in zip(*keys):
+        if (char[0] * len(char) == "".join(char)):
+            index += 1
+
+    if index != 0:
+        prefix = keys[0][:index-1]
+
+    # get dict
+    unflatten_dict = {}
+    for key in keys:
+        # TODO: optimize this
+        # remove prefix from key
+        value = dictionary[key]
+        if prefix:
+            key = key.split(prefix)[1][1:]
+        prefixes = key.split(".")
+
+        cur_dict = unflatten_dict
+        cur_prefix = prefixes.pop()
+        # proceed to the nested dictionary
+        for pkey in prefixes:
+            pvalue = cur_dict.get(pkey)
+            if pvalue is None:
+                cur_dict[pkey] = {}
+            cur_dict = cur_dict[pkey]
+
+        cur_dict[cur_prefix] = value
+    return prefix, unflatten_dict
+        
