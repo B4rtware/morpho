@@ -70,8 +70,8 @@ class Client:
                 },
             )
             response_object = response.json()
-            response_object["trans_document"] = b64decode(
-                response_object["trans_document"].encode("utf-8")
+            response_object["document"] = b64decode(
+                response_object["document"].encode("utf-8")
             ).decode("utf-8")
             return response_object
 
