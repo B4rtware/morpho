@@ -28,7 +28,7 @@ def _decode_base64(string: str, encoding: str = "utf-8"):
 # |                                  Raw Dict Types                                     |
 # +-------------------------------------------------------------------------------------+
 
-# consider to mvoe this into types again (or are they RawTypeModels?)
+# TODO: consider to mvoe this into types again (or are they RawTypeModels?)
 
 class RawTransformDocumentResponse(TypedDict):
     """Raw TransformDocumentResponse dict type"""
@@ -106,16 +106,28 @@ class BaseModel(ABC):
 class B64DocumentField():
 
     def __init__(self, document: str):
+        print("called")
         self._document = ""
         self.document = document
+        print("init called")
 
     @property
     def document(self) -> str:
+        print("return doc: {}.".format(self._document))
         return _decode_base64(self._document)
 
     @document.setter
-    def document(self, document: str):
-        self._document = _encode_base64(self._document)
+    def document(self, document: Optional[str]):
+        if document is not None:
+            self._document = _encode_base64(document)
+
+    @property
+    def document_b64(self) -> str:
+        return self._document
+
+    @document_b64.setter
+    def document_b64(self, document: str):
+        self._document = document
     
 
 class TransformDocumentRequest(BaseModel, B64DocumentField):
@@ -138,7 +150,7 @@ class TransformDocumentRequest(BaseModel, B64DocumentField):
             RawTransformDocumentResponse: TransformDocumentResponse as dict.
         """
         return RawTransformDocumentRequest(
-            document=self.document,
+            document=self.document_b64,
             service_name=self.service_name,
             file_name=self.file_name,
             options=self.options,
@@ -163,7 +175,7 @@ class TransformDocumentResponse(BaseModel, B64DocumentField):
             RawTransformDocumentResponse: TransformDocumentResponse as dict.
         """
         return RawTransformDocumentResponse(
-            document=self.document,
+            document=self.document_b64,
             output=self.output,
             error=self.error,
         )
@@ -211,7 +223,7 @@ class TransformDocumentPipeRequest(BaseModel, B64DocumentField):
 
     def as_dict(self) -> RawTransformDocumentPipeRequest:
         return RawTransformDocumentPipeRequest(
-            document=self.document,
+            document=self.document_b64,
             file_name=self.file_name,
             services=[info.as_dict() for info in self.services],
         )
@@ -232,7 +244,7 @@ class TransformDocumentPipeResponse(TransformDocumentResponse):
 
     def as_dict(self) -> RawTransformDocumentPipeResponse:
         return RawTransformDocumentPipeResponse(
-            document=self.document,
+            document=self.document_b64,
             sender=self.sender,
             output=self.output,
             error=self.error,
