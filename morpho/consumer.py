@@ -1,10 +1,20 @@
 from abc import ABC, abstractmethod
 from contextlib import redirect_stderr, redirect_stdout
 import io
+from morpho.client import Client, ClientConfig
+from morpho.util import unflatten_dict
+from morpho.rest.models import (
+    ListServicesResponse,
+    ServiceInfo,
+    TransformDocumentPipeRequest,
+    TransformDocumentPipeResponse, TransformDocumentRequest,
+    TransformDocumentResponse,
+)
 from threading import Thread
 import traceback
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, cast
 from urllib.error import URLError
+import py_eureka_client.eureka_client as eureka_client
 
 from flask import Flask
 import flask
@@ -13,11 +23,9 @@ import waitress
 from morpho.config import ServerConfig
 from morpho.log import log
 from morpho.rest import Status
-from morpho.types import (
-    Headers,
-    RawListResponse,
-    RawServiceInfo,
-    RawTransformDocumentResponse,
+from morpho.rest.models import (
+    RawListServicesResponse,
+    RawTransformDocumentResponse
 )
 
 # TODO: rename to Base prefix or suffix
@@ -38,20 +46,34 @@ class WorkConsumer(ABC):
     def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
         self._work = work
         self.config = config
+        self.client = Client(ClientConfig(
+            registrar_url=config.registrar_url
+        ))
 
-    def get_services(self) -> List[RawServiceInfo]:
-        """Lists all services names from the eureka server of the provided ``ServerConfig``.
+    def list_services(self) -> ListServicesResponse:
+        """Lists all services from the eureka server of the provided ``ServerConfig``.
         
         Returns:
-            List[str]: List of applications.
+            List[ListServicesResponse]: List of services.
         """
-        applications = []
+        services = []
         if self.config.register:
             try:
-                for application in eureka_client.get_applications(
-                    self.config.registrar_url
-                ).applications:
-                    applications.append(application.instances[0].app)
+                applications = eureka_client.get_applications(self.config.registrar_url)
+                for service in applications.applications:
+                    instance = service.instances[0]
+                    morpho_metadata = {}
+                    for key, value in instance.metadata.items():
+                        if "morpho" in key:
+                            morpho_metadata[key] = value
+                    print(morpho_metadata)
+                    _, dictionary = unflatten_dict(morpho_metadata)
+                    print(dictionary)
+                    service_info = ServiceInfo(
+                        name=instance.app,
+                        version=instance.metadata.get("morpho.version")
+                    )
+                    services.append()
             # TODO: add custom eureka not found error
             except URLError:
                 log.error(
@@ -60,17 +82,72 @@ class WorkConsumer(ABC):
                     )
                 )
         # the service always knows its self
-        if not applications:
-            applications.append(
-                RawServiceInfo(
+        if not services:
+            services.append(
+                ServiceInfo(
                     name=self.config.app_name,
                     version=self.config.version,
-                    options=self.config.options.as_dict()
-                    if self.config.options
-                    else None,
+                    options=self.config.options if self.config.options else None,
                 )
             )
-        return applications
+        return ListServicesResponse(services=services)
+
+    def transform_document(
+        self, request: TransformDocumentRequest,
+    ) -> TransformDocumentResponse:
+        print(self.config.app_name + ": " , request.document)
+
+        trans_document = None
+        # TODO: create a decorator for capturing stdout and stderr
+        # TODO: consider to move this into base class
+        captured_stdout = io.StringIO()
+        captured_stderr = io.StringIO()
+        with redirect_stderr(captured_stderr):
+            with redirect_stdout(captured_stdout):
+                try:
+                    trans_document = self._work(request.document, request.options)
+                except BaseException:  # pylint: disable=broad-except
+                    traceback.print_exc()
+
+        error = captured_stderr.getvalue().splitlines()
+        trans_output = captured_stdout.getvalue().splitlines()
+        captured_stderr.close()
+        captured_stdout.close()
+        print(error)
+        # TODO: test on none return type (if an error occurs) so the error
+        # will be still be transferred to the client
+        return TransformDocumentResponse(
+            trans_document=trans_document, trans_output=trans_output, error=error
+        )
+
+    def transform_document_pipe(self, request: TransformDocumentPipeRequest) -> TransformDocumentPipeResponse:
+        service_info = request.services.pop(0)
+        transform_response = self.transform_document(TransformDocumentRequest(
+            document = request.document,
+            service_name = service_info.name,
+            file_name = request.file_name,
+            options=service_info.options
+        ))
+
+        # return a response if there are only 1 service left
+        # this means that the pipe is either finished or will
+        # be interupted because of an occured error
+        if request.services == [] or transform_response.error:
+            return TransformDocumentPipeResponse(
+                trans_document=transform_response.trans_document,
+                trans_output = transform_response.trans_output,
+                sender = self.config.app_name,
+                error=transform_response.error
+            )
+
+        request.document = transform_response.trans_document
+        response = self.client.transform_document_pipe(request=request)
+
+        # cancat outputs in the right order
+        response.trans_output = transform_response.trans_output + response.trans_output
+        response.error = transform_response.error + response.error
+
+        return response
 
     @abstractmethod
     def start(self) -> None:
@@ -113,16 +190,24 @@ class RestWorkConsumer(WorkConsumer):
         # working_dir = Path.cwd()
         # config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
         # api_doc(self.app, config_path=config_path, url_prefix="/info")
-        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self.transform_document, methods=["POST"])
-        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self.list_services, methods=["GET"])
-        self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self.transform_document_pipe)
+        self.app.add_url_rule("/v1/qds/dta/document/transform", "transform", self._transform_document, methods=["POST"])
+        self.app.add_url_rule("/v1/qds/dta/service/list", "list", self._list_services, methods=["GET"])
+        self.app.add_url_rule("/v1/qds/dta/document/transform-pipe", "pipe", self._transform_document_pipe, methods=["POST"])
         # pylint: enable: line-too-long
         # fmt: on
 
+        # return (
+        #     {
+        #         "trans_document": trans_document,
+        #         "trans_output": trans_output,
+        #         "error": error,
+        #     },
+        #     Status.OK if not error else Status.INTERNAL_SERVER_ERROR,
+        #     Headers({"Content-Type": "application/json"}),
+        # )
+
     # TODO: rename to list services / transform document and transform document pipe
-    def transform_document(
-        self,
-    ) -> Tuple[RawTransformDocumentResponse, Status, Headers]:
+    def _transform_document(self,) -> Tuple[RawTransformDocumentResponse, Status]:
         """Callback function which gets invoked by flask if a transform request is received.
 
         Returns:
@@ -133,43 +218,34 @@ class RestWorkConsumer(WorkConsumer):
             therefore the stdout and stderr any exception and print output can only be seen
             inside the rest response object.
         """
-        trans_document = None
-        # TODO: create a decorator for capturing stdout and stderr
-        captured_stdout = io.StringIO()
-        captured_stderr = io.StringIO()
-        with redirect_stderr(captured_stderr):
-            with redirect_stdout(captured_stdout):
-                try:
-                    trans_document = self._work(flask.request.json["document"])
-                except BaseException:  # pylint: disable=broad-except
-                    traceback.print_exc()
-
-        error = captured_stderr.getvalue().splitlines()
-        trans_output = captured_stdout.getvalue().splitlines()
-        captured_stderr.close()
-        captured_stdout.close()
-        return (
-            {
-                "trans_document": trans_document,
-                "trans_output": trans_output,
-                "error": error,
-            },
-            Status.OK if not error else Status.INTERNAL_SERVER_ERROR,
-            Headers({"Content-Type": "application/json"}),
+        # TODO: what if body is empty -> test
+        request_model = TransformDocumentPipeRequest(**flask.request.json())
+        response_model = self.transform_document(request_model)
+        status_code = (
+            Status.OK if not response_model.error else Status.INTERNAL_SERVER_ERROR
         )
+        return response_model.as_dict(), status_code
 
     # TODO: add options to the list reponse for each application maybe on /options or so
-    def list_services(self) -> Tuple[RawListResponse, Status, Headers]:
-        services = self.get_services()
-        return (
-            {"services": services},
-            Status.OK,
-            Headers({"Content-Type": "application/json"}),
-        )
+    # TODO: or override and call super() ?
+    def _list_services(self) -> Tuple[RawListServicesResponse, Status]:
+        response_model = self.list_services()
+        return response_model.as_dict(), Status.OK
 
     # TODO: create a wrapper for this function because internally it is always the same
-    def transform_document_pipe(self, request, response):
-        pass
+    # TODO: consider to rename this function to _transform_document_pipe to call a super function
+    # TODO: which get called with the TransformDocumentPipeRequest model
+    # TODO: is it possible to use **request even ServiceInfo is required on services?
+    def _transform_document_pipe(self):
+        request = flask.request.json
+        request_model = TransformDocumentPipeRequest(
+            document=request["document"],
+            file_name=request["file_name"],
+            services=[ServiceInfo(**info) for info in request["services"]]
+        )
+        response_model = self.transform_document_pipe(request_model)
+        status_code = Status.OK if not response_model.error else Status.INTERNAL_SERVER_ERROR
+        return response_model.as_dict(), status_code
 
     def start(self) -> None:
         """Implements the start function to start a rest server instance.
