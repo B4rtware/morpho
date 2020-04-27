@@ -15,17 +15,17 @@ from morpho.server import Server, run_app
 class Options(BaseConfig):
     offset: int = 5
 
-@run_app(port=50000)
+@run_app(port=50005)
 class Echo(Server):
     """Simple echo server which will return the 
     """
     # TODO: expose this in list services
     # TODO: create metadata field for options and version
     version = "0.0.1"
-    name = "DE.TU-BERLIN.QDS.ECHOS"
+    name = "DE.TU-BERLIN.QDS.ECHOS3"
     # TODO: implement build in consumer
     # options = Options()
 
     def work(self, document: str, options: Options) -> str:
         print(self.config.app_name)
-        return document
+        return document + "ECHO3"
