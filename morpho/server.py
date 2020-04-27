@@ -7,24 +7,14 @@ Warning:
 """
 from abc import ABC, abstractmethod
 import argparse
-import concurrent.futures as futures
-from contextlib import redirect_stderr, redirect_stdout
-from dataclasses import dataclass
 import dataclasses
-from enum import Enum
-import io
 from pathlib import Path
 import sys
 from threading import Event, Thread
-from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, TypedDict
-from urllib.error import URLError
+from typing import Optional
 
 import colorama as cr
-import flask
-import grpc
-from grpc import ServicerContext
 import py_eureka_client.eureka_client as eureka_client
-import waitress
 
 from morpho.config import ServerConfig
 from morpho.log import log
@@ -64,7 +54,7 @@ parser.add_argument("--init", help="Create a default config file as defined by c
 # pylint: enable=line-too-long
 # fmt: on
 
-
+#TODO: switch for internall server communication either rest or grpc
 class Server(ABC):
     """Server
 
@@ -73,10 +63,11 @@ class Server(ABC):
         Which will sets the log level to debug if true.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, config: Optional[ServerConfig] = None) -> None:
         # add default protocols
         self.protocols = {"rest": RestWorkConsumer}
         self.should_stop = Event()
+        self.config = config
 
     def register_consumer(self, name: str, work_consumer: WorkConsumer):
         """Registers a work consumer.
@@ -111,7 +102,7 @@ class Server(ABC):
         raise NotImplementedError()
 
     @classmethod
-    def run(cls):
+    def run(cls, port: Optional[int] = None):
         """Class method which is used to invoke the server.
         """
         working_home_dir = Path.home()
@@ -133,6 +124,13 @@ class Server(ABC):
             ),
             log_level="INFO",
         )
+
+        print(port)
+        if port is not None:
+            print(config.port_to_listen)
+            config.port_to_listen = str(port)
+            print(config.port_to_listen)
+
 
         # parse arguments to populate the configuration
         args = parser.parse_args()
@@ -165,7 +163,7 @@ class Server(ABC):
                 metadata={},
             )
 
-        cls_instance = cls()
+        cls_instance = cls(config)
         assert (
             cls_instance.protocols
         ), "Have you called super() on your Server implemenation?"
@@ -198,11 +196,17 @@ class Server(ABC):
         except KeyboardInterrupt:
             sys.exit(0)
 
-
-def run_app(cls: Server):
+# TODO: check this 
+# from https://github.com/pallets/flask/blob/master/src/flask/app.py
+def run_app(port: Optional[int]=None):
     """Decorator to apply on the microservice app class which will be then automatically run.
 
     Args:
         cls (Server): Class object of the decorated Server implementation.
     """
-    cls.run()
+    def decorator(cls: Server):
+        print(port)
+        cls.run(port=port)
+        return cls
+
+    return decorator
