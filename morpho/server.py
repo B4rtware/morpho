@@ -119,11 +119,11 @@ class Server(ABC):
             app_name=app_name,
             version=version,
             options=options,
-            config_file=str(
-                working_home_dir / Path("/.morpho/") / app_name / Path("/config.json")
-            ),
-            log_level="INFO",
+            log_level="INFO"
         )
+        #         config_file=str(
+        #     working_home_dir / Path("/.morpho/") / app_name / Path("/config.json")
+        # ),
 
         print(port)
         if port is not None:
