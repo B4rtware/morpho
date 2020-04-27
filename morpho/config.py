@@ -17,7 +17,7 @@ log.basicConfig(level=log.INFO)
 class BaseConfig:
     """Base Configuration class for a morpho server."""
 
-    config_file: str = "./dts/config.json"
+    # config_file: str = "./dts/config.json"
 
     def as_json(self, indent: Optional[int] = None) -> str:
         """[summary]
@@ -43,14 +43,14 @@ class BaseConfig:
         Args:
             file (Optional[IO]): A IO descriptor. Defaults to None.
         """
-        if not file:
-            path = Path(self.config_file)
-            path.parent.mkdir(exist_ok=True, parents=True)
-            with path.open("w") as configuration:
-                json.dump(dataclasses.asdict(self), configuration, indent=4)
-        else:
-            out = json.dumps(dataclasses.asdict(self), indent=4)
-            file.write(out)
+        # if not file:
+        #     path = Path(self.config_file)
+        #     path.parent.mkdir(exist_ok=True, parents=True)
+        #     with path.open("w") as configuration:
+        #         json.dump(dataclasses.asdict(self), configuration, indent=4)
+        # else:
+        out = json.dumps(dataclasses.asdict(self), indent=4)
+        file.write(out)
 
     # doctrans: new_doc_trans_from_file
     @classmethod
@@ -62,14 +62,14 @@ class BaseConfig:
         """
         if not isinstance(path, str):
             path = Path(path)
-        dtas_config = cls()
+        config = cls()
         # open file and add each option to the created configuration instance
         with Path(path).open("r") as file:
             config = json.load(file)
             for arg in config.items():
                 if arg[1]:
-                    setattr(dtas_config, arg[0], arg[1])
-        return dtas_config
+                    setattr(config, arg[0], arg[1])
+        return config
 
 
 # doctrans: DocTransServer
