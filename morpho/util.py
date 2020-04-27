@@ -61,8 +61,7 @@ def unflatten_dict(dictionary: Dict[str, Any]):
         cur_prefix = prefixes.pop()
         # proceed to the nested dictionary
         for pkey in prefixes:
-            pvalue = cur_dict.get(pkey)
-            if pvalue is None:
+            if cur_dict.get(pkey) is None:
                 cur_dict[pkey] = {}
             cur_dict = cur_dict[pkey]
 
