@@ -18,6 +18,11 @@ from typing import Any, Dict, List, Optional, TypedDict
 #     RawTransformDocumentResponse,
 # )
 
+def _encode_base64(string: str, encoding: str = "utf-8"):
+    return b64encode(string.encode(encoding)).decode(encoding)
+
+def _decode_base64(string: str, encoding: str = "utf-8"):
+    return b64decode(string.encode(encoding)).decode(encoding)
 
 # +-------------------------------------------------------------------------------------+
 # |                                  Raw Dict Types                                     |
@@ -98,8 +103,22 @@ class BaseModel(ABC):
         """
         return json.dumps(self.as_dict(), indent=indent)
 
+class B64DocumentField():
 
-class TransformDocumentRequest(BaseModel):
+    def __init__(self, document: str):
+        self._document = ""
+        self.document = document
+
+    @property
+    def document(self) -> str:
+        return _decode_base64(self._document)
+
+    @document.setter
+    def document(self, document: str):
+        self._document = _encode_base64(self._document)
+    
+
+class TransformDocumentRequest(BaseModel, B64DocumentField):
     def __init__(
         self,
         document: str,
@@ -107,28 +126,10 @@ class TransformDocumentRequest(BaseModel):
         file_name: Optional[str] = None,
         options: Optional[Options] = None,
     ) -> None:
-        self._document = ""
-        self.document = document
+        super().__init__(document=document)
         self.service_name = service_name
         self.file_name = file_name
         self.options = options
-
-    @property
-    def document(self) -> str:
-        return b64decode(self._document.encode("utf-8")).decode("utf-8")
-
-    @document.setter
-    def document(self, document: str):
-        self._document = b64encode(document.encode("utf-8")).decode("utf-8")
-        # validate base64
-        # try:
-        #     b64decode(document, validate=True)
-        #     self._document = document
-        # except binascii.Error:
-        #     # TODO: log this error
-        #     raise binascii.Error(
-        #         "Please make sure your document string is base64 encoded!"
-        #     )
 
     def as_dict(self) -> RawTransformDocumentRequest:
         """Creates a dict of the object instance.
@@ -144,35 +145,16 @@ class TransformDocumentRequest(BaseModel):
         )
 
 # TODO: abstract it to a document variable which is inside another class so the validation process is only on one instance?
-class TransformDocumentResponse(BaseModel):
+class TransformDocumentResponse(BaseModel, B64DocumentField):
     def __init__(
         self,
-        trans_document: str,
-        trans_output: Optional[List[str]] = None,
+        document: str,
+        output: Optional[List[str]] = None,
         error: Optional[List[str]] = None,
     ) -> None:
-        self._trans_document = ""
-        self.trans_document = trans_document
-        self.trans_output = trans_output
+        super().__init__(document=document)
+        self.output = output
         self.error = error
-
-    @property
-    def trans_document(self) -> str:
-        return b64decode(self._trans_document.encode("utf-8")).decode("utf-8")
-
-    @trans_document.setter
-    def trans_document(self, trans_document: Optional[str]) -> None:
-        if trans_document is not None:
-            self._trans_document = b64encode(trans_document.encode("utf-8")).decode("utf-8")
-        # validate base64
-        # try:
-        #     b64decode(trans_document, validate=True)
-        #     self._trans_document = trans_document
-        # except binascii.Error:
-        #     # TODO: log this error
-        #     raise binascii.Error(
-        #         "Please make sure your document string is base64 encoded!"
-        #     )
 
     def as_dict(self) -> RawTransformDocumentResponse:
         """Creates a dict of the object instance.
@@ -181,8 +163,8 @@ class TransformDocumentResponse(BaseModel):
             RawTransformDocumentResponse: TransformDocumentResponse as dict.
         """
         return RawTransformDocumentResponse(
-            trans_document=self.trans_document,
-            trans_output=self.trans_output,
+            document=self.document,
+            output=self.output,
             error=self.error,
         )
 
@@ -221,29 +203,11 @@ class ListServicesResponse(BaseModel):
 
 
 # TODO: implement base64 encode decode
-class TransformDocumentPipeRequest(BaseModel):
+class TransformDocumentPipeRequest(BaseModel, B64DocumentField):
     def __init__(self, document: str, services: List[ServiceInfo], file_name: Optional[str]) -> None:
-        self._document = ""
-        self.document = document
+        super().__init__(document=document)
         self.services = services
         self.file_name = file_name
-
-    @property
-    def document(self) -> str:
-        return b64decode(self._document.encode("utf-8")).decode("utf-8")
-
-    @document.setter
-    def document(self, document: str) -> None:
-        # validate base64
-        self._document = b64encode(document.encode("utf-8")).decode("utf-8")
-        # try:
-        #     b64decode(document, validate=True)
-        #     self._document = document
-        # except binascii.Error:
-        #     # TODO: log this error
-        #     raise binascii.Error(
-        #         "Please make sure your document string is base64 encoded!"
-        #     )
 
     def as_dict(self) -> RawTransformDocumentPipeRequest:
         return RawTransformDocumentPipeRequest(
@@ -256,20 +220,20 @@ class TransformDocumentPipeRequest(BaseModel):
 class TransformDocumentPipeResponse(TransformDocumentResponse):
     def __init__(
         self,
-        trans_document: str,
+        document: str,
         sender: str,
-        trans_output: Optional[List[str]] = None,
+        output: Optional[List[str]] = None,
         error: Optional[List[str]] = None,
     ):
         super().__init__(
-            trans_document=trans_document, trans_output=trans_output, error=error
+            document=document, output=output, error=error
         )
         self.sender = sender
 
     def as_dict(self) -> RawTransformDocumentPipeResponse:
         return RawTransformDocumentPipeResponse(
-            trans_document=self.trans_document,
+            document=self.document,
             sender=self.sender,
-            trans_output=self.trans_output,
+            output=self.output,
             error=self.error,
         )
