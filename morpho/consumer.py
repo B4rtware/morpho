@@ -97,7 +97,7 @@ class WorkConsumer(ABC):
     ) -> TransformDocumentResponse:
         print(self.config.app_name + ": " , request.document)
 
-        trans_document = None
+        document = None
         # TODO: create a decorator for capturing stdout and stderr
         # TODO: consider to move this into base class
         captured_stdout = io.StringIO()
@@ -105,19 +105,19 @@ class WorkConsumer(ABC):
         with redirect_stderr(captured_stderr):
             with redirect_stdout(captured_stdout):
                 try:
-                    trans_document = self._work(request.document, request.options)
+                    document = self._work(request.document, request.options)
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
 
         error = captured_stderr.getvalue().splitlines()
-        trans_output = captured_stdout.getvalue().splitlines()
+        output = captured_stdout.getvalue().splitlines()
         captured_stderr.close()
         captured_stdout.close()
         print(error)
         # TODO: test on none return type (if an error occurs) so the error
         # will be still be transferred to the client
         return TransformDocumentResponse(
-            trans_document=trans_document, trans_output=trans_output, error=error
+            document=document, output=output, error=error
         )
 
     def transform_document_pipe(self, request: TransformDocumentPipeRequest) -> TransformDocumentPipeResponse:
@@ -219,7 +219,7 @@ class RestWorkConsumer(WorkConsumer):
             inside the rest response object.
         """
         # TODO: what if body is empty -> test
-        request_model = TransformDocumentPipeRequest(**flask.request.json())
+        request_model = TransformDocumentRequest(**flask.request.json)
         response_model = self.transform_document(request_model)
         status_code = (
             Status.OK if not response_model.error else Status.INTERNAL_SERVER_ERROR
