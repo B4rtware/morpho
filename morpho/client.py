@@ -17,6 +17,7 @@ class ClientConfig:
     registrar_url: str
 
 # TODO: consider to use models instead of function arguments e.g TransformDocumentRequest
+# TODO: add requests parameter such as headers cookies etc which then also can be used on service
 class Client:
     def __init__(self, config: ClientConfig) -> None:
         self.config = config
@@ -62,13 +63,15 @@ class Client:
         if instance_address:
             # wrapper for a consumer request
             response = requests.post(
-                f"http://{instance_address}/v1/qds/dta/document/transform",
+                f"http://{instance_address}/v1/document/transform",
                 json={
                     "document": b64encode(document.encode("utf-8")).decode("utf-8"),
                     "file_name": file_name,
                     "service_name": service_name,
                 },
             )
+            # TODO: if url not found json object not available return error
+            print(response.text)
             response_object = response.json()
             response_object["document"] = b64decode(
                 response_object["document"].encode("utf-8")
@@ -81,7 +84,7 @@ class Client:
         print(request.as_dict())
         if instance_address:
             response = requests.post(
-                f"http://{instance_address}/v1/qds/dta/document/transform-pipe",
+                f"http://{instance_address}/v1/document/transform-pipe",
                 json=request.as_dict()
             )
             print(response.text)
@@ -102,7 +105,7 @@ class Client:
         instance_address = self._get_instance_ip_address(service_name)
         if instance_address:
             response = requests.get(
-                f"http://{instance_address}/v1/qds/dta/service/list"
+                f"http://{instance_address}/v1/service/list"
             )
             response_object = response.json()
             return response_object["services"]
@@ -112,19 +115,20 @@ class Client:
 if __name__ == "__main__":
     config = ClientConfig(registrar_url="http://localhost:8761/eureka")
     morpho_client = Client(config)
-    # document = morpho_client.transform_document(
-    #     "Test Dokument", "DE.TU-BERLIN.QDS.ECHO", file_name="file.txt"
-    # )
+    document = morpho_client.transform_document(
+        "Test Dokument", "PROXY", file_name="file.txt"
+    )
+    print(document)
     # print(c.list_services("DE.TU-BERLIN.QDS.ECHO"))
     # print(document["trans_document"])
 
-    request = TransformDocumentPipeRequest(
-        document="Hello World",
-        file_name=None,
-        services=[
-            ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS", version="0.0.1", options=None),
-            ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS2", version="0.0.1", options=None),
-            ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS3", version="0.0.1", options=None)
-        ]
-    )
-    morpho_client.transform_document_pipe(request=request)
+    # request = TransformDocumentPipeRequest(
+    #     document="Hello World",
+    #     file_name=None,
+    #     services=[
+    #         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS", version="0.0.1", options=None),
+    #         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS2", version="0.0.1", options=None),
+    #         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS3", version="0.0.1", options=None)
+    #     ]
+    # )
+    # morpho_client.transform_document_pipe(request=request)
