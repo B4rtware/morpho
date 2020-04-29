@@ -3,6 +3,7 @@ from base64 import b64decode, b64encode
 import binascii
 from dataclasses import dataclass
 import json
+from morpho.util import decode_base64, encode_base64
 from morpho.types import Options
 # from morpho.config import BaseConfig
 import morpho.config as config
@@ -17,12 +18,6 @@ from typing import Any, Dict, List, Optional, TypedDict
 #     RawTransformDocumentRequest,
 #     RawTransformDocumentResponse,
 # )
-
-def _encode_base64(string: str, encoding: str = "utf-8"):
-    return b64encode(string.encode(encoding)).decode(encoding)
-
-def _decode_base64(string: str, encoding: str = "utf-8"):
-    return b64decode(string.encode(encoding)).decode(encoding)
 
 # +-------------------------------------------------------------------------------------+
 # |                                  Raw Dict Types                                     |
@@ -106,20 +101,17 @@ class BaseModel(ABC):
 class B64DocumentField():
 
     def __init__(self, document: str):
-        print("called")
         self._document = ""
         self.document = document
-        print("init called")
 
     @property
     def document(self) -> str:
-        print("return doc: {}.".format(self._document))
-        return _decode_base64(self._document)
+        return decode_base64(self._document)
 
     @document.setter
     def document(self, document: Optional[str]):
         if document is not None:
-            self._document = _encode_base64(document)
+            self._document = encode_base64(document)
 
     @property
     def document_b64(self) -> str:
