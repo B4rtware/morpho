@@ -1,5 +1,11 @@
+from base64 import b64decode, b64encode
 from typing import Any, Dict, List, Tuple
-import regex
+
+def encode_base64(string: str, encoding: str = "utf-8") -> str:
+    return b64encode(string.encode(encoding)).decode(encoding)
+
+def decode_base64(string: str, encoding: str = "utf-8") -> str:
+    return b64decode(string.encode(encoding)).decode(encoding)
 
 # TODO: complete the example
 def flatten_dict(dictionary: Dict[str, Any], prefix: str = ""):
