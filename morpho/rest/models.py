@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from base64 import b64decode, b64encode
 import binascii
 from dataclasses import dataclass
 import json
 from morpho.util import decode_base64, encode_base64
 from morpho.types import Options
+
 # from morpho.config import BaseConfig
 import morpho.config as config
 from typing import Any, Dict, List, Optional, TypedDict
@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 
 # TODO: consider to mvoe this into types again (or are they RawTypeModels?)
 
+
 class RawTransformDocumentResponse(TypedDict):
     """Raw TransformDocumentResponse dict type"""
 
@@ -41,6 +42,7 @@ class RawTransformDocumentRequest(TypedDict):
     file_name: Optional[str]
     options: Optional[Options]
 
+
 # class RawListService(TypedDict):
 #     """Raw ListService dict type"""
 
@@ -53,8 +55,6 @@ class RawServiceInfo(TypedDict):
     """Raw ServiceInfo dict type"""
 
     name: str
-    version: str
-    options: Optional[Dict[str, Any]]
 
 
 class RawListServicesResponse(TypedDict):
@@ -74,7 +74,28 @@ class RawTransformDocumentPipeRequest(TypedDict):
 class RawTransformDocumentPipeResponse(RawTransformDocumentResponse):
     """Raw TransformDocumentPipeResponse dict type"""
 
-    sender: str
+    last_transformer: str
+
+
+class RawPipeService(TypedDict):
+    name: str
+    options: Options
+
+
+class RawOptionsPropertyError(TypedDict):
+    name: str
+    message: str
+
+
+class RawOptionsErrorResponse(TypedDict):
+    code: int
+    properties: List[RawOptionsPropertyError]
+
+
+class RawErrorResponse(TypedDict):
+    code: int
+    message: str
+
 
 # its models raw responses
 
@@ -98,11 +119,13 @@ class BaseModel(ABC):
         """
         return json.dumps(self.as_dict(), indent=indent)
 
-class B64DocumentField():
 
-    def __init__(self, document: str):
-        self._document = ""
-        self.document = document
+class B64DocumentField:
+    def __init__(self, document: str, is_base64_encoded: bool = False):
+        if not is_base64_encoded:
+            self.document = document
+        else:
+            self._document = document
 
     @property
     def document(self) -> str:
@@ -120,7 +143,7 @@ class B64DocumentField():
     @document_b64.setter
     def document_b64(self, document: str):
         self._document = document
-    
+
 
 class TransformDocumentRequest(BaseModel, B64DocumentField):
     def __init__(
@@ -129,8 +152,9 @@ class TransformDocumentRequest(BaseModel, B64DocumentField):
         service_name: str,
         file_name: Optional[str] = None,
         options: Optional[Options] = None,
+        is_base64_encoded: bool = False,
     ) -> None:
-        super().__init__(document=document)
+        super().__init__(document=document, is_base64_encoded=is_base64_encoded)
         self.service_name = service_name
         self.file_name = file_name
         self.options = options
@@ -148,6 +172,7 @@ class TransformDocumentRequest(BaseModel, B64DocumentField):
             options=self.options,
         )
 
+
 # TODO: abstract it to a document variable which is inside another class so the validation process is only on one instance?
 class TransformDocumentResponse(BaseModel, B64DocumentField):
     def __init__(
@@ -155,8 +180,9 @@ class TransformDocumentResponse(BaseModel, B64DocumentField):
         document: str,
         output: Optional[List[str]] = None,
         error: Optional[List[str]] = None,
+        is_base64_encoded: bool = False,
     ) -> None:
-        super().__init__(document=document)
+        super().__init__(document=document, is_base64_encoded=is_base64_encoded)
         self.output = output
         self.error = error
 
@@ -167,16 +193,13 @@ class TransformDocumentResponse(BaseModel, B64DocumentField):
             RawTransformDocumentResponse: TransformDocumentResponse as dict.
         """
         return RawTransformDocumentResponse(
-            document=self.document_b64,
-            output=self.output,
-            error=self.error,
+            document=self.document_b64, output=self.output, error=self.error,
         )
+
 
 @dataclass
 class ServiceInfo(BaseModel):
     name: str
-    version: str
-    options: Optional[config.BaseConfig] = None
 
     def as_dict(self) -> RawServiceInfo:
         """Creates a dict of the object instance.
@@ -184,12 +207,8 @@ class ServiceInfo(BaseModel):
         Returns:
             RawServiceInfo: ServiceInfo as dict.
         """
-        options = self.options.as_dict() if self.options else None
-        return RawServiceInfo(
-            name=self.name,
-            version=self.version,
-            options=options
-        )
+        return RawServiceInfo(name=self.name,)
+
 
 @dataclass
 class ListServicesResponse(BaseModel):
@@ -206,10 +225,25 @@ class ListServicesResponse(BaseModel):
         )
 
 
+class PipeService(BaseModel):
+    name: str
+    options: Options
+
+    def as_dict(self) -> RawPipeService:
+        return RawPipeService(name=self.name, options=self.options.as_dict())
+
+
 # TODO: implement base64 encode decode
 class TransformDocumentPipeRequest(BaseModel, B64DocumentField):
-    def __init__(self, document: str, services: List[ServiceInfo], file_name: Optional[str]) -> None:
-        super().__init__(document=document)
+    def __init__(
+        self,
+        document: str,
+        services: List[ServiceInfo],
+        file_name: Optional[str] = None,
+        is_base64_encoded: bool = False,
+    ) -> None:
+        super().__init__(document=document, is_base64_encoded=is_base64_encoded)
+
         self.services = services
         self.file_name = file_name
 
@@ -221,23 +255,55 @@ class TransformDocumentPipeRequest(BaseModel, B64DocumentField):
         )
 
 
-class TransformDocumentPipeResponse(TransformDocumentResponse):
+class TransformDocumentPipeResponse(TransformDocumentResponse, B64DocumentField):
     def __init__(
         self,
         document: str,
-        sender: str,
+        last_transformer: str,
+        is_base64_encoded: bool = False,
         output: Optional[List[str]] = None,
         error: Optional[List[str]] = None,
     ):
         super().__init__(
-            document=document, output=output, error=error
+            document=document,
+            output=output,
+            error=error,
+            is_base64_encoded=is_base64_encoded,
         )
-        self.sender = sender
+        self.last_transformer = last_transformer
 
     def as_dict(self) -> RawTransformDocumentPipeResponse:
         return RawTransformDocumentPipeResponse(
             document=self.document_b64,
-            sender=self.sender,
+            last_transformer=self.last_transformer,
             output=self.output,
             error=self.error,
         )
+
+
+class OptionsPropertyError(BaseModel):
+    name: str
+    message: str
+
+    def as_dict(self) -> RawOptionsPropertyError:
+        return RawOptionsPropertyError(name=self.name, message=self.message)
+
+
+class OptionsErrorResponse(BaseModel):
+    code: int
+    properties: List[OptionsPropertyError]
+
+    def as_dict(self) -> RawOptionsErrorResponse:
+        return RawOptionsErrorResponse(
+            code=self.code,
+            properties=[property.as_dict() for property in self.properties],
+        )
+
+
+class ErrorResponse(BaseModel):
+    code: int
+    message: str
+
+    def as_dict(self) -> RawErrorResponse:
+        return RawErrorResponse(code=self.code, message=self.message)
+
