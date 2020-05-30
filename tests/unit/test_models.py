@@ -76,22 +76,22 @@ class TestListServicesResponse():
 
     def test_asdict(self):
         response = ListServicesResponse(services=[
-            ServiceInfo(name="QDS.TEST", version="0.0.1", options=None),
-            ServiceInfo(name="QDS.ECHO", version="0.0.2", options=None)
+            ServiceInfo(name="QDS.TEST"),
+            ServiceInfo(name="QDS.ECHO")
         ])
         response_dict = response.as_dict()
         assert len(response_dict.keys()) == 1
         assert response_dict["services"] == [
-            {"name": "QDS.TEST", "version": "0.0.1", "options": None},
-            {"name": "QDS.ECHO", "version": "0.0.2", "options": None}
+            {"name": "QDS.TEST"},
+            {"name": "QDS.ECHO"}
         ]
 
     def test_asjson(self):
         response = ListServicesResponse(services=[
-            ServiceInfo(name="QDS.TEST", version="0.0.1", options=None),
-            ServiceInfo(name="QDS.ECHO", version="0.0.2", options=None)
+            ServiceInfo(name="QDS.TEST"),
+            ServiceInfo(name="QDS.ECHO")
         ])
-        assert response.as_json() == '{"services": [{"name": "QDS.TEST", "version": "0.0.1", "options": null}, {"name": "QDS.ECHO", "version": "0.0.2", "options": null}]}'
+        assert response.as_json() == '{"services": [{"name": "QDS.TEST"}, {"name": "QDS.ECHO"}]}'
 
 class TestTransformDocumentPipeRequest():
 
@@ -100,54 +100,48 @@ class TestTransformDocumentPipeRequest():
         assert request.document == "Hello Pipe Request!"
 
     def test_asdict_required_params(self):
-        @dataclass
-        class Options(BaseConfig):
-            offset: int = 0
         request = TransformDocumentPipeRequest(
             document="Hello Pipe Request2!",
             services=[
-                ServiceInfo(name="QDS.ECHO", version="0.0.1", options=Options())
+                ServiceInfo(name="QDS.ECHO")
             ],
             file_name=None
         )
         request_dict = request.as_dict()
         assert len(request_dict.keys()) == 3
         assert request_dict["document"] == "SGVsbG8gUGlwZSBSZXF1ZXN0MiE="
-        assert request_dict["services"] == [{"name": "QDS.ECHO", "version": "0.0.1", "options": { "offset": 0 }}]
+        assert request_dict["services"] == [{"name": "QDS.ECHO"}]
         assert request_dict["file_name"] is None
 
     def test_asdict_all_params(self):
-        @dataclass
-        class Options(BaseConfig):
-            debug: bool = True
         request = TransformDocumentPipeRequest(
             document="Hello Pipe Request3!",
             services=[
-                ServiceInfo(name="QDS.COUNT", version="0.0.2", options=Options())
+                ServiceInfo(name="QDS.COUNT")
             ],
             file_name="secret.txt"
         )
         request_dict = request.as_dict()
         assert len(request_dict.keys()) == 3
         assert request_dict["document"] == "SGVsbG8gUGlwZSBSZXF1ZXN0MyE="
-        assert request_dict["services"] == [{"name": "QDS.COUNT", "version": "0.0.2", "options": { "debug": True }}]
+        assert request_dict["services"] == [{"name": "QDS.COUNT"}]
         assert request_dict["file_name"] == "secret.txt"
 
     def test_asjson_required_params(self):
         request = TransformDocumentPipeRequest(document="Hello Pipe Request4!", services=[
-            ServiceInfo(name="QDS.CAESER", version="0.0.1", options=None)
+            ServiceInfo(name="QDS.CAESER")
         ], file_name=None)
-        assert request.as_json() == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NCE=", "file_name": null, "services": [{"name": "QDS.CAESER", "version": "0.0.1", "options": null}]}'
+        assert request.as_json() == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NCE=", "file_name": null, "services": [{"name": "QDS.CAESER"}]}'
 
     def test_asjson_all_params(self):
         request = TransformDocumentPipeRequest(
             document="Hello Pipe Request5!",
             services=[
-                ServiceInfo(name="QDS.MAIL", version="0.0.1", options=None)
+                ServiceInfo(name="QDS.MAIL")
             ],
             file_name="sec.txt"
         )
-        assert request.as_json() == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NSE=", "file_name": "sec.txt", "services": [{"name": "QDS.MAIL", "version": "0.0.1", "options": null}]}'
+        assert request.as_json() == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NSE=", "file_name": "sec.txt", "services": [{"name": "QDS.MAIL"}]}'
 
 # class TestTransformDocumentPipeResponse():
 #     B64_HELLO_WORLD_PIPE_BACK = b64encode("Hello World Pipe Back!".encode("utf-8")).decode("utf-8")
