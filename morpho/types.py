@@ -1,7 +1,15 @@
 from enum import Enum
 # from morpho.rest.models import ServiceInfo
-from typing import Any, Dict, List, NewType, Optional, TypedDict
+from typing import Any, Callable, Dict, NewType, TYPE_CHECKING
+from pydantic import BaseModel
 
+if TYPE_CHECKING:
+# FIXME: change to type checking import and wait for issue answer
+    from morpho.config import BaseConfig
+
+# fmt: off
+Worker = Callable[[str, "BaseConfig"], str]
+# fmt: on
 
 # must resides here because otherwise circular import
 class ServiceType(Enum):
@@ -16,5 +24,5 @@ class ServiceType(Enum):
 #     def 
 
 # TODO consider to use dicttypes
-Options = NewType("Options", Dict[str, Any])
+Options = NewType("Options", BaseModel)
 Headers = NewType("Headers", Dict[str, str])
