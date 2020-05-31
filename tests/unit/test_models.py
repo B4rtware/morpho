@@ -1,12 +1,23 @@
-from morpho.types import Options
-from morpho.rest.models import ListServicesResponse, ServiceInfo, TransformDocumentPipeRequest, TransformDocumentPipeResponse, TransformDocumentRequest, TransformDocumentResponse
+from pydantic.main import BaseModel
+from morpho.rest.models import (
+    ListServicesResponse,
+    ServiceInfo,
+    TransformDocumentPipeRequest,
+    TransformDocumentPipeResponse,
+    TransformDocumentRequest,
+    TransformDocumentResponse,
+)
 from morpho.util import decode_base64, encode_base64
 
 
-class TestTransformDocumentRequest():
+class TestTransformDocumentRequest:
+    class TempOptions(BaseModel):
+        offset: int
 
     def test_asdict_required_params(self):
-        request = TransformDocumentRequest(document=encode_base64("Hello World!"), service_name="QDS.TEST")
+        request = TransformDocumentRequest(
+            document=encode_base64("Hello World!"), service_name="QDS.TEST"
+        )
         request_dict = request.dict()
         assert len(request_dict.keys()) == 4
         assert request_dict["document"] == "SGVsbG8gV29ybGQh"
@@ -16,27 +27,47 @@ class TestTransformDocumentRequest():
 
     def test_asdict_all_params(self):
         # TODO: pyright issue?
-        options: Options = {"offset": 8}
-        request = TransformDocumentRequest(document=encode_base64("Hello World2!"), service_name="QDS.TEST", file_name="file.txt", options=options)
+        options = self.TempOptions(offset=8)
+        request = TransformDocumentRequest(
+            document=encode_base64("Hello World2!"),
+            service_name="QDS.TEST",
+            file_name="file.txt",
+            options=options,
+        )
         request_dict = request.dict()
         assert len(request_dict.keys()) == 4
         assert request_dict["document"] == "SGVsbG8gV29ybGQyIQ=="
         assert request_dict["service_name"] == "QDS.TEST"
         assert request_dict["file_name"] == "file.txt"
-        assert request_dict["options"] == options
+        assert request_dict["options"] == options.dict()
 
     def test_asjson_required_params(self):
-        request = TransformDocumentRequest(document=encode_base64("Hello World3!"), service_name="QDS.TEST")
-        assert request.json() == '{"document": "SGVsbG8gV29ybGQzIQ==", "service_name": "QDS.TEST", "file_name": null, "options": null}'
+        request = TransformDocumentRequest(
+            document=encode_base64("Hello World3!"), service_name="QDS.TEST"
+        )
+        assert (
+            request.json()
+            == '{"document": "SGVsbG8gV29ybGQzIQ==", "service_name": "QDS.TEST", "file_name": null, "options": null}'
+        )
 
     def test_asjson_all_params(self):
-        request = TransformDocumentRequest(document=encode_base64("Hello World4!"), service_name="QDS.TEST", file_name="file.txt", options={"offset": 4})
-        assert request.json() == '{"document": "SGVsbG8gV29ybGQ0IQ==", "service_name": "QDS.TEST", "file_name": "file.txt", "options": {"offset": 4}}'
+        request = TransformDocumentRequest(
+            document=encode_base64("Hello World4!"),
+            service_name="QDS.TEST",
+            file_name="file.txt",
+            options=self.TempOptions(offset=4),
+        )
+        assert (
+            request.json()
+            == '{"document": "SGVsbG8gV29ybGQ0IQ==", "service_name": "QDS.TEST", "file_name": "file.txt", "options": {"offset": 4}}'
+        )
 
-class TestTransformDocumentResponse():
 
+class TestTransformDocumentResponse:
     def test_asdict_required_params(self):
-        response = TransformDocumentResponse(document=encode_base64("Hello World Response2!"))
+        response = TransformDocumentResponse(
+            document=encode_base64("Hello World Response2!")
+        )
         response_dict = response.dict()
         assert len(response_dict.keys()) == 3
         assert response_dict["document"] == "SGVsbG8gV29ybGQgUmVzcG9uc2UyIQ=="
@@ -44,7 +75,11 @@ class TestTransformDocumentResponse():
         assert response_dict["error"] is None
 
     def test_asdict_all_params(self):
-        response = TransformDocumentResponse(document=encode_base64("Hello World Response3!"), output=["OUTPUT 1", "OUTPUT 2"], error=["ERROR 1", "ERROR 2"])
+        response = TransformDocumentResponse(
+            document=encode_base64("Hello World Response3!"),
+            output=["OUTPUT 1", "OUTPUT 2"],
+            error=["ERROR 1", "ERROR 2"],
+        )
         response_dict = response.dict()
         assert len(response_dict.keys()) == 3
         assert response_dict["document"] == "SGVsbG8gV29ybGQgUmVzcG9uc2UzIQ=="
@@ -52,43 +87,51 @@ class TestTransformDocumentResponse():
         assert response_dict["error"] == ["ERROR 1", "ERROR 2"]
 
     def test_asjson_required_params(self):
-        response = TransformDocumentResponse(document=encode_base64("Hello World Response4!"))
-        assert response.json() == '{"document": "SGVsbG8gV29ybGQgUmVzcG9uc2U0IQ==", "output": null, "error": null}'
+        response = TransformDocumentResponse(
+            document=encode_base64("Hello World Response4!")
+        )
+        assert (
+            response.json()
+            == '{"document": "SGVsbG8gV29ybGQgUmVzcG9uc2U0IQ==", "output": null, "error": null}'
+        )
 
     def test_asjson_all_params(self):
-        response = TransformDocumentResponse(document=encode_base64("Hello World Response5!"), output=["OUTPUT 1", "OUTPUT 2"], error=["ERROR 1", "ERROR 2"])
-        assert response.json() == '{"document": "SGVsbG8gV29ybGQgUmVzcG9uc2U1IQ==", "output": ["OUTPUT 1", "OUTPUT 2"], "error": ["ERROR 1", "ERROR 2"]}'
+        response = TransformDocumentResponse(
+            document=encode_base64("Hello World Response5!"),
+            output=["OUTPUT 1", "OUTPUT 2"],
+            error=["ERROR 1", "ERROR 2"],
+        )
+        assert (
+            response.json()
+            == '{"document": "SGVsbG8gV29ybGQgUmVzcG9uc2U1IQ==", "output": ["OUTPUT 1", "OUTPUT 2"], "error": ["ERROR 1", "ERROR 2"]}'
+        )
 
-class TestListServicesResponse():
 
+class TestListServicesResponse:
     def test_asdict(self):
-        response = ListServicesResponse(services=[
-            ServiceInfo(name="QDS.TEST"),
-            ServiceInfo(name="QDS.ECHO")
-        ])
+        response = ListServicesResponse(
+            services=[ServiceInfo(name="QDS.TEST"), ServiceInfo(name="QDS.ECHO")]
+        )
         response_dict = response.dict()
         assert len(response_dict.keys()) == 1
-        assert response_dict["services"] == [
-            {"name": "QDS.TEST"},
-            {"name": "QDS.ECHO"}
-        ]
+        assert response_dict["services"] == [{"name": "QDS.TEST"}, {"name": "QDS.ECHO"}]
 
     def test_asjson(self):
-        response = ListServicesResponse(services=[
-            ServiceInfo(name="QDS.TEST"),
-            ServiceInfo(name="QDS.ECHO")
-        ])
-        assert response.json() == '{"services": [{"name": "QDS.TEST"}, {"name": "QDS.ECHO"}]}'
+        response = ListServicesResponse(
+            services=[ServiceInfo(name="QDS.TEST"), ServiceInfo(name="QDS.ECHO")]
+        )
+        assert (
+            response.json()
+            == '{"services": [{"name": "QDS.TEST"}, {"name": "QDS.ECHO"}]}'
+        )
 
-class TestTransformDocumentPipeRequest():
 
+class TestTransformDocumentPipeRequest:
     def test_asdict_required_params(self):
         request = TransformDocumentPipeRequest(
             document=encode_base64("Hello Pipe Request2!"),
-            services=[
-                ServiceInfo(name="QDS.ECHO")
-            ],
-            file_name=None
+            services=[ServiceInfo(name="QDS.ECHO")],
+            file_name=None,
         )
         request_dict = request.dict()
         assert len(request_dict.keys()) == 3
@@ -99,10 +142,8 @@ class TestTransformDocumentPipeRequest():
     def test_asdict_all_params(self):
         request = TransformDocumentPipeRequest(
             document=encode_base64("Hello Pipe Request3!"),
-            services=[
-                ServiceInfo(name="QDS.COUNT")
-            ],
-            file_name="secret.txt"
+            services=[ServiceInfo(name="QDS.COUNT")],
+            file_name="secret.txt",
         )
         request_dict = request.dict()
         assert len(request_dict.keys()) == 3
@@ -111,20 +152,27 @@ class TestTransformDocumentPipeRequest():
         assert request_dict["file_name"] == "secret.txt"
 
     def test_asjson_required_params(self):
-        request = TransformDocumentPipeRequest(document=encode_base64("Hello Pipe Request4!"), services=[
-            ServiceInfo(name="QDS.CAESER")
-        ], file_name=None)
-        assert request.json() == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NCE=", "services": [{"name": "QDS.CAESER", "options": null}], "file_name": null}'
+        request = TransformDocumentPipeRequest(
+            document=encode_base64("Hello Pipe Request4!"),
+            services=[ServiceInfo(name="QDS.CAESER")],
+            file_name=None,
+        )
+        assert (
+            request.json()
+            == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NCE=", "services": [{"name": "QDS.CAESER", "options": null}], "file_name": null}'
+        )
 
     def test_asjson_all_params(self):
         request = TransformDocumentPipeRequest(
             document=encode_base64("Hello Pipe Request5!"),
-            services=[
-                ServiceInfo(name="QDS.MAIL")
-            ],
-            file_name="sec.txt"
+            services=[ServiceInfo(name="QDS.MAIL")],
+            file_name="sec.txt",
         )
-        assert request.json() == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NSE=", "services": [{"name": "QDS.MAIL", "options": null}], "file_name": "sec.txt"}'
+        assert (
+            request.json()
+            == '{"document": "SGVsbG8gUGlwZSBSZXF1ZXN0NSE=", "services": [{"name": "QDS.MAIL", "options": null}], "file_name": "sec.txt"}'
+        )
+
 
 # class TestTransformDocumentPipeResponse():
 #     B64_HELLO_WORLD_PIPE_BACK = b64encode("Hello World Pipe Back!".encode("utf-8")).decode("utf-8")
