@@ -1,6 +1,10 @@
-from base64 import b64decode, b64encode
 from dataclasses import dataclass
-from morpho.rest.models import ServiceInfo, TransformDocumentPipeRequest, TransformDocumentPipeResponse
+from morpho.rest.models import (
+    TransformDocumentPipeRequest,
+    TransformDocumentPipeResponse,
+    TransformDocumentRequest,
+    TransformDocumentResponse,
+)
 from typing import List, Optional
 from urllib.error import HTTPError
 
@@ -11,10 +15,18 @@ import requests
 from morpho.error import ServiceNotFoundError
 from morpho.types import Options
 
+# from morpho.log import log
+# import logginga
+
+from morpho.log import logging
+
+log = logging.getLogger(__name__)
+
 
 @dataclass
 class ClientConfig:
     registrar_url: str
+
 
 # TODO: consider to use models instead of function arguments e.g TransformDocumentRequest
 # TODO: add requests parameter such as headers cookies etc which then also can be used on service
@@ -24,6 +36,7 @@ class Client:
 
     def _get_instance_ip_address(self, service_name: str) -> Optional[str]:
         service: Optional[Application] = None
+        log.info("contacting eureka at <{}>".format(self.config.registrar_url))
         try:
             service = eureka_client.get_application(
                 self.config.registrar_url, service_name
@@ -36,6 +49,11 @@ class Client:
 
         if service:
             instance = service.instances[0]
+            log.info(
+                "found instance: <{}> at <{}:{}>".format(
+                    instance.app, instance.ipAddr, instance.port.port
+                )
+            )
             return f"{instance.ipAddr}:{instance.port.port}"
         return None
 
@@ -46,6 +64,7 @@ class Client:
         service_name: str,
         options: Optional[Options] = None,
         file_name: Optional[str] = None,
+        address: Optional[str] = None,
     ):
         """Transforms the given document.
         
@@ -58,37 +77,43 @@ class Client:
         Raises:
             ServiceNotFoundError: If the requested service in the eureka registry could not be found.
         """
+        request = TransformDocumentRequest(
+            document=document,
+            service_name=service_name,
+            file_name=file_name,
+            options=options,
+        )
         # get application from eureka
-        instance_address = self._get_instance_ip_address(service_name)
-        if instance_address:
+        if address is None:
+            address = f"http://{self._get_instance_ip_address(service_name)}/v1/document/transform"
+        if address:
             # wrapper for a consumer request
-            response = requests.post(
-                f"http://{instance_address}/v1/document/transform",
-                json={
-                    "document": b64encode(document.encode("utf-8")).decode("utf-8"),
-                    "file_name": file_name,
-                    "service_name": service_name,
-                },
-            )
+            log.info("sending <DocumentTransformRequest> to <%s>", address)
+            log.info("content: %s", request.as_json(indent=4))
+            response = requests.post(address, json=request.as_dict())
             # TODO: if url not found json object not available return error
-            print(response.text)
-            response_object = response.json()
-            response_object["document"] = b64decode(
-                response_object["document"].encode("utf-8")
-            ).decode("utf-8")
+            log.debug("content of response: %s", response.text)
+            response_object = TransformDocumentResponse(
+                **response.json(), is_base64_encoded=True
+            )
             return response_object
 
-    def transform_document_pipe(self, request: TransformDocumentPipeRequest) -> TransformDocumentPipeResponse:
-        # TODO: 
+    def transform_document_pipe(
+        self, request: TransformDocumentPipeRequest
+    ) -> TransformDocumentPipeResponse:
         instance_address = self._get_instance_ip_address(request.services[0].name)
-        print(request.as_dict())
-        if instance_address:
-            response = requests.post(
-                f"http://{instance_address}/v1/document/transform-pipe",
-                json=request.as_dict()
-            )
-            print(response.text)
-            return TransformDocumentPipeResponse(**response.json())
+        # print(request.as_dict())
+        if instance_address is None:
+            message = f"No service named <{request.services[0].name}>."
+            raise ServiceNotFoundError(message)
+        log.info("sending transform document pipe request.")
+        log.info("content: %s", request.as_json(indent=4))
+        response = requests.post(
+            f"http://{instance_address}/v1/document/transform-pipe",
+            json=request.as_dict(),
+        )
+        # print(response.text)
+        return TransformDocumentPipeResponse(**response.json(), is_base64_encoded=True)
 
     def list_services(self, service_name: str) -> List[str]:
         """Lists the services which are known by the provided service.
@@ -104,31 +129,29 @@ class Client:
         """
         instance_address = self._get_instance_ip_address(service_name)
         if instance_address:
-            response = requests.get(
-                f"http://{instance_address}/v1/service/list"
-            )
+            response = requests.get(f"http://{instance_address}/v1/service/list")
             response_object = response.json()
             return response_object["services"]
         return []
 
 
-if __name__ == "__main__":
-    config = ClientConfig(registrar_url="http://localhost:8761/eureka")
-    morpho_client = Client(config)
-    document = morpho_client.transform_document(
-        "Test Dokument", "PROXY", file_name="file.txt"
-    )
-    print(document)
-    # print(c.list_services("DE.TU-BERLIN.QDS.ECHO"))
-    # print(document["trans_document"])
+# if __name__ == "__main__":
+#     config = ClientConfig(registrar_url="http://localhost:8761/eureka")
+#     morpho_client = Client(config)
+#     document = morpho_client.transform_document(
+#         "Test Dokument", "PROXY", file_name="file.txt"
+#     )
+# print(document)
+# print(c.list_services("DE.TU-BERLIN.QDS.ECHO"))
+# print(document["trans_document"])
 
-    # request = TransformDocumentPipeRequest(
-    #     document="Hello World",
-    #     file_name=None,
-    #     services=[
-    #         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS", version="0.0.1", options=None),
-    #         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS2", version="0.0.1", options=None),
-    #         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS3", version="0.0.1", options=None)
-    #     ]
-    # )
-    # morpho_client.transform_document_pipe(request=request)
+# request = TransformDocumentPipeRequest(
+#     document="Hello World",
+#     file_name=None,
+#     services=[
+#         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS", version="0.0.1", options=None),
+#         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS2", version="0.0.1", options=None),
+#         ServiceInfo(name="DE.TU-BERLIN.QDS.ECHOS3", version="0.0.1", options=None)
+#     ]
+# )
+# morpho_client.transform_document_pipe(request=request)
