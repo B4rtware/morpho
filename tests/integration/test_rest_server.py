@@ -1,15 +1,16 @@
 from base64 import b64encode
 from base64 import b64decode
+from morpho.consumer import RestWorkConsumer
 from morpho.config import BaseConfig
+from morpho.rest.models import TransformDocumentResponse
 from typing import Optional
-from morpho.rest.models import RawTransformDocumentPipeRequest, RawTransformDocumentResponse, TransformDocumentResponse
 import sys
 import pytest
 from threading import Thread
 
 import requests as r
 
-from morpho.server import Server
+from morpho.server import Service
 
 # TODO: create fixture for rest server
 # TODO: rename to test_rest.py
@@ -18,17 +19,14 @@ from morpho.server import Server
 MAX_RETRIES = 120
 
 
-class MorphoTest(Server):
-    version = "0.0.1"
-    name = "TEST"
-    consumer = ["rest"]
+def work(document: str, options: Optional[BaseConfig]) -> str:
+    return document
 
-    def work(self, document: str, options: Optional[BaseConfig]) -> str:
-        print("hellllllooo")
-        return document
+print("IJSIJDISJD")
+morpho_test_service = Service(name="TEST", version="0.0.1", protocols=[RestWorkConsumer], worker=work)
+print("Jasodjaisd")
 
-
-class MorhpoPipeTest0(Server):
+class MorhpoPipeTest0(Service):
     version = "0.0.1"
     name = "TEST"
 
@@ -37,10 +35,11 @@ class MorhpoPipeTest0(Server):
 def rest_server():
     # TODO: use a client to interact with the server to use more than one component?
     # remove all other program arguments and add the rest protocol
-    sys.argv = [sys.argv[0], "--protocols=rest"]
+    # sys.argv = [sys.argv[0], "--protocols=rest"]
+    sys.argv = [sys.argv[0]]
 
     # app = QDS_TEST
-    app_thread = Thread(target=MorphoTest.run, daemon=True)
+    app_thread = Thread(target=morpho_test_service.run, daemon=True)
     app_thread.start()
 
     retry = 0
@@ -68,7 +67,7 @@ def test_rest_transform(rest_server):
     # assert app_thread.is_alive()
 
     result = r.post(
-        "http://127.0.0.1:50000/v1/qds/dta/document/transform",
+        "http://127.0.0.1:50000/v1/document/transform",
         json={
             "document": "Hello World!",
             "service_name": "QDS.TEST"
@@ -77,11 +76,9 @@ def test_rest_transform(rest_server):
 
     assert result.status_code == 200
     assert result.text
-    response: RawTransformDocumentResponse = result.json()
-    document_response = TransformDocumentResponse(document="", output=response["output"], error=response["error"])
-    document_response.document_b64 = response["document"]
-    assert document_response.document == "Hello World!"
-    assert document_response.error == []
+    transform_document_response = TransformDocumentResponse(**result.json())
+    assert transform_document_response.document == "Hello World!"
+    assert transform_document_response.error == []
 
 
 def test_rest_list(rest_server):
@@ -92,12 +89,12 @@ def test_rest_list(rest_server):
 
     # app_thread.join(timeout=5)
     # assert app_thread.is_alive()
-    result = r.get("http://127.0.0.1:50000/v1/qds/dta/service/list")
+    result = r.get("http://127.0.0.1:50000/v1/service/list")
     assert result.status_code == 200
     assert result.text
     document_response = result.json()
     assert document_response["services"] == [
-        {"name": "TEST", "options": None, "version": "0.0.1"}
+        {"name": "TEST"}
     ]
 
 
