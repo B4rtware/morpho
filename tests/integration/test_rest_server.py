@@ -1,5 +1,7 @@
 from base64 import b64encode
 from base64 import b64decode
+
+from pydantic.main import BaseModel
 from morpho.consumer import RestWorkConsumer
 from morpho.config import BaseConfig
 from morpho.rest.models import TransformDocumentResponse
@@ -19,17 +21,10 @@ from morpho.server import Service
 MAX_RETRIES = 120
 
 
-def work(document: str, options: Optional[BaseConfig]) -> str:
+def work(document: str, _: BaseModel) -> str:
     return document
 
-print("IJSIJDISJD")
 morpho_test_service = Service(name="TEST", version="0.0.1", protocols=[RestWorkConsumer], worker=work)
-print("Jasodjaisd")
-
-class MorhpoPipeTest0(Service):
-    version = "0.0.1"
-    name = "TEST"
-
 
 @pytest.fixture(scope="module")
 def rest_server():
