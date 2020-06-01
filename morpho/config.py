@@ -1,16 +1,18 @@
 import dataclasses
 from dataclasses import dataclass
 import json
-import logging as log
+
+# from morpho.consumer import RestWorkConsumer, WorkConsumer
 from pathlib import Path
-from typing import Any, Dict, IO, Optional, Union
+from typing import Any, Dict, IO, List, Optional, TYPE_CHECKING, Type, Union
 
 from morpho.types import ServiceType
 
-log.basicConfig(level=log.INFO)
-
 # TODO: consider to move the parser logic into this module e.g init() / parse()
 # TODO: use loads load dump dumps
+
+if TYPE_CHECKING:
+    from morpho.consumer import WorkConsumer
 
 
 @dataclass
@@ -54,7 +56,7 @@ class BaseConfig:
 
     # doctrans: new_doc_trans_from_file
     @classmethod
-    def load(cls, path: Union[Path, str]) -> "ServerConfig":
+    def load(cls, path: Union[Path, str]) -> "ServiceConfig":
         """Load a morpho configuration file from a given path.
 
         Returns:
@@ -74,15 +76,16 @@ class BaseConfig:
 
 # doctrans: DocTransServer
 @dataclass
-class ServerConfig(BaseConfig):
+class ServiceConfig(BaseConfig):
     """Configuration class for a morpho server.
 
     It is a direct mapping for a given configuration file. Which should only contain
     options which are also supported by this class.
     """
 
-    app_name: str = ""
+    name: str = ""
     version: str = ""
+    protocols: Optional[List[Type["WorkConsumer"]]] = None
     options: Optional[BaseConfig] = None
 
     register: bool = False
@@ -98,4 +101,5 @@ class ServerConfig(BaseConfig):
     http_port: str = "8080"
 
     log_level: str = ""
+    timeout: float = 20
     init: bool = False
