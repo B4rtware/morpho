@@ -1,32 +1,37 @@
 from abc import ABC, abstractmethod
 from contextlib import redirect_stderr, redirect_stdout
 import io
+from morpho.types import Worker
 from morpho.client import Client, ClientConfig
 from morpho.util import unflatten_dict
 from morpho.rest.models import (
     ListServicesResponse,
     ServiceInfo,
     TransformDocumentPipeRequest,
-    TransformDocumentPipeResponse, TransformDocumentRequest,
+    TransformDocumentPipeResponse,
+    TransformDocumentRequest,
     TransformDocumentResponse,
 )
+from morpho.rest.raw import RawTransformDocumentResponse, RawListServicesResponse
 from threading import Thread
 import traceback
-from typing import Callable, List, Optional, Tuple, cast
+from typing import Optional, TYPE_CHECKING, Tuple
 from urllib.error import URLError
 import py_eureka_client.eureka_client as eureka_client
+from wrapt_timeout_decorator import timeout
 
 from flask import Flask
 import flask
 import waitress
 
-from morpho.config import ServerConfig
-from morpho.log import log
 from morpho.rest import Status
-from morpho.rest.models import (
-    RawListServicesResponse,
-    RawTransformDocumentResponse
-)
+
+from morpho.log import logging
+
+log = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from morpho.config import ServiceConfig
 
 # TODO: rename to Base prefix or suffix
 class WorkConsumer(ABC):
@@ -35,7 +40,7 @@ class WorkConsumer(ABC):
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (ServerConfig): Configuration for the given Server.
+        config (ServiceConfig): Configuration for the given Server.
 
     Note:
         The ``work`` callback should be called once on a implemented work consumer after the
@@ -43,15 +48,14 @@ class WorkConsumer(ABC):
         be correctly marshalled.
     """
 
-    def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
+    def __init__(self, work: Worker, config: "ServiceConfig") -> None:
         self._work = work
         self.config = config
-        self.client = Client(ClientConfig(
-            registrar_url=config.registrar_url
-        ))
+        self.client = Client(ClientConfig(registrar_url=config.registrar_url))
+        log.info("initialized abc worker.")
 
     def list_services(self) -> ListServicesResponse:
-        """Lists all services from the eureka server of the provided ``ServerConfig``.
+        """Lists all services from the eureka server of the provided ``ServiceConfig``.
         
         Returns:
             List[ListServicesResponse]: List of services.
@@ -63,15 +67,16 @@ class WorkConsumer(ABC):
                 for service in applications.applications:
                     instance = service.instances[0]
                     morpho_metadata = {}
+                    # TODO: fix these metatdata options
                     for key, value in instance.metadata.items():
                         if "morpho" in key:
                             morpho_metadata[key] = value
-                    print(morpho_metadata)
+                    # print(morpho_metadata)
                     _, dictionary = unflatten_dict(morpho_metadata)
-                    print(dictionary)
+                    # print(dictionary)
                     service_info = ServiceInfo(
                         name=instance.app,
-                        version=instance.metadata.get("morpho.version")
+                        version=instance.metadata.get("morpho.version"),
                     )
                     services.append()
             # TODO: add custom eureka not found error
@@ -83,20 +88,12 @@ class WorkConsumer(ABC):
                 )
         # the service always knows its self
         if not services:
-            services.append(
-                ServiceInfo(
-                    name=self.config.app_name,
-                    version=self.config.version,
-                    options=self.config.options if self.config.options else None,
-                )
-            )
+            services.append(ServiceInfo(name=self.config.name,))
         return ListServicesResponse(services=services)
 
     def transform_document(
         self, request: TransformDocumentRequest,
     ) -> TransformDocumentResponse:
-        print(self.config.app_name + ": " , request.document)
-
         document = None
         # TODO: create a decorator for capturing stdout and stderr
         # TODO: consider to move this into base class
@@ -113,38 +110,43 @@ class WorkConsumer(ABC):
         output = captured_stdout.getvalue().splitlines()
         captured_stderr.close()
         captured_stdout.close()
-        print(error)
         # TODO: test on none return type (if an error occurs) so the error
         # will be still be transferred to the client
-        return TransformDocumentResponse(
-            document=document, output=output, error=error
-        )
+        return TransformDocumentResponse(document=document, output=output, error=error)
 
-    def transform_document_pipe(self, request: TransformDocumentPipeRequest) -> TransformDocumentPipeResponse:
+    def transform_document_pipe(
+        self, request: TransformDocumentPipeRequest
+    ) -> TransformDocumentPipeResponse:
+        log.info("transform document pipe was called with: <%s>", request.document)
         service_info = request.services.pop(0)
-        transform_response = self.transform_document(TransformDocumentRequest(
-            document = request.document,
-            service_name = service_info.name,
-            file_name = request.file_name,
-            options=service_info.options
-        ))
-
+        transform_response = self.transform_document(
+            TransformDocumentRequest(
+                document=request.document,
+                service_name=service_info.name,
+                file_name=request.file_name,
+                options=service_info.options,
+            )
+        )
         # return a response if there are only 1 service left
         # this means that the pipe is either finished or will
         # be interupted because of an occured error
         if request.services == [] or transform_response.error:
+            log.info(
+                "reached end of pipe returning response: %s",
+                transform_response.document,
+            )
             return TransformDocumentPipeResponse(
-                trans_document=transform_response.trans_document,
-                trans_output = transform_response.trans_output,
-                sender = self.config.app_name,
-                error=transform_response.error
+                document=transform_response.document,
+                output=transform_response.output,
+                last_transformer=self.config.name,
+                error=transform_response.error,
             )
 
-        request.document = transform_response.trans_document
+        request.document = transform_response.document
         response = self.client.transform_document_pipe(request=request)
 
         # cancat outputs in the right order
-        response.trans_output = transform_response.trans_output + response.trans_output
+        response.output = transform_response.output + response.output
         response.error = transform_response.error + response.error
 
         return response
@@ -174,10 +176,11 @@ class RestWorkConsumer(WorkConsumer):
     Attributes:
         work (Callable[[str], str]): Worker function which will executed to get the
                                      transformed document.
-        config (ServerConfig): Configuration for the given Server.
+        config (ServiceConfig): Configuration for the given Server.
     """
 
-    def __init__(self, work: Callable[[str], str], config: ServerConfig):
+    def __init__(self, work: Worker, config: "ServiceConfig"):
+        log.info("initialized abc worker.")
         super().__init__(work, config)
         self._work = work
         self.config = config
@@ -196,18 +199,8 @@ class RestWorkConsumer(WorkConsumer):
         # pylint: enable: line-too-long
         # fmt: on
 
-        # return (
-        #     {
-        #         "trans_document": trans_document,
-        #         "trans_output": trans_output,
-        #         "error": error,
-        #     },
-        #     Status.OK if not error else Status.INTERNAL_SERVER_ERROR,
-        #     Headers({"Content-Type": "application/json"}),
-        # )
-
     # TODO: rename to list services / transform document and transform document pipe
-    def _transform_document(self,) -> Tuple[RawTransformDocumentResponse, Status]:
+    def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
         """Callback function which gets invoked by flask if a transform request is received.
 
         Returns:
@@ -219,18 +212,20 @@ class RestWorkConsumer(WorkConsumer):
             inside the rest response object.
         """
         # TODO: what if body is empty -> test
+        log.info("received request on rest worker")
+        log.debug("content received: %s", flask.request.json)
         request_model = TransformDocumentRequest(**flask.request.json)
         response_model = self.transform_document(request_model)
         status_code = (
             Status.OK if not response_model.error else Status.INTERNAL_SERVER_ERROR
         )
-        return response_model.as_dict(), status_code
+        return response_model.dict(), status_code
 
     # TODO: add options to the list reponse for each application maybe on /options or so
     # TODO: or override and call super() ?
     def _list_services(self) -> Tuple[RawListServicesResponse, Status]:
         response_model = self.list_services()
-        return response_model.as_dict(), Status.OK
+        return response_model.dict(), Status.OK
 
     # TODO: create a wrapper for this function because internally it is always the same
     # TODO: consider to rename this function to _transform_document_pipe to call a super function
@@ -241,10 +236,13 @@ class RestWorkConsumer(WorkConsumer):
         request_model = TransformDocumentPipeRequest(
             document=request["document"],
             file_name=request["file_name"],
-            services=[ServiceInfo(**info) for info in request["services"]]
+            services=[ServiceInfo(**info) for info in request["services"]],
+            is_base64_encoded=True,
         )
         response_model = self.transform_document_pipe(request_model)
-        status_code = Status.OK if not response_model.error else Status.INTERNAL_SERVER_ERROR
+        status_code = (
+            Status.OK if not response_model.error else Status.INTERNAL_SERVER_ERROR
+        )
         return response_model.as_dict(), status_code
 
     def start(self) -> None:
@@ -270,10 +268,10 @@ class RestWorkConsumer(WorkConsumer):
 #     Attributes:
 #         work (Callable[[str], str]): Worker function which will executed to get the
 #                                      transformed document.
-#         config (ServerConfig): Configuration for the given Server.
+#         config (ServiceConfig): Configuration for the given Server.
 #     """
 
-#     def __init__(self, work: Callable[[str], str], config: ServerConfig) -> None:
+#     def __init__(self, work: Callable[[str], str], config: ServiceConfig) -> None:
 #         self._work = work
 #         self.config = config
 #         self.server = None
@@ -318,3 +316,52 @@ class RestWorkConsumer(WorkConsumer):
 #         # bind properties to be used inside the class instance
 #         add_DTAServerServicer_to_server(self, self.server)
 #         self.server.start()
+
+
+# from starlette.applications import Starlette
+# from starlette.responses import JSONResponse
+# from starlette.routing import Route
+
+# from threading import Thread
+# from multiprocessing import Process
+# import uvicorn
+# import asyncio
+
+# loop = asyncio.new_event_loop()
+
+# async def test(request):
+#     return JSONResponse({"Hello": "World!"})
+
+# app = Starlette(debug=True, routes=[
+#     Route("/", test)
+# ])
+
+# class CustomServer(uvicorn.Server):
+#     def install_signal_handlers(self):
+#         pass
+# class RestWorkConsumer(WorkConsumer):
+#     def __init__(self, work: Worker, config: "ServiceConfig") -> None:
+#         self._work = work
+#         self.config = config
+#         self.app = Starlette(debug=True, routes=[
+#             Route("/", self.test)
+#         ])
+
+#     async def looong(self):
+#         await asyncio.sleep(20)
+
+
+#     async def test(self, request):
+#         await asyncio.wait_for(self.looong(), 2)
+#         return JSONResponse({"do": "is"})
+
+
+#     def start(self) -> None:
+#         # t = Process(target=uvicorn.run, kwargs={"app": self.app}, daemon=True)
+#         # config = uvicorn.Config(self.app, loop="none", lifespan="off")
+#         config = uvicorn.Config(self.app)
+#         server = CustomServer(config)
+#         t = Thread(target=server.run, daemon=True)
+#         # asyncio.run(server.serve())
+#         t.start()
+#         # t.start()
