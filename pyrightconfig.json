@@ -6,10 +6,15 @@
     "exclude": [
         "**/run_codegen.py",
         "./client/grpc/client.py",
-        "./typings"
+        "./typings",
+        "./examples",
+        "./tests",
+        "./tasks.py",
+        "./notifier.py",
+        "./docs"
     ],
     "ignore": [
         "./typings",
-        "./service/proto"
+        "./morpho/proto"
     ]
 }
