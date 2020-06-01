@@ -1,24 +1,24 @@
 
-from dataclasses import dataclass
-from service.config import BaseConfig
-from service.server import DTAServer
+from pydantic import BaseModel
+from morpho.server import Service
 
 # TODO: option to add info about option
 
-@dataclass
-class Options(BaseConfig):
+class Options(BaseModel):
     key: str = "LEMON"
 
-class Permutation(DTAServer):
-    version = "0.0.1"
-    name = "de.tu-berlin.qds.crypto.vigenere"
-    options = Options()
+service = Service(name="de.tu-berlin.qds.crypto.vigenere", version="0.0.1", options=Options)
 
-    def work(self, document: str, options: Options) -> str:
-        document = document.capitalize()
-        key = options.key.capitalize()
-        encrypted = ""
-        for index, char in enumerate(document):
-            key_char = key[index % len(key)]
-            encrypted += chr((((ord(char) - 65) + (ord(key_char) - 65)) % 26)+65)
-        return encrypted
+@service.worker
+def work(document: str, options: Options) -> str:
+    document = document.capitalize()
+    key = options.key.capitalize()
+    encrypted = ""
+    for index, char in enumerate(document):
+        key_char = key[index % len(key)]
+        encrypted += chr((((ord(char) - 65) + (ord(key_char) - 65)) % 26)+65)
+    return encrypted
+
+if __name__ == "__main__":
+    service.run()
+
