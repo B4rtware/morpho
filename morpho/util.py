@@ -73,4 +73,59 @@ def unflatten_dict(dictionary: Dict[str, Any]):
 
         cur_dict[cur_prefix] = value
     return prefix, unflatten_dict
-        
+
+# from threading import Thread
+
+# import asyncio
+
+# def run_until_timeout(func, timeout):
+#     result_queue = Queue()
+#     worker_process = Process(target=worker, args=(func, result_queue), daemon=True)
+#     worker_process.start()
+#     worker_process.join(timeout)
+#     if worker_process.is_alive():
+#         worker_process.terminate()
+#         worker_process.join()
+#         # if worker_process.is_alive():
+#         #     raise Exception("worker is still alive")
+#         raise ServerTimeout()
+#     if not result_queue.empty():
+#         print(result_queue.get())
+
+
+# def test():
+#     for i in range(10):
+#         print("sleeping")
+#         time.sleep(1)
+#     return "result"
+
+# def run_func(func):
+#     with ThreadPoolExecutor(max_workers=2) as pool:
+#         result = pool.submit(func)
+#         result.result(5)
+#         pool.shutdown(False)
+#         pool.shutdown()
+#         print("shuedown")
+#         # print(result.cancel())
+#         # print(result.set_exception(Exception("Timeout")))
+
+
+# def run_until_timeout(func, timeout):
+#     run_func(func)
+#     print("DONE")
+
+
+# def worker(func, queue):
+#     result = func()
+#     queue.put(result)
+
+# if __name__ == "__main__":
+#     run_until_timeout(test, 10)
+    # worker_process = Process(target=test, daemon=True)
+    # worker_process.start()
+    # worker_process.join(5)
+    # if worker_process.is_alive():
+    #     worker_process.terminate()
+    #     if worker_process.is_alive():
+    #         raise Exception("worker is still alive")
+    #     raise ServerTimeout()
