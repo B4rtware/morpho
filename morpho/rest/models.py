@@ -1,9 +1,6 @@
-from dataclasses import dataclass
-from pydantic import BaseModel
-from morpho.util import decode_base64, encode_base64
-
-# from morpho.config import BaseConfig
 from typing import List, Optional
+
+from pydantic import BaseModel
 
 
 # its models raw responses
@@ -13,6 +10,22 @@ from typing import List, Optional
 
 # TODO: consider to use a normal class here insteat of dataclasses because of the weird issure with intellisense
 # TODO: consider to use a dataclasses if the problem is solved with having a dataclass and properties
+
+
+# def __init__(self, **data) -> None:
+#     try:
+#         super().__init__(**data)
+#     except ValidationError as e:
+#         errors = []
+#         for prop in json.loads(e.json()):
+#             errors.append(
+#                 OptionsPropertyError(
+#                     name=",".join(prop["loc"]),
+#                     message="{}: {}".format(prop["type"], prop["msg"]),
+#                 )
+#             )
+#         options_error_response = OptionsErrorResponse(code=504, properties=errors)
+#         raise ServerOptionsValidationError(error=options_error_response)
 
 
 class Model(BaseModel):
