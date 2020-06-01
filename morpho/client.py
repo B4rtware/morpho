@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+
+from pydantic.main import BaseModel
 from morpho.rest.models import (
     TransformDocumentPipeRequest,
     TransformDocumentPipeResponse,
@@ -13,7 +15,6 @@ from py_eureka_client.eureka_client import Application
 import requests
 
 from morpho.error import ServiceNotFoundError
-from morpho.types import Options
 
 # from morpho.log import log
 # import logginga
@@ -62,7 +63,7 @@ class Client:
         self,
         document: str,
         service_name: str,
-        options: Optional[Options] = None,
+        options: Optional[BaseModel] = None,
         file_name: Optional[str] = None,
         address: Optional[str] = None,
     ):

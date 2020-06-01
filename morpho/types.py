@@ -1,14 +1,15 @@
 from enum import Enum
+
 # from morpho.rest.models import ServiceInfo
-from typing import Any, Callable, Dict, NewType, TYPE_CHECKING
+from typing import Callable, Dict, NewType
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-# FIXME: change to type checking import and wait for issue answer
-    from morpho.config import BaseConfig
+# if TYPE_CHECKING:
+# # FIXME: change to type checking import and wait for issue answer
+# from morpho.config import BaseConfig
 
 # fmt: off
-Worker = Callable[[str, "BaseConfig"], str]
+Worker = Callable[[str, BaseModel], str]
 # fmt: on
 
 # must resides here because otherwise circular import
@@ -19,10 +20,10 @@ class ServiceType(Enum):
     PROXY = "proxy"
     GATEWAY = "gateway"
 
+
 # @dataclass
 # class Metadata(ServiceInfo):
-#     def 
+#     def
 
 # TODO consider to use dicttypes
-Options = NewType("Options", BaseModel)
 Headers = NewType("Headers", Dict[str, str])

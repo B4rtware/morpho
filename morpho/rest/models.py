@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from morpho.util import decode_base64, encode_base64
 
-from morpho.types import Options
-
 # from morpho.config import BaseConfig
 from typing import List, Optional
 
@@ -40,12 +38,12 @@ class TransformDocumentRequest(Model):
     document: str
     service_name: str
     file_name: Optional[str] = None
-    options: Optional[Options] = None
+    options: Optional[BaseModel] = None
 
 
 class PipeService(Model):
     name: str
-    options: Optional[Options]
+    options: Optional[BaseModel]
 
 
 class TransformDocumentPipeRequest(Model):
