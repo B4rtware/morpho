@@ -1,6 +1,9 @@
-import logging as log
+import logging
 
 # setup logger
-log.basicConfig(
-    format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%d.%m.%Y %H:%M:%S"
+logging.basicConfig(
+    format="[{asctime}] [ {name} ] [ {levelname:<7} ] {message}",
+    datefmt="%d.%m.%Y %H:%M:%S",
+    level=0,
+    style="{",
 )
