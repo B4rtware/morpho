@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "morpho"
-version = "0.1.0"
+version = "1.0.0-alpha.1"
 description = ""
 authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
 
