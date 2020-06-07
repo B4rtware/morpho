@@ -90,8 +90,8 @@ class Client:
         if address:
             # wrapper for a consumer request
             log.info("sending <DocumentTransformRequest> to <%s>", address)
-            log.info("content: %s", request.as_json(indent=4))
-            response = requests.post(address, json=request.as_dict())
+            log.info("content: %s", request.json(indent=4))
+            response = requests.post(address, json=request.dict())
             # TODO: if url not found json object not available return error
             log.debug("content of response: %s", response.text)
             response_object = TransformDocumentResponse(
@@ -111,7 +111,7 @@ class Client:
         log.info("content: %s", request.as_json(indent=4))
         response = requests.post(
             f"http://{instance_address}/v1/document/transform-pipe",
-            json=request.as_dict(),
+            json=request.dict(),
         )
         # print(response.text)
         return TransformDocumentPipeResponse(**response.json(), is_base64_encoded=True)
