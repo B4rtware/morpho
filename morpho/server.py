@@ -116,7 +116,7 @@ class Service:
         if self.config.register:
             eureka_client.init_registry_client(
                 eureka_server=self.config.registrar_url,
-                instance_id=self.config.host_name,
+                instance_host=self.config.host_name,
                 app_name=self.config.name,
                 instance_port=int(self.config.port_to_listen),
                 instance_secure_port_enabled=self.config.is_ssl,
