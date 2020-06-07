@@ -56,7 +56,7 @@ class TransformDocumentRequest(Model):
 
 class PipeService(Model):
     name: str
-    options: Optional[BaseModel]
+    options: Optional[Dict[str, Any]]
 
 
 class TransformDocumentPipeRequest(Model):
