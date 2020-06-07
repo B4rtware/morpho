@@ -1,5 +1,8 @@
 # v1.0.0a2 - (07.06.2020)
 
+## Added
+- added: changelog
+
 ## Changed
 - changed: temporarily remove grpcio depencdency until it is fully integrated
 - changed(examples): remove client examples which where based on grpcio
