@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -51,7 +51,7 @@ class TransformDocumentRequest(Model):
     document: str
     service_name: str
     file_name: Optional[str] = None
-    options: Optional[BaseModel] = None
+    options: Optional[Dict[str, Any]] = None
 
 
 class PipeService(Model):
