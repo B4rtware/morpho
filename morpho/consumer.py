@@ -237,7 +237,6 @@ class RestWorkConsumer(WorkConsumer):
             document=request["document"],
             file_name=request["file_name"],
             services=[ServiceInfo(**info) for info in request["services"]],
-            is_base64_encoded=True,
         )
         response_model = self.transform_document_pipe(request_model)
         status_code = (

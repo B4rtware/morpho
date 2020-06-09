@@ -94,9 +94,7 @@ class Client:
             response = requests.post(address, json=request.dict())
             # TODO: if url not found json object not available return error
             log.debug("content of response: %s", response.text)
-            response_object = TransformDocumentResponse(
-                **response.json(), is_base64_encoded=True
-            )
+            response_object = TransformDocumentResponse(**response.json())
             return response_object
 
     def transform_document_pipe(
@@ -114,9 +112,9 @@ class Client:
             json=request.dict(),
         )
         # print(response.text)
-        return TransformDocumentPipeResponse(**response.json(), is_base64_encoded=True)
+        return TransformDocumentPipeResponse(**response.json())
 
-    def list_services(self, service_name: str) -> List[str]:
+    def list_services(self, service_name: Optional[str]) -> List[str]:
         """Lists the services which are known by the provided service.
         
         Args:
