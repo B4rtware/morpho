@@ -64,11 +64,12 @@ class Service:
         protocols: Optional[List[Type[WorkConsumer]]] = None,
         worker: Optional[Worker] = None,
         config: Optional[ServiceConfig] = None,
-        options: Optional[Type[BaseModel]] = None
+        options_type: Optional[Type[BaseModel]] = None
     ):
         if protocols is None:
             protocols = [RestWorkConsumer]
         self.config = ServiceConfig(name=name, version=version, protocols=protocols,)
+        self.options_type = options_type
 
         self._should_stop = Event()
         self._worker = worker
@@ -130,7 +131,7 @@ class Service:
         # start protocol consumer
         if self._worker is not None:
             for protocol in self.config.protocols:
-                instance: WorkConsumer = protocol(self._worker, self.config)
+                instance: WorkConsumer = protocol(self._worker, self.config, self.options_type)
                 instance.start()
         else:
             log.warning("no work function is specified. No consumer started.")

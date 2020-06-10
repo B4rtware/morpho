@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from contextlib import redirect_stderr, redirect_stdout
 import io
+
+from pydantic.main import BaseModel
 from morpho.types import Worker
 from morpho.client import Client, ClientConfig
 from morpho.util import unflatten_dict
@@ -15,7 +17,7 @@ from morpho.rest.models import (
 from morpho.rest.raw import RawTransformDocumentResponse, RawListServicesResponse
 from threading import Thread
 import traceback
-from typing import Optional, TYPE_CHECKING, Tuple
+from typing import Optional, TYPE_CHECKING, Tuple, Type
 from urllib.error import URLError
 import py_eureka_client.eureka_client as eureka_client
 from wrapt_timeout_decorator import timeout
@@ -48,10 +50,16 @@ class WorkConsumer(ABC):
         be correctly marshalled.
     """
 
-    def __init__(self, work: Worker, config: "ServiceConfig") -> None:
+    def __init__(
+        self,
+        work: Worker,
+        config: "ServiceConfig",
+        options_type: Optional[Type[BaseModel]],
+    ) -> None:
         self._work = work
         self.config = config
         self.client = Client(ClientConfig(registrar_url=config.registrar_url))
+        self.options_type = options_type
         log.info("initialized abc worker.")
 
     def list_services(self) -> ListServicesResponse:
@@ -101,8 +109,11 @@ class WorkConsumer(ABC):
         captured_stderr = io.StringIO()
         with redirect_stderr(captured_stderr):
             with redirect_stdout(captured_stdout):
+                options = (
+                    self.options_type(**request.options) if self.options_type else None
+                )
                 try:
-                    document = self._work(request.document, request.options)
+                    document = self._work(request.document, options)
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
 
@@ -179,9 +190,11 @@ class RestWorkConsumer(WorkConsumer):
         config (ServiceConfig): Configuration for the given Server.
     """
 
-    def __init__(self, work: Worker, config: "ServiceConfig"):
+    def __init__(
+        self, work: Worker, config: "ServiceConfig", options_type: Type[BaseModel]
+    ):
         log.info("initialized abc worker.")
-        super().__init__(work, config)
+        super().__init__(work, config, options_type)
         self._work = work
         self.config = config
         self.thread: Optional[Thread] = None
