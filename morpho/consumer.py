@@ -74,19 +74,8 @@ class WorkConsumer(ABC):
                 applications = eureka_client.get_applications(self.config.registrar_url)
                 for service in applications.applications:
                     instance = service.instances[0]
-                    morpho_metadata = {}
-                    # TODO: fix these metatdata options
-                    for key, value in instance.metadata.items():
-                        if "morpho" in key:
-                            morpho_metadata[key] = value
-                    # print(morpho_metadata)
-                    _, dictionary = unflatten_dict(morpho_metadata)
-                    # print(dictionary)
-                    service_info = ServiceInfo(
-                        name=instance.app,
-                        version=instance.metadata.get("morpho.version"),
-                    )
-                    services.append()
+                    service_info = ServiceInfo(name=instance.app)
+                    services.append(service_info)
             # TODO: add custom eureka not found error
             except URLError:
                 log.error(
