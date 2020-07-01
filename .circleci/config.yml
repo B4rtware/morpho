@@ -2,8 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.8.2-buster
-      - image: circleci/openjdk:11.0.7-jdk-buster
+      - image: b4rtware/morpho-test:morpho-test:python3.8.3-openjdk11-buster
     steps:
       - run:
           name: test
