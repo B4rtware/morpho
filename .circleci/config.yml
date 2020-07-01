@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: b4rtware/morpho-test:morpho-test:python3.8.3-openjdk11-buster
+      - image: b4rtware/morpho-test:python3.8.3-openjdk11-buster
     steps:
       - run:
           name: test
