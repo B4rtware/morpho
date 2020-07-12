@@ -14,6 +14,64 @@
 </a>
 </div>
 
+# 💡 Installation
+
+`pip install morpho`
+
+# ⚙️ Server Example
+
+## - without options
+
+service.py
+```python
+from morpho.server import Service
+
+def work(document: str) -> str:
+    return document
+
+service = Service(name="Echo", version="0.0.1")
+
+if __name__ == "__main__":
+    service.run()
+```
+
+## - with options
+
+service.py
+```python
+from morpho.server import Service
+from pydantic import BaseModel
+
+class Options(BaseModel):
+    name: str
+
+def work(document: str, options: Options) -> str:
+    return document + options.name
+
+service = Service(name="AppendName", version="0.0.1", options_type=Options)
+
+if __name__ == "__main__":
+    service.run()
+```
+
+# 🖥️ Client Example
+```python
+from morpho.client import Client
+from morpho.client import ClientConfig
+
+morpho = Client(ClientConfig("http://localhost:8761/eureka/"))
+
+response = morpho.transform_document(
+    "This is a Document!",
+    service_name="Echo"
+)
+
+print(response.document)
+```
+`>>> This is a Document!`
+
+# 📦 Docker
+
 # proto from: https://github.com/googleapis/googleapis/tree/master/google/api
 
 # Install
@@ -73,5 +131,5 @@
 
 # Usage
 
-# License
+# 📝 License
 MIT
