@@ -8,10 +8,15 @@ from morpho.consumer import RestWorkConsumer
 from morpho.rest import Status
 from morpho.rest.models import TransformDocumentPipeRequest, TransformDocumentRequest
 import flask
+from morpho.log import logging as log
 
 
 class GatewayConsumer(RestWorkConsumer):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
     def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
+        log.info("transform request: " + str(flask.request.json))
         request_model = TransformDocumentRequest(**flask.request.json)
         result = self.client.transform_document(**request_model.dict())
         return cast(RawTransformDocumentResponse, result.dict()), Status.OK
@@ -24,13 +29,7 @@ class GatewayConsumer(RestWorkConsumer):
         return cast(RawTransformDocumentPipeResponse, result.dict()), Status.OK
 
 
-# TODO: implement ability to set worker to None
-gateway = Service(
-    name="crypto-gateway",
-    version="0.0.1",
-    protocols=[GatewayConsumer],
-    worker=lambda x: x,
-)
+gateway = Service(name="crypto-gateway", version="0.0.1", protocols=[GatewayConsumer])
 
 if __name__ == "__main__":
-    gateway.run(50000)
+    gateway.run(50001)
