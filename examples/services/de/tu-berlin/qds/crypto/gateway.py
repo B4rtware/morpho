@@ -26,7 +26,10 @@ class GatewayConsumer(RestWorkConsumer):
 
 # TODO: implement ability to set worker to None
 gateway = Service(
-    name="crypto-gateway", version="0.0.1", protocols=[GatewayConsumer], worker=lambda x: x
+    name="crypto-gateway",
+    version="0.0.1",
+    protocols=[GatewayConsumer],
+    worker=lambda x: x,
 )
 
 if __name__ == "__main__":
