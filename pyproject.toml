@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "morpho"
-version = "1.0.0a4"
+version = "1.0.0a5"
 description = "Framework for document transformations as microservice based web services."
 authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
 license = "MIT"
