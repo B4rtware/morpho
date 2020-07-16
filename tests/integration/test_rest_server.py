@@ -1,18 +1,18 @@
-from base64 import b64encode
-from base64 import b64decode
-
+import subprocess
 from pydantic.main import BaseModel
 from morpho.consumer import RestWorkConsumer
-from morpho.config import BaseConfig
-from morpho.rest.models import TransformDocumentResponse
-from typing import Optional
+from morpho.rest.models import PipeService, TransformDocumentPipeRequest, TransformDocumentResponse
+from morpho.client import Client, ClientConfig
 import sys
 import pytest
 from threading import Thread
+from multiprocessing import Process
+from pathlib import Path
 
 import requests as r
 
 from morpho.server import Service
+import time
 
 # TODO: create fixture for rest server
 # TODO: rename to test_rest.py
@@ -25,6 +25,72 @@ def work(document: str, _: BaseModel) -> str:
     return document
 
 morpho_test_service = Service(name="TEST", version="0.0.1", protocols=[RestWorkConsumer], worker=work)
+
+# services for pipe
+
+def work1(document: str, _: BaseModel):
+    print("work1 called")
+    return document + ",TEST1"
+
+def work2(document: str, _: BaseModel):
+    print("work2 called")
+    return document + ",TEST2"
+
+def work3(document: str, _: BaseModel):
+    print("work3 called")
+    return document + ",TEST3"
+
+def service1(port: int):
+    Service(name="TEST1", version="0.0.1", worker=work1).run(port=port)
+def service2(port: int):
+    Service(name="TEST2", version="0.0.1", worker=work2).run(port=port)
+def service3(port: int):
+    Service(name="TEST3", version="0.0.1", worker=work3).run(port=port)
+# morpho_test_service_1 = Service(name="TEST1", version="0.0.1", worker=work1)
+# morpho_test_service_2 = Service(name="TEST2", version="0.0.1", worker=work2)
+# morpho_test_service_3 = Service(name="TEST3", version="0.0.1", worker=work3)
+
+import requests
+
+@pytest.fixture(scope="module")
+def eureka_server():
+    integration_path = Path(__file__).parent
+    p = subprocess.Popen(["java","-jar","{}/eureka-0.0.1-SNAPSHOT.jar".format(integration_path)])
+    # time.sleep(50)
+    # result = requests.get("http://localhost:8761/actuator/health", verify=False)
+    for i in range(10):
+        try:
+            result = requests.get("http://localhost:8761/actuator/health")
+            break
+        except requests.exceptions.ConnectionError:
+            pass
+        time.sleep(1)
+        
+
+        if i == 9:
+            print("error while starting eureka server...")
+
+    if result.json()["status"] == "UP":
+        sys.argv = [sys.argv[0], "--register"]
+        # services = [morpho_test_service_1.run, morpho_test_service_2.run, morpho_test_service_3.run]
+        services = [service1, service2, service3]
+        processes = [Process(target=run, kwargs={"port": 50001+index}, daemon=True) for index, run in enumerate(services)]
+        for process in processes:
+            process.start()
+        # spawn threads
+        # print("wait some time")
+        time.sleep(20)
+        return p
+    #     for process in processes:
+    #         process.terminate()
+    #         process.join()
+    #         print("process: " + str(process.ident) + " gracefully stopped with: " + str(process.exitcode))
+    # else:
+    #     print("status is not up")
+    # print(p.pid)
+    # time.sleep(30)
+
+    # p.terminate()
 
 @pytest.fixture(scope="module")
 def rest_server():
@@ -93,7 +159,21 @@ def test_rest_list(rest_server):
     ]
 
 
-# def test_rest_transform_pip():
-#     data = RawTransformDocumentPipeRequest(
-#       document = b64encode("Hello I want to be piped.")
-#     )
+def test_rest_transform_pipe(eureka_server):
+    print("start pipe test")
+    config = ClientConfig("http://127.0.0.1:8761/eureka")
+    client = Client(config)
+    response = client.transform_document_pipe(TransformDocumentPipeRequest(
+        document="Hello World",
+        services=[
+            PipeService(name="TEST1"),
+            PipeService(name="TEST2"),
+            PipeService(name="TEST3")
+        ]
+    ))
+    assert response.document == "Hello World,TEST1,TEST2,TEST3"
+    assert response.last_transformer == "TEST3"
+
+    # FIXME: should not be terminated here
+    eureka_server.terminate()
+
