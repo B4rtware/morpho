@@ -4,10 +4,6 @@ jobs:
     docker:
       - image: b4rtware/morpho-test:python3.8.3-openjdk11-buster
     steps:
-      - run:
-          name: test
-          command: java -version
-          
       - checkout
 
       - restore_cache:
