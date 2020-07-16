@@ -27,5 +27,5 @@ class Echo(Server):
     # options = Options()
 
     def work(self, document: str, options: Options) -> str:
-        print(self.config.app_name)
+        # print(self.config.app_name)
         return document

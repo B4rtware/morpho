@@ -26,10 +26,11 @@ class QDS_DATABASE(DTAServer):
 
         try:
             api_response = api_instance.traces_create(trace)
-            print(api_response)
+            # print(api_response)
         except doctrans_py_swagger_client.rest.ApiException as e:
-            # TODO: log this output
-            print(f"Exception when calling TracesApi->traces_create: {e}\n")
+            pass
+            # TODO: log this output custom 
+            # print(f"Exception when calling TracesApi->traces_create: {e}\n")
 
         return ("", None)
 
