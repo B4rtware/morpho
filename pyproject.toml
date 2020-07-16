@@ -1,8 +1,15 @@
 [tool.poetry]
 name = "morpho"
 version = "1.0.0a3"
-description = ""
+description = "Framework for document transformations as microservice based web services."
 authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+homepage = "https://python-poetry.org/"
+repository = "https://github.com/python-poetry/poetry"
+
+keywords = ["microservice", "distributed-systems", "transform", "metamorphosis"]
 
 [tool.black]
 line-length = 88
