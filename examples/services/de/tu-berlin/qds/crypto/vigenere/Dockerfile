@@ -44,4 +44,6 @@ RUN poetry install --no-dev
 # Remove build dependencies
 RUN apk del build-dependencies
 
-CMD poetry run python main.py
+EXPOSE 50000
+
+CMD poetry run python main.py --register --registrar-url "http://morpho-crypto-eureka:8761/eureka"

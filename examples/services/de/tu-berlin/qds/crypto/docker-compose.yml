@@ -4,28 +4,55 @@ services:
   caeser:
     image: b4rtware/morpho-caeser:latest
     build: ./caeser
-    ports:
-      - "50000:50000"
     networks:
+      eureka:
+        aliases:
+          - morpho-crypto-caeser
+
+    depends_on:
       - eureka
+
   permutation:
     image: b4rtware/morpho-permutation:latest
     build: ./permutation
-    ports:
-      - "50001:50000"
     networks:
+      eureka:
+        aliases:
+          - morpho-crypto-caeser
+    depends_on:
       - eureka
+
   vigenere:
     image: b4rtware/morpho-vigenere:latest
     build: ./vigenere
-    ports:
-      - "50002:50000"
     networks:
+      eureka:
+        aliases:
+          - morpho-crypto-caeser
+    depends_on:
       - eureka
+
+  gateway: 
+    image: b4rtware/morpho-gateway:latest
+    build: ./gateway
+    ports: 
+      - "50000:50000"
+    networks:
+      eureka:
+        aliases:
+          - morpho-crypto-caeser
+    depends_on:
+      - eureka
+
   eureka:
     image: b4rtware/morpho-eureka:latest
+    ports:
+      - "8761:8761"
     networks:
-      - eureka
+      eureka:
+        aliases:
+          - morpho-crypto-eureka
 
 networks:
   eureka:
+    name: morpho_crypto_eureka

@@ -14,6 +14,7 @@ from morpho.log import logging as log
 class GatewayConsumer(RestWorkConsumer):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        print("Init called")
 
     def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
         log.info("transform request: " + str(flask.request.json))
@@ -28,8 +29,8 @@ class GatewayConsumer(RestWorkConsumer):
         result = self.client.transform_document_pipe(**request_model.dict())
         return cast(RawTransformDocumentPipeResponse, result.dict()), Status.OK
 
-
-gateway = Service(name="crypto-gateway", version="0.0.1", protocols=[GatewayConsumer])
+# TODO: add morpho tag attribute like tag=gateway or type=gateway
+gateway = Service(name="gateway", version="0.0.1", protocols=[GatewayConsumer])
 
 if __name__ == "__main__":
-    gateway.run(50001)
+    gateway.run(50000)
