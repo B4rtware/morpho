@@ -7,7 +7,7 @@ from morpho.types import Worker
 from morpho.client import Client, ClientConfig
 from morpho.util import unflatten_dict
 from morpho.rest.models import (
-    ListServicesResponse,
+    ListServicesResponse, PipeService,
     ServiceInfo,
     TransformDocumentPipeRequest,
     TransformDocumentPipeResponse,
@@ -105,11 +105,14 @@ class WorkConsumer(ABC):
                     document = self._work(request.document, options)
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
-
         error = captured_stderr.getvalue().splitlines()
         output = captured_stdout.getvalue().splitlines()
         captured_stderr.close()
         captured_stdout.close()
+        log.info("-- after transform document --")
+        log.info("document: {}".format(document))
+        log.info("error: {}".format(error))
+        log.info("output: {}".format(output))
         # TODO: test on none return type (if an error occurs) so the error
         # will be still be transferred to the client
         return TransformDocumentResponse(document=document, output=output, error=error)
@@ -118,13 +121,13 @@ class WorkConsumer(ABC):
         self, request: TransformDocumentPipeRequest
     ) -> TransformDocumentPipeResponse:
         log.info("transform document pipe was called with: <%s>", request.document)
-        service_info = request.services.pop(0)
+        pipe_service = request.services.pop(0)
         transform_response = self.transform_document(
             TransformDocumentRequest(
                 document=request.document,
-                service_name=service_info.name,
+                service_name=pipe_service.name,
                 file_name=request.file_name,
-                options=service_info.options,
+                options=pipe_service.options,
             )
         )
         # return a response if there are only 1 service left
@@ -238,13 +241,13 @@ class RestWorkConsumer(WorkConsumer):
         request_model = TransformDocumentPipeRequest(
             document=request["document"],
             file_name=request["file_name"],
-            services=[ServiceInfo(**info) for info in request["services"]],
+            services=[PipeService(**info) for info in request["services"]],
         )
         response_model = self.transform_document_pipe(request_model)
         status_code = (
             Status.OK if not response_model.error else Status.INTERNAL_SERVER_ERROR
         )
-        return response_model.as_dict(), status_code
+        return response_model.dict(), status_code
 
     def start(self) -> None:
         """Implements the start function to start a rest server instance.
