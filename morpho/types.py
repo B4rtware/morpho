@@ -1,7 +1,7 @@
 from enum import Enum
 
 # from morpho.rest.models import ServiceInfo
-from typing import Callable, Dict, NewType, Optional
+from typing import Callable, Dict, NewType
 from pydantic import BaseModel
 
 # if TYPE_CHECKING:
@@ -9,7 +9,7 @@ from pydantic import BaseModel
 # from morpho.config import BaseConfig
 
 # fmt: off
-Worker = Callable[[str, Optional[BaseModel]], str]
+Worker = Callable[[str, BaseModel], str]
 # fmt: on
 
 # must resides here because otherwise circular import
