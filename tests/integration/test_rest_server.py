@@ -56,7 +56,7 @@ import requests
 def eureka_server():
     integration_path = Path(__file__).parent
     p = subprocess.Popen(["java","-jar","{}/eureka-0.0.1-SNAPSHOT.jar".format(integration_path)])
-    # time.sleep(50)
+    time.sleep(50)
     # result = requests.get("http://localhost:8761/actuator/health", verify=False)
     for i in range(10):
         try:
@@ -79,7 +79,7 @@ def eureka_server():
             process.start()
         # spawn threads
         # print("wait some time")
-        time.sleep(20)
+        time.sleep(50)
         return p
     #     for process in processes:
     #         process.terminate()
