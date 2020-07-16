@@ -7,12 +7,16 @@
 </a>
 <a href=""><img alt="license: MIT" src="https://img.shields.io/badge/license%3A-MIT-green?style=flat-square">
 </a>
-<a href=""><img src="https://img.shields.io/badge/python%3A-%5E3.6-blue?style=flat-square"></a><br>
+<a href=""><img src="https://img.shields.io/badge/python%3A-%5E3.8-blue?style=flat-square"></a><br>
 <a href=""><img src="https://circleci.com/gh/B4rtware/morpho.svg?style=shield&circle-token=5cd58aa7f458d098a3b9a82e861d87d64ec4a181"></a>
 <a href="https://codecov.io/gh/B4rtware/morpho">
   <img src="https://codecov.io/gh/B4rtware/morpho/branch/master/graph/badge.svg?token=14BJUE5PY5" />
 </a>
 </div>
+
+Morpho is a framework for microservice based web services. It offers the ability to transform a given document with a provided function.
+
+In the first place this framework was created to use it for research purposes.
 
 ## 💡 Installation
 
@@ -22,7 +26,7 @@
 
 ### via git
 
-1. make sure to use at least **python 3.6** (currently it is not important but I am planning to use f-strings which are only ^3.6 compatible)
+1. make sure to use at least **python 3.8**
 2. clone the repo `git clone https://github.com/B4rtware/morpho.git`
 3. `cd morpho` and install dependencies via
     - `poetry install` ([Poetry](https://github.com/python-poetry/poetry))
@@ -31,7 +35,7 @@
 
 ## ⚙️ Server Example
 
-### ➡️ without options
+### ... without options
 
 service.py
 ```python
@@ -46,7 +50,7 @@ if __name__ == "__main__":
     service.run()
 ```
 
-### ➡️ with options
+### ... with options
 
 service.py
 ```python
@@ -82,8 +86,6 @@ response = morpho.transform_document(
 print(response.document)
 ```
 `>>> This is a Document!`
-
-# proto from: https://github.com/googleapis/googleapis/tree/master/google/api
 
 ## 📝 License
 MIT
