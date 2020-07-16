@@ -20,7 +20,6 @@ import traceback
 from typing import Optional, TYPE_CHECKING, Tuple, Type
 from urllib.error import URLError
 import py_eureka_client.eureka_client as eureka_client
-from wrapt_timeout_decorator import timeout
 
 from flask import Flask
 import flask
