@@ -106,7 +106,7 @@ class Client:
             message = f"No service named <{request.services[0].name}>."
             raise ServiceNotFoundError(message)
         log.info("sending transform document pipe request.")
-        log.info("content: %s", request.as_json(indent=4))
+        log.info("content: %s", request.json(indent=4))
         response = requests.post(
             f"http://{instance_address}/v1/document/transform-pipe",
             json=request.dict(),
@@ -126,7 +126,8 @@ class Client:
         Note:
             Will always return its own service name.
         """
-        instance_address = self._get_instance_ip_address(service_name)
+        if not service_name:
+            instance_address = self._get_instance_ip_address(service_name)
         if instance_address:
             response = requests.get(f"http://{instance_address}/v1/service/list")
             response_object = response.json()
