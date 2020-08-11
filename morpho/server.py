@@ -24,7 +24,7 @@ cr.init()
 
 log = logging.getLogger(__name__)
 
-
+# TODO: put parser in function parse or something like main or so
 # TODO: verify that all options are used or at least output a warning
 # fmt: off
 # pylint: disable=line-too-long
