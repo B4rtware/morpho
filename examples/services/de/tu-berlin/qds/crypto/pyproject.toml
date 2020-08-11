@@ -6,7 +6,6 @@ authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-morpho = {git = "git@github.com:B4rtware/morpho.git"}
 
 [tool.poetry.dev-dependencies]
 

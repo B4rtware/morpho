@@ -3,6 +3,8 @@ version: "3.7"
 services:
   caeser:
     image: b4rtware/morpho-caeser:latest
+    environment:
+      REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
     build: ./caeser
     networks:
       eureka:
@@ -14,6 +16,8 @@ services:
 
   permutation:
     image: b4rtware/morpho-permutation:latest
+    environment:
+      REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
     build: ./permutation
     networks:
       eureka:
@@ -24,6 +28,8 @@ services:
 
   vigenere:
     image: b4rtware/morpho-vigenere:latest
+    environment:
+      REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
     build: ./vigenere
     networks:
       eureka:
@@ -34,6 +40,8 @@ services:
 
   gateway: 
     image: b4rtware/morpho-gateway:latest
+    environment:
+      REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
     build: ./gateway
     ports: 
       - "50000:50000"
