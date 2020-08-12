@@ -78,9 +78,7 @@ class WorkConsumer(ABC):
             # TODO: add custom eureka not found error
             except URLError:
                 log.error(
-                    "no eureka instance is running at: {}".format(
-                        self.config.registrar_url
-                    )
+                    "no eureka instance is running at: %s", self.config.registrar_url
                 )
         # the service always knows its self
         if not services:
@@ -109,9 +107,9 @@ class WorkConsumer(ABC):
         captured_stderr.close()
         captured_stdout.close()
         log.info("-- after transform document --")
-        log.info("document: {}".format(document))
-        log.info("error: {}".format(error))
-        log.info("output: {}".format(output))
+        log.info("document: %s", document)
+        log.info("error: %s", error)
+        log.info("output: %s", output)
         # TODO: test on none return type (if an error occurs) so the error
         # will be still be transferred to the client
         return TransformDocumentResponse(document=document, output=output, error=error)
@@ -197,11 +195,18 @@ class RestWorkConsumer(WorkConsumer):
         # working_dir = Path.cwd()
         # config_path = working_dir / Path("./service/rest/swagger/openapi.yaml")
         # api_doc(self.app, config_path=config_path, url_prefix="/info")
-        self.app.add_url_rule("/v1/document/transform", "transform", self._transform_document, methods=["POST"])
+        self.app.add_url_rule("/v1/service/options", "options", self._options, methods=["GET"])
         self.app.add_url_rule("/v1/service/list", "list", self._list_services, methods=["GET"])
+        self.app.add_url_rule("/v1/document/transform", "transform", self._transform_document, methods=["POST"])
         self.app.add_url_rule("/v1/document/transform-pipe", "pipe", self._transform_document_pipe, methods=["POST"])
         # pylint: enable: line-too-long
         # fmt: on
+
+    # TODO: should this be inside the ConsumerBase?
+    def _options(self) -> Tuple[Dict, Status]:
+        if self.options_type is None:
+            return {}, Status.OK
+        return self.options_type.schema(), Status.OK
 
     # TODO: rename to list services / transform document and transform document pipe
     def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:

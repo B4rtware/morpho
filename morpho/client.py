@@ -37,7 +37,7 @@ class Client:
 
     def _get_instance_ip_address(self, service_name: str) -> Optional[str]:
         service: Optional[Application] = None
-        log.info("contacting eureka at <{}>".format(self.config.registrar_url))
+        log.info("contacting eureka at <%s>", self.config.registrar_url)
         try:
             service = eureka_client.get_application(
                 self.config.registrar_url, service_name
@@ -51,10 +51,8 @@ class Client:
         if service:
             instance = service.instances[0]
             log.info(
-                "found instance: <{}> at <{}:{}>".format(
-                    instance.app, instance.ipAddr, instance.port.port
+                    "found instance: <%s> at <%s:%s>", instance.app, instance.ipAddr, instance.port.port
                 )
-            )
             return f"{instance.ipAddr}:{instance.port.port}"
         return None
 
