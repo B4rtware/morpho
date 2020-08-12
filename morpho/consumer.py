@@ -17,7 +17,7 @@ from morpho.rest.models import (
 from morpho.rest.raw import RawTransformDocumentResponse, RawListServicesResponse
 from threading import Thread
 import traceback
-from typing import Optional, TYPE_CHECKING, Tuple, Type
+from typing import Dict, Optional, TYPE_CHECKING, Tuple, Type
 from urllib.error import URLError
 import py_eureka_client.eureka_client as eureka_client
 
