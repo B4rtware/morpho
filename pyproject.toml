@@ -22,7 +22,6 @@ exclude = """
 [tool.poetry.dependencies]
 python = "^3.8"
 py-eureka-client = "^0.7.4"
-dataclasses-json = "^0.3.7"
 googleapis-common-protos = "^1.6.0"
 waitress = "^1.4.2"
 requests = "^2.22.0"
