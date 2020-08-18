@@ -1,7 +1,7 @@
 from enum import Enum
 
 # from morpho.rest.models import ServiceInfo
-from typing import Callable, Dict, NewType
+from typing import Any, Callable, Dict, NewType
 from pydantic import BaseModel
 
 # if TYPE_CHECKING:
@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 # fmt: off
 Worker = Callable[[str, BaseModel], str]
+Schema = Dict[str, Any]
 # fmt: on
 
 # must resides here because otherwise circular import
