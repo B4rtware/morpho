@@ -3,7 +3,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import io
 
 from pydantic.main import BaseModel
-from morpho.types import Worker
+from morpho.types import Schema, Worker
 from morpho.client import Client, ClientConfig
 from morpho.util import unflatten_dict
 from morpho.rest.models import (
@@ -17,7 +17,7 @@ from morpho.rest.models import (
 from morpho.rest.raw import RawTransformDocumentResponse, RawListServicesResponse
 from threading import Thread
 import traceback
-from typing import Dict, Optional, TYPE_CHECKING, Tuple, Type
+from typing import Optional, TYPE_CHECKING, Tuple, Type
 from urllib.error import URLError
 import py_eureka_client.eureka_client as eureka_client
 
@@ -84,6 +84,16 @@ class WorkConsumer(ABC):
         if not services:
             services.append(ServiceInfo(name=self.config.name,))
         return ListServicesResponse(services=services)
+
+    def options(self) -> Schema:
+        """Lists available options of the service.
+
+        Returns:
+            Schema: A Schema representing the different available options. Returns an empty dictionary `{}` if no option is present.
+        """
+        if self.options_type is None:
+            return {}
+        return self.options_type.schema()
 
     def transform_document(
         self, request: TransformDocumentRequest,
@@ -202,11 +212,14 @@ class RestWorkConsumer(WorkConsumer):
         # pylint: enable: line-too-long
         # fmt: on
 
-    # TODO: should this be inside the ConsumerBase?
-    def _options(self) -> Tuple[Dict, Status]:
-        if self.options_type is None:
-            return {}, Status.OK
-        return self.options_type.schema(), Status.OK
+    def _options(self) -> Tuple[Schema, Status]:
+        """Callback function which gets invoked by flask if a 'options' request is received.
+
+        Returns:
+            Tuple[Schema, Status]: Returns a flask response. Returns an empty dict if the options_type is empty.
+        """
+        options = self.options()
+        return options, Status.OK
 
     # TODO: rename to list services / transform document and transform document pipe
     def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
