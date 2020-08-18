@@ -7,14 +7,19 @@ from morpho.types import Schema, Worker
 from morpho.client import Client, ClientConfig
 from morpho.util import unflatten_dict
 from morpho.rest.models import (
-    ListServicesResponse, PipeService,
+    ListServicesResponse,
+    PipeService,
     ServiceInfo,
     TransformDocumentPipeRequest,
     TransformDocumentPipeResponse,
     TransformDocumentRequest,
     TransformDocumentResponse,
 )
-from morpho.rest.raw import RawTransformDocumentResponse, RawListServicesResponse
+from morpho.rest.raw import (
+    RawTransformDocumentPipeResponse,
+    RawTransformDocumentResponse,
+    RawListServicesResponse,
+)
 from threading import Thread
 import traceback
 from typing import Optional, TYPE_CHECKING, Tuple, Type
@@ -223,10 +228,10 @@ class RestWorkConsumer(WorkConsumer):
 
     # TODO: rename to list services / transform document and transform document pipe
     def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
-        """Callback function which gets invoked by flask if a transform request is received.
+        """Callback function which gets invoked by flask if a 'transform' request is received.
 
         Returns:
-            Tuple[RawTransformDocumentResponse, Status, Headers: [description]
+            Tuple[RawTransformDocumentResponse, Status]: Returns a flask response.
 
         Note:
             It captures the standard output and standard error of the :func:`_work` function
@@ -246,6 +251,11 @@ class RestWorkConsumer(WorkConsumer):
     # TODO: add options to the list reponse for each application maybe on /options or so
     # TODO: or override and call super() ?
     def _list_services(self) -> Tuple[RawListServicesResponse, Status]:
+        """Callback function which gets invoked by flask if a 'list' request is received.
+
+        Returns:
+            Tuple[RawListServicesResponse, Status]: Returns a flask response.
+        """
         response_model = self.list_services()
         return response_model.dict(), Status.OK
 
@@ -253,7 +263,14 @@ class RestWorkConsumer(WorkConsumer):
     # TODO: consider to rename this function to _transform_document_pipe to call a super function
     # TODO: which get called with the TransformDocumentPipeRequest model
     # TODO: is it possible to use **request even ServiceInfo is required on services?
-    def _transform_document_pipe(self):
+    def _transform_document_pipe(
+        self,
+    ) -> Tuple[RawTransformDocumentPipeResponse, Status]:
+        """Callback function which gets invoked by flask if a 'transform pipe' request is received.
+
+        Returns:
+            Tuple[RawTransformDocumentPipeResponse, Status]: Returns a flask response.
+        """
         request = flask.request.json
         request_model = TransformDocumentPipeRequest(
             document=request["document"],
