@@ -37,7 +37,7 @@ jobs:
       - run:
           name: Run Coverage
           command: |
-            poetry run python -m pytest --cov=. tests/unit
+            poetry run python -m pytest --cov=morpho tests/unit
 
       - run:
           name: Send to Codecov
