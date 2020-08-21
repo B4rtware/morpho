@@ -1,26 +1,73 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: Doctrans API v1
-  description: The Document Transformation Application (DTA) is a microservice based
-    web service application provided by the research group QDS of the TU Berlin.
-  version: 0.1.0
-servers:
-- url: https://virtserver.swaggerhub.com/restlife/doctrans/0.1.0
-  description: SwaggerHub API Auto Mocking
+  title: DTA API v1
+  description: The Document Transformation Application (DTA) API.
+  version: 1.0.0
+tags:
+  - name: service
+    description: Retrieves information about service(s).
+  - name: document
+    description: Operations on document.
 paths:
-  /service/list:
+  /v1/service/options:
     get:
-      summary: Lists all available services.
+      tags:
+        - service
+      summary: Retrieves available options of the service.
+      description: >-
+        The response **has to** be a valid [JSON
+        Schema](http://json-schema.org/draft-07/schema#).
       responses:
-        "200":
+        '200':
+          description: OK
+          type: object
+        '504':
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 504
+                message: Gateway Timeout
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/service/list:
+    get:
+      tags:
+        - service
+      summary: Lists available services.
+      responses:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListServiceResponse'
-  /document/transform:
+                $ref: '#/components/schemas/ListServicesResponse'
+        '504':
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 504
+                message: Gateway Timeout
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/document/transform:
     post:
-      summary: Transform a plain document.
+      tags:
+        - document
+      summary: Transforms a plain document.
       requestBody:
         content:
           application/json:
@@ -28,99 +75,235 @@ paths:
               $ref: '#/components/schemas/TransformDocumentRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransformDocumentResponse'
-  /document/transform/pipe:
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptionsErrorResponse'
+        '504':
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 504
+                message: Gateway Timeout
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/document/transform-pipe:
     post:
+      tags:
+        - document
       summary: Executes a given sequence of transforms on a plain document.
+      description: >-
+        The services inside the list (`[0, 1, ..., n]`) **has to** be handled in
+        ascending order from the first (`0`) to the last (`n`) element.
       requestBody:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/TransformDocumentRequest'
+              $ref: '#/components/schemas/TransformDocumentPipeRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransformDocumentPipeResponse'
+        '400':
+          description: Validation Error (from called service)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptionsErrorResponse'
+        '504':
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 504
+                message: Gateway Timeout
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ListServiceResponse:
+    ServiceInfo:
+      properties:
+        name:
+          type: string
+    ListServicesResponse:
+      required:
+        - services
       properties:
         services:
           type: array
+          description: Available services.
           example:
-          - qds.dta.dts.encryption.caeser
-          - qds.dta.dts.encryption.permutation
-          - qds.dta.dts.converters.tokenizer
+            - name: DE.TU-BERLIN.QDS.COUNT
+            - name: DE.TU-BERLIN.QDS.ECHO
+            - name: DE.TU-BERLIN.QDS.HTML2TEXT
+            - name: DE.TU-BERLIN.QDS.TEXT2HTML
+            - name: DE.TU-BERLIN.QDS.COUNT_GENERIC
           items:
-            type: string
+            $ref: '#/components/schemas/ServiceInfo'
     TransformDocumentResponse:
+      required:
+        - document
+        - error
+        - output
       properties:
         document:
           type: string
-          description: Transformed document in base64 encoding.
+          description: Transformed Base64 encoded document.
           format: byte
+          example: SGFsbG8gZGFzIGlzdCBlaW4gVGVzdCBEb2N1bWVudCE=
         output:
           type: array
           description: Standard output from the specified service.
           example:
-          - transforming document <simpletext.txt> ...
-          - '[OK] succesfully transformed document.'
+            - transforming document <simpletext.txt> ...
           items:
             type: string
         error:
           type: array
           description: Standard error from the specified service.
           example:
-          - 'wrong offset specfied: 20'
+            - Unknown Exception
           items:
             type: string
     TransformDocumentRequest:
       required:
-      - document
+        - document
+        - service_name
       properties:
         document:
           type: string
-          description: A base64 encoded document.
+          description: Base64 encoded document.
           format: byte
-        file_name:
-          type: string
-          description: The filename of the content from the document.
-          example: simpletext.txt
+          example: SGFsbG8gZGFzIGlzdCBlaW4gVGVzdCBEb2N1bWVudCE=
         service_name:
           type: string
-          description: The name of the service on which the transform is beeing requested.
-          example: qds.dta.dts.encryption.caeser
+          description: The name of the service which performs the transformation.
+          example: DE.TU-BERLIN.QDS.COUNT
+        file_name:
+          type: string
+          description: The filename of the document.
+          example: simpletext.txt
         options:
           type: object
-          additionalProperties:
-            type: string
+          description: Service options.
           example:
             offset: 5
             debug: true
-    TransformDocumentPipeResponse:
+    PipeService:
       required:
-      - result
-      - services
+        - name
       properties:
+        name:
+          type: string
+          example: DE.TU-BERLIN.QDS.COUNT
+        options:
+          type: object
+    TransformDocumentPipeRequest:
+      required:
+        - document
+        - services
+      properties:
+        document:
+          type: string
+          description: Base64 encoded document.
+          format: byte
+          example: SGFsbG8gZGFzIGlzdCBlaW4gVGVzdCBEb2N1bWVudCE=
         services:
           type: array
-          description: Services on which the transformation successfully passed through.
-          example:
-          - qds.dta.dts.encryption.caeser
-          - qds.dta.dts.encryption.permutation
-          - qds.dta.dts.share.email
+          description: >-
+            Sequence of services that are used to transform the document. (Each
+            service can have options)
+          items:
+            $ref: '#/components/schemas/PipeService'
+        file_name:
+          type: string
+          example: simpletext.txt
+          description: The filename of the document.
+    TransformDocumentPipeResponse:
+      required:
+        - document
+        - error
+        - output
+      properties:
+        document:
+          type: string
+          description: Transformed Base64 encoded document.
+          format: byte
+          example: SGFsbG8gZGFzIGlzdCBlaW4gVGVzdCBEb2N1bWVudCE=
+        output:
+          type: array
+          description: Standard output from the specified service.
           items:
             type: string
-        result:
-          $ref: '#/components/schemas/TransformDocumentResponse'
+          example:
+            - transforming document <simpletext.txt> ...
+        error:
+          type: array
+          description: Standard error from the specified service.
+          items:
+            type: string
+          example:
+            - Unknown Exception
+        last_transformer:
+          type: string
+          example: DE.TU-BERLIN.QDS.COUNT
+          description: Name of the last service which transformed the document.
+    OptionsPropertyError:
+      type: object
+      properties:
+        name:
+          type: string
+        message:
+          type: string
+    OptionsErrorResponse:
+      type: object
+      properties:
+        code:
+          type: number
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionsPropertyError'
+      example:
+        code: 400
+        properties:
+          - name: offset
+            message: Must be between 0 and 27
+    ErrorResponse:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+      example:
+        code: 500
+        message: Internal Server Error
