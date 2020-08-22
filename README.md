@@ -1,4 +1,4 @@
-<img src="docs/images/morpho.png" width="100%" alt="Morpho Logo">
+<img src="https://raw.githubusercontent.com/B4rtware/morpho/master/docs/images/morpho.png" width="100%" alt="Morpho Logo">
 
 > Python port for the go written [doctrans](https://github.com/theovassiliou/doctrans)
 
