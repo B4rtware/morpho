@@ -3,14 +3,17 @@
 > Python port for the go written [doctrans](https://github.com/theovassiliou/doctrans)
 
 <div align="center">
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
 </a>
-<a href=""><img alt="license: MIT" src="https://img.shields.io/badge/license%3A-MIT-green?style=flat-square">
+<a href=""><img alt="license: MIT" src="https://img.shields.io/badge/license%3A-MIT-green">
 </a>
-<a href=""><img src="https://img.shields.io/badge/python%3A-%5E3.8-blue?style=flat-square"></a><br>
-<a href=""><img src="https://circleci.com/gh/B4rtware/morpho.svg?style=shield&circle-token=5cd58aa7f458d098a3b9a82e861d87d64ec4a181"></a>
+<a href=""><img src="https://img.shields.io/badge/python%3A-%5E3.8-blue"></a><br>
+<a href=""><img src="https://circleci.com/gh/B4rtware/morpho.svg?style=shield"></a>
 <a href="https://codecov.io/gh/B4rtware/morpho">
-  <img src="https://codecov.io/gh/B4rtware/morpho/branch/master/graph/badge.svg?token=14BJUE5PY5" />
+  <img src="https://codecov.io/gh/B4rtware/morpho/branch/master/graph/badge.svg" />
+</a>
+<a href="">
+  <img src="https://img.shields.io/pypi/v/morpho?color=dar-green" />
 </a>
 </div>
 
