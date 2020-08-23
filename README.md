@@ -19,7 +19,7 @@
 
 Morpho is a framework for microservice based web services. It offers the ability to transform a given document with a provided function.
 
-In the first place this framework was created to use it for research purposes.
+In the first place this framework was created to be used for research purposes.
 
 ## 💡 Installation
 
@@ -98,7 +98,7 @@ print(response.document)
 <br>*Morpho* uses the following schema: `^\d+\.\d+\.\d+(-(b|a)\.\d+)?$`
 
 2. Bump the version within the file: `morpho/__version__.py`
-<br>Make sure its the same which was used bumping with poetry
+<br>Make sure it's the same version used when bumping with poetry
 
 3. Open `Changelog.md` and write the new changelog:
     - Use the following `#` header: `v<version> - (dd.mm.yyyy)`
@@ -119,7 +119,7 @@ print(response.document)
 
 7. Attach the produced tarball and wheel (`dist/`) to the release
 
-8. Check *This is a pre-release* if its either an alpha or beta release *(a|b)* - ***optional*** 
+8. Check *This is a pre-release* if it's either an alpha or beta release *(a|b)* - ***optional*** 
 
 9. **Publish release**
 
