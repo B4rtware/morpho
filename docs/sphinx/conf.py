@@ -47,7 +47,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx.ext.napoleon",
-    "sphinx_rtd_theme",
     "sphinxcontrib.spelling",
     "sphinxcontrib.openapi",
 ]
@@ -73,8 +72,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "proto"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'alabaster'
-# html_theme = "sphinx_rtd_theme"
 html_theme = "sphinx_material"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -108,7 +105,7 @@ html_theme_options = {
 
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
-    'base_url': 'https://bashtage.github.io/sphinx-material/',
+    # 'base_url': 'https://bashtage.github.io/sphinx-material/',
     "html_prettify": True,
 
     # Include the master document at the top of the page in the breadcrumb bar.
