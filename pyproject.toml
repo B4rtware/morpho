@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "morpho"
 version = "1.0.0a5"
-description = "Framework for document transformations as microservice based web services."
+description = "A framework for microservice based document transformation."
 authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
 license = "MIT"
 readme = "README.md"
@@ -22,7 +22,6 @@ exclude = """
 [tool.poetry.dependencies]
 python = "^3.8"
 py-eureka-client = "^0.7.4"
-googleapis-common-protos = "^1.6.0"
 waitress = "^1.4.2"
 requests = "^2.22.0"
 colorama = "^0.4.3"
@@ -36,15 +35,13 @@ black = "^19.10b0"
 pylint = "^2.4.4"
 pyenchant = "^3.0.1"
 Sphinx = "^3.0.1"
-sphinx-rtd-theme = "^0.4.3"
 invoke = "^1.4.1"
-protobuf = "^3.11.3"
-googleapis-common-protos = "^1.51.0"
 pytest-cov = "^2.8.1"
 codecov = "^2.0.22"
 sphinxcontrib-spelling = "^5.0.0"
 pytest = "^5.4.2"
-pre-commit = "^2.5.1"
+sphinxcontrib-openapi = "^0.7.0"
+sphinx-material = "^0.0.30"
 
 [build-system]
 requires = ["poetry>=0.12"]
