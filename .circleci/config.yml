@@ -1,13 +1,13 @@
 version: 2
 jobs:
-  build:
+  test:
     docker:
       - image: b4rtware/morpho-test:python3.8.3-openjdk11-buster
     steps:
       - checkout
 
       - restore_cache:
-          keys: 
+          keys:
             - morpho-{{ checksum "poetry.lock" }}
 
       - run:
@@ -20,7 +20,12 @@ jobs:
 
       - save_cache:
           key: morpho-{{ checksum "poetry.lock" }}
-          paths: 
+          paths:
+            - /home/circleci/.cache/pypoetry/virtualenvs
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
             - /home/circleci/.cache/pypoetry/virtualenvs
 
       - run:
@@ -42,8 +47,7 @@ jobs:
       - run:
           name: Send to Codecov
           command: poetry run python -m codecov
-          when:
-            on_success
+          when: on_success
 
       - store_test_results:
           path: test-results
@@ -54,3 +58,68 @@ jobs:
       - run:
           name: Send to Telegram
           command: poetry run python -m notifier.py
+
+  deploy:
+    docker:
+      - image: python:3.8.5-buster
+    steps:
+        - run:
+            name: Publish to PyPi
+            command: poetry publish
+
+  build-docs:
+    docker:
+      - image: python:3.8.5-buster
+    steps:
+      - attach_workspace:
+          at: /
+
+      - run:
+          name: Install Poetry
+          command: pip install poetry
+
+      - run:
+          name: Build Documentation
+          command: poetry run sphinx-build -M html ./docs/sphinx ./docs/dist -v
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - "./docs/dist"
+
+  deploy-docs:
+    machine:
+      enabled: true
+    steps:
+      - attach_workspace:
+          at: /
+
+      - add_ssh_keys:
+          fingerprints:
+            - "aa:ed:87:a9:e2:8a:ca:4a:6b:67:70:ed:6d:85:33:23"
+      - run:
+          name: Deploy over ssh via rsync
+          command: |
+             rsync -avz -e "ssh" /docs/dist/ $SSH_USER@$SSH_HOST:/var/www/python-morpho.org
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
+      - deploy:
+          requires:
+            - test
+
+  tagged-deploy:
+    jobs:
+      - build-docs:
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+(-(b|a)\.\d+)?$/
+              
+      - deploy-docs:
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+(-(b|a)\.\d+)?$/
+
