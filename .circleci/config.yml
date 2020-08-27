@@ -108,18 +108,29 @@ workflows:
     jobs:
       - test
       - deploy:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
+            branches:
+              ignore: /.*/
           requires:
             - test
 
-  tagged-deploy:
+  deploy:
     jobs:
       - build-docs:
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+((b|a)\d+)?$/
+              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
+            branches:
+              ignore: /.*/
 
       - deploy-docs:
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+((b|a)\d+)?$/
+              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
+            branches:
+              ignore: /.*/
+          requires:
+            - build-docs
 
