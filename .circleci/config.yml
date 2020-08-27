@@ -103,13 +103,14 @@ jobs:
       - run:
           name: Deploy over ssh via rsync
           command: |
-             rsync -avz -e "ssh" /home/circleci/morpho/docs/dist/ $SSH_USER@$SSH_HOST:/home/circleci/www/python-morpho.org
+             rsync -avz -e "ssh" /home/circleci/morpho/docs/dist/ $SSH_USER@$SSH_HOST:$SSH_PATH
 
 workflows:
   version: 2
-  test:
+  test-build-deploy:
     jobs:
       - tests
+
       - deploy:
           filters:
             tags:
@@ -119,8 +120,6 @@ workflows:
           requires:
             - tests
 
-  deploy:
-    jobs:
       - build-docs:
           # filters:
           #   tags:
