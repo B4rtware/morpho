@@ -95,7 +95,7 @@ print(response.document)
 ### Creating a new release
 
 1. Run the following command `poetry bump <version>`
-<br>*Morpho* uses the following schema: `^\d+\.\d+\.\d+(-(b|a)\.\d+)?$`
+<br>*Morpho* uses the following schema: `^v\d+\.\d+\.\d+((b|a)\d+)?$`
 
 2. Bump the version within the file: `morpho/__version__.py`
 <br>Make sure it's the same version used when bumping with poetry

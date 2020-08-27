@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  test:
+  tests:
     docker:
       - image: b4rtware/morpho-test:python3.8.3-openjdk11-buster
     steps:
@@ -24,9 +24,9 @@ jobs:
             - /home/circleci/.cache/pypoetry/virtualenvs
 
       - persist_to_workspace:
-          root: /tmp
+          root: /home/circleci/.cache/pypoetry
           paths:
-            - /home/circleci/.cache/pypoetry/virtualenvs
+            - virtualenvs
 
       - run:
           name: Run Unit Tests
@@ -72,7 +72,7 @@ jobs:
       - image: python:3.8.5-buster
     steps:
       - attach_workspace:
-          at: /
+          at: /home/circleci/.cache/pypoetry
 
       - run:
           name: Install Poetry
@@ -100,7 +100,7 @@ jobs:
       - run:
           name: Deploy over ssh via rsync
           command: |
-             rsync -avz -e "ssh" /docs/dist/ $SSH_USER@$SSH_HOST:/var/www/python-morpho.org
+             rsync -avz -e "ssh" /docs/dist/ $SSH_USER@$SSH_HOST:/home/circleci/www/python-morpho.org
 
 workflows:
   version: 2
@@ -116,10 +116,10 @@ workflows:
       - build-docs:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(-(b|a)\.\d+)?$/
-              
+              only: /^v\d+\.\d+\.\d+((b|a)\d+)?$/
+
       - deploy-docs:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(-(b|a)\.\d+)?$/
+              only: /^v\d+\.\d+\.\d+((b|a)\d+)?$/
 
