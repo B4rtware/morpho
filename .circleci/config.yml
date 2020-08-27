@@ -1,3 +1,4 @@
+# TODO: consider to cache .git folder of the git repository if its increases speed.
 version: 2
 jobs:
   tests:
@@ -71,8 +72,10 @@ jobs:
     docker:
       - image: python:3.8.5-buster
     steps:
+      - checkout
+
       - attach_workspace:
-          at: /home/circleci/.cache/pypoetry
+          at: /
 
       - run:
           name: Install Poetry
@@ -83,9 +86,9 @@ jobs:
           command: poetry run sphinx-build -M html ./docs/sphinx ./docs/dist -v
 
       - persist_to_workspace:
-          root: /tmp
+          root: /home/circleci/morpho
           paths:
-            - "./docs/dist"
+            - "docs/dist"
 
   deploy-docs:
     machine:
@@ -100,7 +103,7 @@ jobs:
       - run:
           name: Deploy over ssh via rsync
           command: |
-             rsync -avz -e "ssh" /docs/dist/ $SSH_USER@$SSH_HOST:/home/circleci/www/python-morpho.org
+             rsync -avz -e "ssh" /home/circleci/morpho/docs/dist/ $SSH_USER@$SSH_HOST:/home/circleci/www/python-morpho.org
 
 workflows:
   version: 2
@@ -119,18 +122,20 @@ workflows:
   deploy:
     jobs:
       - build-docs:
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
+          #   branches:
+          #     ignore: /.*/
+          requires:
+            - tests
 
       - deploy-docs:
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
+          #   branches:
+          #     ignore: /.*/
           requires:
             - build-docs
 
