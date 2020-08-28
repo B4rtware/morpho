@@ -75,6 +75,10 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Install enchant
+          command: "apt-get install libenchant-dev"
+
       # - attach_workspace:
       #     at: /
 
