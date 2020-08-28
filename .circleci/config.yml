@@ -107,10 +107,6 @@ jobs:
           name: Build Documentation
           command: poetry run sphinx-build -M html ./docs/sphinx ./docs/dist -v
 
-      - run:
-          name: Debug
-          command: ls -la
-
       - persist_to_workspace:
           root: /home/circleci/project
           paths:
@@ -123,17 +119,13 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project/docs/dist/html
 
-      - run:
-          name: Debug
-          command: ls -la
-
       - add_ssh_keys:
           fingerprints:
             - "aa:ed:87:a9:e2:8a:ca:4a:6b:67:70:ed:6d:85:33:23"
       - run:
           name: Deploy over ssh via rsync
           command: |
-             rsync -avz -e "ssh" ./home/circleci/project/docs/dist/html/ $SSH_USER@$SSH_HOST:$SSH_PATH
+             rsync -avz -e "ssh" ./docs/dist/html/ $SSH_USER@$SSH_HOST:$SSH_PATH
 
 workflows:
   version: 2
