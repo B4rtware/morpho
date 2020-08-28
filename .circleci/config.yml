@@ -75,12 +75,29 @@ jobs:
     steps:
       - checkout
 
-      - attach_workspace:
-          at: /
+      # - attach_workspace:
+      #     at: /
+
+      # - run:
+      #     name: Install Poetry
+      #     command: pip install poetry
+
+      - restore_cache:
+          keys:
+            - morpho-{{ checksum "poetry.lock" }}
 
       - run:
           name: Install Poetry
           command: pip install poetry
+
+      - run:
+          name: Install Dependencies
+          command: poetry install
+
+      - save_cache:
+          key: morpho-{{ checksum "poetry.lock" }}
+          paths:
+            - /home/circleci/.cache/pypoetry/virtualenvs
 
       - run:
           name: Build Documentation
@@ -96,7 +113,7 @@ jobs:
       enabled: true
     steps:
       - attach_workspace:
-          at: /
+          at: .
 
       - add_ssh_keys:
           fingerprints:
@@ -104,7 +121,7 @@ jobs:
       - run:
           name: Deploy over ssh via rsync
           command: |
-             rsync -avz -e "ssh" /home/circleci/morpho/docs/dist/ $SSH_USER@$SSH_HOST:$SSH_PATH
+             rsync -avz -e "ssh" ./home/circleci/morpho/docs/dist/ $SSH_USER@$SSH_HOST:$SSH_PATH
 
 workflows:
   version: 2
