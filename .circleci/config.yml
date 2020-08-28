@@ -127,6 +127,10 @@ jobs:
           command: |
              rsync -avz docs/dist/html/ $SSH_USER@$SSH_HOST:$SSH_PATH
 
+      - run:
+          name: Copy files into docker
+          command: ssh $SSH_USER@$SSH_HOST $SSH_COMMAND
+
 workflows:
   version: 2
   test-build-deploy:
