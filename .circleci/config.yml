@@ -56,9 +56,9 @@ jobs:
       - store_artifacts:
           path: test-results
 
-      - run:
-          name: Send to Telegram
-          command: poetry run python -m notifier.py
+      # - run:
+      #     name: Send to Telegram
+      #     command: poetry run python -m notifier.py
 
   deploy:
     docker:
