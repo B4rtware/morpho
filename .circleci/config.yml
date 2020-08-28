@@ -129,7 +129,7 @@ jobs:
 
       - run:
           name: Copy files into docker
-          command: ssh -t $SSH_USER@$SSH_HOST "$SSH_COMMAND"
+          command: ssh $SSH_USER@$SSH_HOST "$SSH_COMMAND"
 
 workflows:
   version: 2
