@@ -35,10 +35,10 @@ jobs:
             mkdir test_results
             poetry run python -m pytest --junitxml=test-results/junit.xml tests/unit
 
-      - run:
-          name: Run Integration Tests
-          command: |
-            poetry run python -m pytest --junitxml=test-results/junit-integration.xml -s tests/integration
+      # - run:
+      #     name: Run Integration Tests
+      #     command: |
+      #       poetry run python -m pytest --junitxml=test-results/junit-integration.xml -s tests/integration
 
       - run:
           name: Run Coverage
@@ -71,6 +71,7 @@ jobs:
   build-docs:
     docker:
       - image: python:3.8.5-buster
+        user: circleci
     steps:
       - checkout
 
