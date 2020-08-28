@@ -108,7 +108,7 @@ jobs:
           command: poetry run sphinx-build -M html ./docs/sphinx ./docs/dist -v
 
       - persist_to_workspace:
-          root: /home/circleci/morpho
+          root: /home/circleci/project/morpho
           paths:
             - "docs/dist"
 
@@ -125,7 +125,7 @@ jobs:
       - run:
           name: Deploy over ssh via rsync
           command: |
-             rsync -avz -e "ssh" ./home/circleci/morpho/docs/dist/ $SSH_USER@$SSH_HOST:$SSH_PATH
+             rsync -avz -e "ssh" ./home/circleci/project/morpho/docs/dist/ $SSH_USER@$SSH_HOST:$SSH_PATH
 
 workflows:
   version: 2
