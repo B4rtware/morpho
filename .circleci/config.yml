@@ -62,16 +62,16 @@ jobs:
 
   deploy:
     docker:
-      - image: python:3.8.5-buster
+      - image: circleci/python:3.8.5-buster
     steps:
+        - checkout
         - run:
             name: Publish to PyPi
             command: poetry publish
 
   build-docs:
     docker:
-      - image: python:3.8.5-buster
-        user: circleci
+      - image: circleci/python:3.8.5-buster
     steps:
       - checkout
 
