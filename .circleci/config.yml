@@ -117,7 +117,7 @@ jobs:
       enabled: true
     steps:
       - attach_workspace:
-          at: .
+          at: /home/circleci/project/morpho/docs/dist
 
       - add_ssh_keys:
           fingerprints:
