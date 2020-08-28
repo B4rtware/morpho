@@ -125,7 +125,7 @@ jobs:
       - run:
           name: Deploy over ssh via rsync
           command: |
-             rsync -avz -e "ssh" ./docs/dist/html/ $SSH_USER@$SSH_HOST:$SSH_PATH
+             rsync -avz docs/dist/html/ $SSH_USER@$SSH_HOST:$SSH_PATH
 
 workflows:
   version: 2
