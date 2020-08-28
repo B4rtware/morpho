@@ -117,7 +117,7 @@ jobs:
       enabled: true
     steps:
       - attach_workspace:
-          at: /home/circleci/project/docs/dist/html
+          at: /home/circleci/project
 
       - add_ssh_keys:
           fingerprints:
