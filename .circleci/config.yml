@@ -121,7 +121,11 @@ jobs:
       enabled: true
     steps:
       - attach_workspace:
-          at: /home/circleci/project/docs/dist
+          at: /home/circleci/project/docs/dist/html
+
+      - run:
+          name: Debug
+          command: ls -la
 
       - add_ssh_keys:
           fingerprints:
