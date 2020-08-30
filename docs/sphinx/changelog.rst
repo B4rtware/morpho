@@ -2,7 +2,7 @@ v1.0.0a5 - (16.07.2020)
 =======================
 
 🔨 Fixed
--------
+--------
 
 -  fixed(\ **types**): make callable's worker BaseModel not optional
    (593377e57c2f3d447fa826c53c32d41b15fed3bb)
@@ -11,13 +11,13 @@ v1.0.0a4 - (16.07.2020)
 =======================
 
 💌 Added
--------
+--------
 
 -  added(\ **examples**): gateway example to crypto
    (67da16e8d199df69bb95dda6c9b0d0de513b0a28)
 
 🔨 Fixed
--------
+--------
 
 -  fixed(\ **consumer**): wrong dict convert function was used in
    transform pipe (5c96cab81c9c16c0584006e45bcf54ef80a7d595)
@@ -28,7 +28,7 @@ v1.0.0a3 - (10.06.2020)
 =======================
 
 🔨 Fixed
--------
+--------
 
 -  fixed: worker signature allowing optional BaseModel
    (de07dde9c9670732b64db656dfe0956b98087209)
@@ -42,7 +42,7 @@ v1.0.0a2 - (07.06.2020)
 =======================
 
 💌 Added
--------
+--------
 
 -  added: changelog
 
@@ -55,7 +55,7 @@ v1.0.0a2 - (07.06.2020)
    grpcio
 
 🔨 Fixed
--------
+--------
 
 -  fixed(\ **client**): pydantic conversion functions not being used
 -  fixed(\ **models**): wrong type for options property
