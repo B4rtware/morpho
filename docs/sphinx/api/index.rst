@@ -18,7 +18,6 @@ Morpho API
    error
    types
    util
-   proto
    consumer
 
 

@@ -8,7 +8,6 @@ service
    config
    error
    log
-   proto
    rest
    server
    types
