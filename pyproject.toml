@@ -42,6 +42,7 @@ sphinxcontrib-spelling = "^5.0.0"
 pytest = "^5.4.2"
 sphinxcontrib-openapi = "^0.7.0"
 sphinx-material = "^0.0.30"
+sphinx-issues = {git = "https://github.com/B4rtware/sphinx-issues.git"}
 
 [build-system]
 requires = ["poetry>=0.12"]

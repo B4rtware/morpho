@@ -326,7 +326,7 @@ description = "More routines for operating on iterables, beyond itertools"
 name = "more-itertools"
 optional = false
 python-versions = ">=3.5"
-version = "8.4.0"
+version = "8.5.0"
 
 [[package]]
 category = "dev"
@@ -593,6 +593,26 @@ test = ["pytest", "pytest-cov", "html5lib", "typed-ast", "cython"]
 
 [[package]]
 category = "dev"
+description = "A Sphinx extension for linking to your project's issue tracker"
+name = "sphinx-issues"
+optional = false
+python-versions = "*"
+version = "1.2.0"
+
+[package.dependencies]
+sphinx = "*"
+
+[package.extras]
+dev = ["pytest", "flake8 (3.8.3)", "pre-commit (>=1.18,<2.0)", "tox", "mock", "flake8-bugbear (19.8.0)"]
+lint = ["flake8 (3.8.3)", "pre-commit (>=1.18,<2.0)", "flake8-bugbear (19.8.0)"]
+tests = ["pytest", "mock"]
+
+[package.source]
+reference = "f5bf43085e6edce5e998cbdcec1736b2dc8bd8f1"
+type = "git"
+url = "https://github.com/B4rtware/sphinx-issues.git"
+[[package]]
+category = "dev"
 description = "Material sphinx theme"
 name = "sphinx-material"
 optional = false
@@ -813,7 +833,8 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "c01e9499ae8ea5ba31f2e4dd10524c6a1058dfdd4021e1ba024e578fd01a9767"
+content-hash = "07719c5297613ebdb1f5637af63e6342deab693accff4c8fffca6bd3d04721af"
+lock-version = "1.0"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1047,8 +1068,8 @@ mistune = [
     {file = "mistune-0.8.4.tar.gz", hash = "sha256:59a3429db53c50b5c6bcc8a07f8848cb00d7dc8bdb431a4ab41920d201d4756e"},
 ]
 more-itertools = [
-    {file = "more-itertools-8.4.0.tar.gz", hash = "sha256:68c70cc7167bdf5c7c9d8f6954a7837089c6a36bf565383919bb595efb8a17e5"},
-    {file = "more_itertools-8.4.0-py3-none-any.whl", hash = "sha256:b78134b2063dd214000685165d81c154522c3ee0a1c0d4d113c80361c234c5a2"},
+    {file = "more-itertools-8.5.0.tar.gz", hash = "sha256:6f83822ae94818eae2612063a5101a7311e68ae8002005b5e05f03fd74a86a20"},
+    {file = "more_itertools-8.5.0-py3-none-any.whl", hash = "sha256:9b30f12df9393f0d28af9210ff8efe48d10c94f73e5daf886f10c4b0b0b4f03c"},
 ]
 packaging = [
     {file = "packaging-20.4-py2.py3-none-any.whl", hash = "sha256:998416ba6962ae7fbd6596850b80e17859a5753ba17c32284f67bfff33784181"},
@@ -1181,6 +1202,7 @@ sphinx = [
     {file = "Sphinx-3.2.1-py3-none-any.whl", hash = "sha256:ce6fd7ff5b215af39e2fcd44d4a321f6694b4530b6f2b2109b64d120773faea0"},
     {file = "Sphinx-3.2.1.tar.gz", hash = "sha256:321d6d9b16fa381a5306e5a0b76cd48ffbc588e6340059a729c6fdd66087e0e8"},
 ]
+sphinx-issues = []
 sphinx-material = [
     {file = "sphinx_material-0.0.30-py3-none-any.whl", hash = "sha256:12e5a5fc8b3f7718d4f5168d12680fb87c2abb2a5f250dcd547de18c41e4ae82"},
     {file = "sphinx_material-0.0.30.tar.gz", hash = "sha256:a12864f832d792fd445e920c61c82f3c51233eaa652741d91bb20d7c38ab2a82"},
