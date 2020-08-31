@@ -23,6 +23,9 @@ TOML_DIR = ROOT_DIR
 sys.path.append(str(ROOT_DIR.absolute()))
 sys.path.append(str(SERVICE_DIR.absolute()))
 
+def setup(app):
+    app.add_css_file('css/main.css')
+
 
 # -- Project information -----------------------------------------------------
 
@@ -49,6 +52,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxcontrib.spelling",
     "sphinxcontrib.openapi",
+    "sphinx_issues"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -64,7 +68,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "proto"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -78,9 +82,9 @@ html_theme = "sphinx_material"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-# html_css_files = [
-#     "css/main.css"
-# ]
+html_css_files = [
+    "css/main.css"
+]
 
 pygments_style = "solarized-light"
 
@@ -94,6 +98,11 @@ html_sidebars = {
 
 # -- Extension configuration -------------------------------------------------
 
+# -- Sphinx Issues options
+
+# GitHub repo
+issues_github_path = "B4rtware/morpho"
+
 # -- Material theme options (see theme.conf for more information)
 html_theme_options = {
 
@@ -106,7 +115,7 @@ html_theme_options = {
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
     # 'base_url': 'https://bashtage.github.io/sphinx-material/',
-    "html_prettify": True,
+    "html_prettify": False,
 
     # Include the master document at the top of the page in the breadcrumb bar.
     # You must also set this to true if you want to override the rootrellink block, in which
