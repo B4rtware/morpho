@@ -69,6 +69,36 @@ jobs:
             name: Publish to PyPi
             command: poetry publish
 
+  generate-requirements:
+    machine:
+      enabled: true
+    steps:
+        - checkout
+        - add_ssh_keys:
+            fingerprints:
+              - "cb:8a:29:06:bd:73:48:1c:06:6b:4f:a6:ee:8b:7b:0f"    
+        - run:
+            name: Commit requirements to GitHub
+            command: |
+              OLD_CONTENT=$(cat requirements-dev.txt)
+              OTHER_CONTENT=$(poetry export -f requirements.txt --without-hashes --dev)
+              if [ "$OLD_CONTENT" = "$OTHER_CONTENT" ]; then
+                echo "Requirements unchanged."
+              else
+                echo "Requirements have changed."
+                echo "Writing new requirements-dev.txt file..."
+                poetry export -f requirements.txt --without-hashes --dev > requirements-dev.txt
+                echo "Writing new requirements.txt file..."
+                poetry export -f requirements.txt --without-hashes > requirements.txt
+                echo "Done."
+                echo "Creating commit..."
+                git config user.email "34386047+B4rtware@users.noreply.github.com"
+                git config user.name "CircleCI Bot"
+                git commit -am "chore: rebuild requirements files"
+                git push origin master
+                echo "Done."
+              fi
+
   build-docs:
     docker:
       - image: circleci/python:3.8.5-buster
@@ -143,6 +173,10 @@ workflows:
               only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
             branches:
               ignore: /.*/
+          requires:
+            - tests
+
+      - generate-requirements:
           requires:
             - tests
 
