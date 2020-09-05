@@ -5,10 +5,10 @@
 <div align="center">
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
 </a>
-<a href=""><img alt="license: MIT" src="https://img.shields.io/badge/license%3A-MIT-green">
+<a href="https://github.com/B4rtware/morpho/blob/master/LICENSE"><img alt="license: MIT" src="https://img.shields.io/badge/license%3A-MIT-green">
 </a>
-<a href=""><img src="https://img.shields.io/badge/python%3A-%5E3.8-blue"></a><br>
-<a href=""><img src="https://circleci.com/gh/B4rtware/morpho.svg?style=shield"></a>
+<a href="https://github.com/B4rtware/morpho"><img src="https://img.shields.io/badge/python%3A-%5E3.8-blue"></a><br>
+<a href="https://app.circleci.com/pipelines/github/B4rtware/morpho"><img src="https://circleci.com/gh/B4rtware/morpho.svg?style=shield"></a>
 <a href="https://codecov.io/gh/B4rtware/morpho">
   <img src="https://codecov.io/gh/B4rtware/morpho/branch/master/graph/badge.svg" />
 </a>
