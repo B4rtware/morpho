@@ -9,7 +9,7 @@ ROOT="."
 REPOSITORY_TYPE="github"
 CIRCLE_API="https://circleci.com/api"
 
-MONO_PACKAGES=docs morpho
+MONO_PACKAGES=(docs morpho)
 
 ############################################
 ## 1. Commit SHA of last CI build
