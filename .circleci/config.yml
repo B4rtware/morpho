@@ -1,6 +1,30 @@
-# TODO: consider to cache .git folder of the git repository if its increases speed.
-version: 2
+# based on: https://github.com/labs42io/circleci-monorepo/blob/master/.circleci/config.yml
+
+version: 2.1
+
+parameters:
+  trigger:
+    type: boolean
+    default: true
+
+  docs:
+    type: boolean
+    default: false
+
+  morpho:
+    type: boolean
+    default: false
+
 jobs:
+  trigger-workflows:
+    machine:
+      enabled: true
+    steps:
+      - checkout
+      - run:
+          name: Trigger workflows
+          command: chmod +x .circleci/circle_trigger.sh && .circleci/circle_trigger.sh
+
   tests:
     docker:
       - image: b4rtware/morpho-test:python3.8.3-openjdk11-buster
@@ -60,45 +84,6 @@ jobs:
       #     name: Send to Telegram
       #     command: poetry run python -m notifier.py
 
-  deploy:
-    docker:
-      - image: circleci/python:3.8.5-buster
-    steps:
-        - checkout
-        - run:
-            name: Publish to PyPi
-            command: poetry publish
-
-  generate-requirements:
-    machine:
-      enabled: true
-    steps:
-        - checkout
-        - add_ssh_keys:
-            fingerprints:
-              - "cb:8a:29:06:bd:73:48:1c:06:6b:4f:a6:ee:8b:7b:0f"    
-        - run:
-            name: Commit requirements to GitHub
-            command: |
-              OLD_CONTENT=$(cat requirements-dev.txt)
-              OTHER_CONTENT=$(poetry export -f requirements.txt --without-hashes --dev)
-              if [ "$OLD_CONTENT" = "$OTHER_CONTENT" ]; then
-                echo "Requirements unchanged."
-              else
-                echo "Requirements have changed."
-                echo "Writing new requirements-dev.txt file..."
-                poetry export -f requirements.txt --without-hashes --dev > requirements-dev.txt
-                echo "Writing new requirements.txt file..."
-                poetry export -f requirements.txt --without-hashes > requirements.txt
-                echo "Done."
-                echo "Creating commit..."
-                git config user.email "34386047+B4rtware@users.noreply.github.com"
-                git config user.name "CircleCI Bot"
-                git commit -am "chore: rebuild requirements files"
-                git push origin master
-                echo "Done."
-              fi
-
   build-docs:
     docker:
       - image: circleci/python:3.8.5-buster
@@ -108,13 +93,6 @@ jobs:
       - run:
           name: Install enchant
           command: "sudo apt-get install libenchant-dev"
-
-      # - attach_workspace:
-      #     at: /
-
-      # - run:
-      #     name: Install Poetry
-      #     command: pip install poetry
 
       - restore_cache:
           keys:
@@ -161,40 +139,24 @@ jobs:
           name: Copy files into docker
           command: ssh $SSH_USER@$SSH_HOST "$SSH_COMMAND"
 
+
 workflows:
   version: 2
-  test-build-deploy:
+
+  ci:
+    when: << pipeline.parameters.trigger >>
     jobs:
-      - tests
+      - trigger-workflows
 
-      - deploy:
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
-            branches:
-              ignore: /.*/
-          requires:
-            - tests
-
-      - generate-requirements:
-          requires:
-            - tests
-
-      - build-docs:
-          # filters:
-          #   tags:
-          #     only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
-          #   branches:
-          #     ignore: /.*/
-          requires:
-            - tests
-
+  docs:
+    when: << pipeline.parameters.docs >>
+    jobs:
+      - build-docs
       - deploy-docs:
-          # filters:
-          #   tags:
-          #     only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
-          #   branches:
-          #     ignore: /.*/
           requires:
             - build-docs
 
+  tests:
+    when: << pipeline.parameters.morpho >>
+    jobs:
+      - tests
