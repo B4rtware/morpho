@@ -59,10 +59,10 @@ jobs:
             mkdir test_results
             poetry run python -m pytest --junitxml=test-results/junit.xml tests/unit
 
-      # - run:
-      #     name: Run Integration Tests
-      #     command: |
-      #       poetry run python -m pytest --junitxml=test-results/junit-integration.xml -s tests/integration
+      - run:
+          name: Run Integration Tests
+          command: |
+            poetry run python -m pytest --junitxml=test-results/junit-integration.xml -s tests/integration
 
       - run:
           name: Run Coverage
@@ -80,9 +80,9 @@ jobs:
       - store_artifacts:
           path: test-results
 
-      # - run:
-      #     name: Send to Telegram
-      #     command: poetry run python -m notifier.py
+      - run:
+          name: Send to Telegram
+          command: poetry run python -m notifier.py
 
   build-docs:
     docker:
