@@ -72,7 +72,7 @@ fi
 ## 2. Changed packages
 ############################################
 # PACKAGES=$(ls ${ROOT} -l | grep ^d | awk '{print $9}')
-PACKAGES=$MONO_PACKAGES
+# PACKAGES=$MONO_PACKAGES
 echo "Searching for changes since commit [${LAST_COMPLETED_BUILD_SHA:0:7}] ..."
 
 ## The CircleCI API parameters object
@@ -90,7 +90,7 @@ FAILED_WORKFLOWS=$(cat circle.json \
 
 echo "Workflows currently in failed status: (${FAILED_WORKFLOWS[@]})."
 
-for PACKAGE in ${PACKAGES[@]}
+for PACKAGE in ${MONO_PACKAGES[@]}
 do
   PACKAGE_PATH=${ROOT#.}/$PACKAGE
   LATEST_COMMIT_SINCE_LAST_BUILD=$(git log -1 $LAST_COMPLETED_BUILD_SHA..$CIRCLE_SHA1 --format=format:%H --full-diff ${PACKAGE_PATH#/})
