@@ -74,9 +74,6 @@ class Service:
         self._should_stop = Event()
         self._worker = worker
 
-    def worker(self, func: Worker) -> None:
-        self._worker = func
-
     def run(self, port: Optional[int] = None):
         """Class method which is used to invoke the server.
         """
