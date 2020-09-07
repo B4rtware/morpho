@@ -536,7 +536,7 @@ security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python 2 and 3 compatibility utilities"
 name = "six"
 optional = false
@@ -611,6 +611,7 @@ tests = ["pytest", "mock"]
 reference = "f5bf43085e6edce5e998cbdcec1736b2dc8bd8f1"
 type = "git"
 url = "https://github.com/B4rtware/sphinx-issues.git"
+
 [[package]]
 category = "dev"
 description = "Material sphinx theme"
@@ -748,6 +749,20 @@ linter = ["flake8 (3.8.2)"]
 test = ["pytest", "pytest-cov", "fixtures (>=3.0.0)", "coverage (>=4.0,<4.4 || >4.4)"]
 
 [[package]]
+category = "main"
+description = "Retry code until it succeeds"
+name = "tenacity"
+optional = false
+python-versions = "*"
+version = "6.2.0"
+
+[package.dependencies]
+six = ">=1.9.0"
+
+[package.extras]
+doc = ["reno", "sphinx", "tornado (>=4.5)"]
+
+[[package]]
 category = "dev"
 description = "The most basic Text::Unidecode port"
 name = "text-unidecode"
@@ -833,7 +848,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "07719c5297613ebdb1f5637af63e6342deab693accff4c8fffca6bd3d04721af"
+content-hash = "8a30c204a54164708ee31a304021664fbe34e03c921ded1418799f8d24995bb5"
 lock-version = "1.0"
 python-versions = "^3.8"
 
@@ -1241,6 +1256,10 @@ sphinxcontrib-serializinghtml = [
 sphinxcontrib-spelling = [
     {file = "sphinxcontrib-spelling-5.3.0.tar.gz", hash = "sha256:2bbc35d5b778ba302088bc40cf22473b1417b118954469d765847a2226a4bf94"},
     {file = "sphinxcontrib_spelling-5.3.0-py3-none-any.whl", hash = "sha256:2574cab32d974729868aac107b067aeb8362478c7ded3ba18bc0bad9d4cc8cca"},
+]
+tenacity = [
+    {file = "tenacity-6.2.0-py2.py3-none-any.whl", hash = "sha256:5a5d3dcd46381abe8b4f82b5736b8726fd3160c6c7161f53f8af7f1eb9b82173"},
+    {file = "tenacity-6.2.0.tar.gz", hash = "sha256:29ae90e7faf488a8628432154bb34ace1cca58244c6ea399fd33f066ac71339a"},
 ]
 text-unidecode = [
     {file = "text-unidecode-1.3.tar.gz", hash = "sha256:bad6603bb14d279193107714b288be206cac565dfa49aa5b105294dd5c4aab93"},
