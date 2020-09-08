@@ -156,12 +156,12 @@ workflows:
     when: << pipeline.parameters.trigger >>
     jobs:
       - trigger-workflows
-      - publish:
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
-            branches:
-              ignore: /.*/
+      - publish
+          # filters:
+          #   tags:
+          #     only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
+          #   branches:
+          #     ignore: /.*/
 
 
   docs:
