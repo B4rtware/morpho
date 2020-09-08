@@ -1,36 +1,62 @@
+# v1.0.0b1 - (08.09.2020)
+
+## 🔥 BREAKING CHANGES
+- removed proto dependencies and files
+- removed worker decorator
+
+## 💌 Added
+- (d5d217a4b735ddbbb96d07b2f5be08bd71e974fc): information section about how to create a new release (closes: #24)
+- (d111c810b2f784dad568afed8ab92020eaa6f571) **consumer**: implement options rest endpoint (closes: #23)
+- (a44721ab171fe2c78cc54ed59cf91e44f62fcdb6) **consumer**: improved documentation of functions
+- (5104a8bac5dc3b408f3968dcc012c755ebc43c42) **openapi**: new openapi specification
+- (d7552cc7f355f1ee47fd226608b5aaf5883c59a3) **sphinx**: sphinx documentation
+
+## ♻️ Changes
+- (9dac3a61f2748bca7843c6f69b8a84f77cd5962b) **examples**: all examples now uses the public morpho repository
+- (d996ec6bf1b0a5e24a55262831fd078281cd6cfb): remove unused dependencies (closes: #7)
+- (84fe09f9e13b78cf01657ae1a89c128a17805267) **proto**: remove proto files 
+- (6bd16587b568e14869d949ba9e8c2c0e444bb74d) **tasks**: remove grpc relavant tasks
+- (8c32d5fdcb93dff7964b55d4bf04c49c37ade69a): remove proto from docs
+- (15a0cd9a8153c23808e001be9676d6b5754ca732) **server**: remove worker decorator
+
+## 🔨 Fixed
+- (c5cd08546a5cfc9e4cdd3b8a3cfb7d95cfa43daf) **consumer**: missing Dict type import
+- (8693688233f2f0f4799197198a7108c549858607) **circleci**: codecov uses the wrong package directory
+
+
 # v1.0.0a5 - (16.07.2020)
 
 ## 🔨 Fixed
-- fixed(**types**): make callable's worker BaseModel not optional (593377e57c2f3d447fa826c53c32d41b15fed3bb)
+- (593377e57c2f3d447fa826c53c32d41b15fed3bb) **types**: make callable's worker BaseModel not optional 
 
 # v1.0.0a4 - (16.07.2020)
 
 ## 💌 Added
-- added(**examples**): gateway example to crypto (67da16e8d199df69bb95dda6c9b0d0de513b0a28)
+- (67da16e8d199df69bb95dda6c9b0d0de513b0a28) **examples**: gateway example to crypto 
 
 ## 🔨 Fixed
-- fixed(**consumer**): wrong dict convert function was used in transform pipe (5c96cab81c9c16c0584006e45bcf54ef80a7d595)
-- fixed(**client**): wrong json convert function was used in transform pipe (a3e77a982cc9db1fb4551b174ae8fd327c189b39)
+- (5c96cab81c9c16c0584006e45bcf54ef80a7d595) **consumer**: wrong dict convert function was used in transform pipe 
+- (a3e77a982cc9db1fb4551b174ae8fd327c189b39) **client**: wrong json convert function was used in transform pipe
 
 # v1.0.0a3 - (10.06.2020)
 
 ## 🔨 Fixed
-- fixed: worker signature allowing optional BaseModel (de07dde9c9670732b64db656dfe0956b98087209)
-- fixed: supressed error which was raised by not converting the options dict to the options BaseModel (309e20e5c35a984de2aa972f1f2327bc268a440d)
-- fixed: is_byte64_encoded variable still being used and caused crashes (d4498f37e2711cb588afcf6c83b945249b4283bd)
+- (de07dde9c9670732b64db656dfe0956b98087209): worker signature allowing optional BaseModel
+- (309e20e5c35a984de2aa972f1f2327bc268a440d): supressed error which was raised by not converting the options dict to the options BaseModel
+- (d4498f37e2711cb588afcf6c83b945249b4283bd): is_byte64_encoded variable still being used and caused crashes
 
 # v1.0.0a2 - (07.06.2020)
 
 ## 💌 Added
-- added: changelog
+- (70a86dc113f79d0e7a040b866a372a67b49fe659): changelog
 
 ## ♻️ Changed
-- changed: temporarily remove grpcio depencdency until it is fully integrated
-- changed(**examples**): remove client examples which where based on grpcio
+- (caec7a7c2cc8a17149cb43738b824ce50dae91c3): temporarily remove grpcio depencdency until it is fully integrated
+- (0462b568838be04a855ee18de04785c892c3a60d) **examples**: remove client examples which where based on grpcio
 
 ## 🔨 Fixed
-- fixed(**client**): pydantic conversion functions not being used
-- fixed(**models**): wrong type for options property
+- (d5b34e18467dbb14e0c54ad4a5e36fa1e2a908d9) **client**: pydantic conversion functions not being used
+- (cef3b8ddce6a6755624cc709030c0805d684477d) **models**: wrong type for options property
 
 # v1.0.0a1 - (03.06.2020)
 
