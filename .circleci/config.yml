@@ -25,6 +25,15 @@ jobs:
           name: Trigger workflows
           command: chmod +x .circleci/circle_trigger.sh && .circleci/circle_trigger.sh
 
+  publish:
+    docker:
+      - image: circleci/python:3.8.5-buster
+    steps:
+        - checkout
+        - run:
+            name: Publish to PyPi
+            command: poetry publish
+
   tests:
     docker:
       - image: b4rtware/morpho-test:python3.8.3-openjdk11-buster
@@ -147,6 +156,13 @@ workflows:
     when: << pipeline.parameters.trigger >>
     jobs:
       - trigger-workflows
+      - publish:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+((b|a)\d+)?/
+            branches:
+              ignore: /.*/
+
 
   docs:
     when: << pipeline.parameters.docs >>
