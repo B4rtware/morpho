@@ -32,7 +32,7 @@ jobs:
         - checkout
         - run:
             name: Publish to PyPi
-            command: poetry publish
+            command: poetry publish --build
 
   tests:
     docker:
