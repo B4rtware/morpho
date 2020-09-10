@@ -8,12 +8,6 @@ class Options(BaseModel):
     key: str = "LEMON"
 
 
-service = Service(
-    name="vigenere", version="0.0.1", options_type=Options
-)
-
-
-@service.worker
 def work(document: str, options: Options) -> str:
     document = document.capitalize()
     key = options.key.capitalize()
@@ -22,6 +16,9 @@ def work(document: str, options: Options) -> str:
         key_char = key[index % len(key)]
         encrypted += chr((((ord(char) - 65) + (ord(key_char) - 65)) % 26) + 65)
     return encrypted
+
+
+service = Service(name="vigenere", version="0.0.1", options_type=Options, worker=work)
 
 
 if __name__ == "__main__":

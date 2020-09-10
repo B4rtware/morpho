@@ -7,12 +7,6 @@ class Options(BaseModel):
     pi: List[int] = [2, 4, 1, 2]
 
 
-service = Service(
-    name="permutation", version="0.0.1", options_type=Options
-)
-
-
-@service.worker
 def work(document: str, options: Options) -> str:
     stack = list(document)
 
@@ -24,6 +18,11 @@ def work(document: str, options: Options) -> str:
         index += len(options.pi)
 
     return "".join(stack)
+
+
+service = Service(
+    name="permutation", version="0.0.1", options_type=Options, worker=work
+)
 
 
 if __name__ == "__main__":
