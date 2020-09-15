@@ -18,7 +18,7 @@ import py_eureka_client.eureka_client as eureka_client
 from pydantic import BaseModel
 
 from morpho.config import ServiceConfig
-from morpho.consumer import RestWorkConsumer, WorkConsumer
+from morpho.consumer import GatewayConsumer, RestWorkConsumer, WorkConsumer
 
 cr.init()
 
@@ -126,12 +126,9 @@ class Service:
             self.config.protocols
         ), "Have you called super() on your Server implemenation?"
         # start protocol consumer
-        if self._worker is not None:
-            for protocol in self.config.protocols:
-                instance: WorkConsumer = protocol(self._worker, self.config, self.options_type)
-                instance.start()
-        else:
-            log.warning("no work function is specified. No consumer started.")
+        for protocol in self.config.protocols:
+            instance: WorkConsumer = protocol(self._worker, self.config, self.options_type)
+            instance.start()
 
         # fmt: off
         if __debug__:
@@ -158,10 +155,19 @@ class Service:
             sys.exit(0)
 
 if __name__ == "__main__":
-    service = Service(name="echo", version="1.0.1")
+    # from pydantic import BaseModel
 
-    @service.worker
-    def work(document: str) -> str:
-        return document
+    # class Options(BaseModel):
+    #     offset: int
 
-    service.run(50000)
+    # def work(document: str, option: Options) -> str:
+    #     return document
+
+    # service = Service(name="echo", version="1.0.1", worker=work, options_type=Options)
+
+    # service.run(50000)
+
+    # TODO: add morpho tag attribute like tag=gateway or type=gateway
+    gateway = Service(name="gateway", version="0.0.1", protocols=[GatewayConsumer])
+
+    gateway.run(50010)

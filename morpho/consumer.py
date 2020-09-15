@@ -56,7 +56,7 @@ class WorkConsumer(ABC):
 
     def __init__(
         self,
-        work: Worker,
+        work: Optional[Worker],
         config: "ServiceConfig",
         options_type: Optional[Type[BaseModel]],
     ) -> None:
@@ -113,6 +113,8 @@ class WorkConsumer(ABC):
                 options = (
                     self.options_type(**request.options) if self.options_type else None
                 )
+                if self._work is None:
+                    raise Exception("worker function is None!")
                 try:
                     document = self._work(request.document, options)
                 except BaseException:  # pylint: disable=broad-except
