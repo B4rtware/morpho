@@ -298,3 +298,30 @@ class RestWorkConsumer(WorkConsumer):
             },
         )
         self.thread.start()
+
+
+class GatewayConsumer(RestWorkConsumer):
+    """Implements a gateway consumer on top of the rest protocol.
+    """
+
+    def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
+        """Callback function which gets invoked by flask if a 'transform' request is received.
+
+        Returns:
+            Tuple[RawTransformDocumentResponse, Status]: Returns a flask response.
+        """
+        request_model = TransformDocumentRequest(**flask.request.json)
+        result = self.client.transform_document(**request_model.dict())
+        return cast(RawTransformDocumentResponse, result.dict()), Status.OK
+
+    def _transform_document_pipe(
+        self,
+    ) -> Tuple[RawTransformDocumentPipeResponse, Status]:
+        """Callback function which gets invoked by flask if a 'transform pipe' request is received.
+
+        Returns:
+            Tuple[RawTransformDocumentPipeResponse, Status]: Returns a flask response.
+        """
+        request_model = TransformDocumentPipeRequest(**flask.request.json)
+        result = self.client.transform_document_pipe(**request_model.dict())
+        return cast(RawTransformDocumentPipeResponse, result.dict()), Status.OK
