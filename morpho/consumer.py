@@ -302,7 +302,7 @@ class RestWorkConsumer(WorkConsumer):
         self.thread.start()
 
 
-class GatewayConsumer(RestWorkConsumer):
+class RestGatewayConsumer(RestWorkConsumer):
     """Implements a gateway consumer on top of the rest protocol.
     """
 

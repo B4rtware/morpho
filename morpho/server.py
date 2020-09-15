@@ -18,7 +18,7 @@ import py_eureka_client.eureka_client as eureka_client
 from pydantic import BaseModel
 
 from morpho.config import ServiceConfig
-from morpho.consumer import GatewayConsumer, RestWorkConsumer, WorkConsumer
+from morpho.consumer import RestGatewayConsumer, RestWorkConsumer, WorkConsumer
 
 cr.init()
 
@@ -168,6 +168,6 @@ if __name__ == "__main__":
     # service.run(50000)
 
     # TODO: add morpho tag attribute like tag=gateway or type=gateway
-    gateway = Service(name="gateway", version="0.0.1", protocols=[GatewayConsumer])
+    gateway = Service(name="gateway", version="0.0.1", protocols=[RestGatewayConsumer])
 
     gateway.run(50010)
