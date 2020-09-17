@@ -14,14 +14,6 @@ Schema = Dict[str, Any]
 # fmt: on
 
 # must resides here because otherwise circular import
-class ServiceType(Enum):
-    """Type for a Service"""
-
-    SERVICE = "service"
-    PROXY = "proxy"
-    GATEWAY = "gateway"
-
-
 class DtaType(Enum):
     """Document Transformation Application Type of a Service"""
 
