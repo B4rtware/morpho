@@ -55,7 +55,6 @@ class Client:
             return f"{instance.ipAddr}:{instance.port.port}"
         return None
 
-    # TODO: consider to use **kwargs for options
     def transform_document(
         self, request: TransformDocumentRequest, instance_address: Optional[str] = None,
     ) -> TransformDocumentResponse:
