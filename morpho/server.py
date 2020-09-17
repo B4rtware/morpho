@@ -63,13 +63,20 @@ class Service:
         version: str,
         protocols: Optional[List[Type[WorkConsumer]]] = None,
         worker: Optional[Worker] = None,
+        register: bool = False,
         config: Optional[ServiceConfig] = None,
         type: DtaType = DtaType.SERVICE,
-        options_type: Optional[Type[BaseModel]] = None
+        options_type: Optional[Type[BaseModel]] = None,
     ):
         if protocols is None:
             protocols = [RestWorkConsumer]
-        self.config = ServiceConfig(name=name, version=version, protocols=protocols, type=type)
+        self.config = ServiceConfig(
+            name=name,
+            version=version,
+            protocols=protocols,
+            type=type,
+            register=register,
+        )
         self.options_type = options_type
 
         self._should_stop = Event()
@@ -169,6 +176,12 @@ if __name__ == "__main__":
     # service.run(50000)
 
     # TODO: add morpho tag attribute like tag=gateway or type=gateway
-    gateway = Service(name="gateway", version="0.0.1", protocols=[RestGatewayConsumer], type=DtaType.GATEWAY)
+    gateway = Service(
+        name="gateway",
+        version="0.0.1",
+        protocols=[RestGatewayConsumer],
+        type=DtaType.GATEWAY,
+        register=True,
+    )
 
     gateway.run(50010)
