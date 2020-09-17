@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, IO, List, Optional, TYPE_CHECKING, Type, Union
 
-from morpho.types import ServiceType
+from morpho.types import DtaType
 
 # TODO: consider to move the parser logic into this module e.g init() / parse()
 # TODO: use loads load dump dumps
@@ -95,7 +95,7 @@ class ServiceConfig(BaseConfig):
 
     host_name: str = ""
     port_to_listen: str = "50000"
-    service_type: ServiceType = ServiceType.SERVICE
+    type: DtaType = DtaType.SERVICE
     is_ssl: bool = False
     rest: bool = False
     http_port: str = "8080"

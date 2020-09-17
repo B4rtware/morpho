@@ -22,6 +22,14 @@ class ServiceType(Enum):
     GATEWAY = "gateway"
 
 
+class DtaType(Enum):
+    """Document Transformation Application Type of a Service"""
+
+    SERVICE = "service"
+    GATEWAY = "gateway"
+    UNKNOWN = "unknown"
+
+
 # @dataclass
 # class Metadata(ServiceInfo):
 #     def

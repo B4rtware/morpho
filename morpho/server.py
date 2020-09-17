@@ -6,7 +6,7 @@ Warning:
     This might change in future versions.
 """
 import argparse
-from morpho.types import Worker
+from morpho.types import DtaType, Worker
 import sys
 from threading import Event
 from typing import List, Optional, Type
@@ -64,11 +64,12 @@ class Service:
         protocols: Optional[List[Type[WorkConsumer]]] = None,
         worker: Optional[Worker] = None,
         config: Optional[ServiceConfig] = None,
+        type: DtaType = DtaType.SERVICE,
         options_type: Optional[Type[BaseModel]] = None
     ):
         if protocols is None:
             protocols = [RestWorkConsumer]
-        self.config = ServiceConfig(name=name, version=version, protocols=protocols,)
+        self.config = ServiceConfig(name=name, version=version, protocols=protocols, type=type)
         self.options_type = options_type
 
         self._should_stop = Event()
@@ -168,6 +169,6 @@ if __name__ == "__main__":
     # service.run(50000)
 
     # TODO: add morpho tag attribute like tag=gateway or type=gateway
-    gateway = Service(name="gateway", version="0.0.1", protocols=[RestGatewayConsumer])
+    gateway = Service(name="gateway", version="0.0.1", protocols=[RestGatewayConsumer], type=DtaType.GATEWAY)
 
     gateway.run(50010)
