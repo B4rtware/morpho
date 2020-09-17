@@ -1,25 +1,25 @@
 from dataclasses import dataclass
+from typing import Optional, cast
+from urllib.error import HTTPError
 
-from pydantic.main import BaseModel
+import requests
+from py_eureka_client import eureka_client
+from py_eureka_client.eureka_client import Application
+
+from morpho.error import ServiceNotFoundError
+from morpho.log import logging
 from morpho.rest.models import (
+    ListServicesResponse,
     TransformDocumentPipeRequest,
     TransformDocumentPipeResponse,
     TransformDocumentRequest,
     TransformDocumentResponse,
 )
-from typing import List, Optional
-from urllib.error import HTTPError
-
-from py_eureka_client import eureka_client
-from py_eureka_client.eureka_client import Application
-import requests
-
-from morpho.error import ServiceNotFoundError
+from morpho.types import Schema
 
 # from morpho.log import log
 # import logginga
 
-from morpho.log import logging
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +31,7 @@ class ClientConfig:
 
 # TODO: consider to use models instead of function arguments e.g TransformDocumentRequest
 # TODO: add requests parameter such as headers cookies etc which then also can be used on service
+# TODO: consider to allow empty config because of the explicit instance_address parameter on each function
 class Client:
     def __init__(self, config: ClientConfig) -> None:
         self.config = config
@@ -51,58 +52,49 @@ class Client:
         if service:
             instance = service.instances[0]
             log.info(
-                    "found instance: <%s> at <%s:%s>", instance.app, instance.ipAddr, instance.port.port
-                )
+                "found instance: <%s> at <%s:%s>",
+                instance.app,
+                instance.ipAddr,
+                instance.port.port,
+            )
             return f"{instance.ipAddr}:{instance.port.port}"
         return None
 
     # TODO: consider to use **kwargs for options
     def transform_document(
-        self,
-        document: str,
-        service_name: str,
-        options: Optional[BaseModel] = None,
-        file_name: Optional[str] = None,
-        address: Optional[str] = None,
-    ):
+        self, request: TransformDocumentRequest, instance_address: Optional[str] = None,
+    ) -> TransformDocumentResponse:
         """Transforms the given document.
         
         Args:
-            document (str): Document to be transformed.
-            file_name (str): Filename of the document.
-            service_name (str): Service name for the requested service.
-            options (Optional[Options], optional): Service specific options. Defaults to None.
+            request (TransformDocumentRequest): Request object.
+            instance_address (Optional[str]): 
         
         Raises:
             ServiceNotFoundError: If the requested service in the eureka registry could not be found.
         """
-        request = TransformDocumentRequest(
-            document=document,
-            service_name=service_name,
-            file_name=file_name,
-            options=options,
-        )
         # get application from eureka
-        if address is None:
-            address = f"http://{self._get_instance_ip_address(service_name)}/v1/document/transform"
-        if address:
-            # wrapper for a consumer request
-            log.info("sending <DocumentTransformRequest> to <%s>", address)
-            log.info("content: %s", request.json(indent=4))
-            response = requests.post(address, json=request.dict())
-            # TODO: if url not found json object not available return error
-            log.debug("content of response: %s", response.text)
-            response_object = TransformDocumentResponse(**response.json())
-            return response_object
+        if not instance_address:
+            instance_address = self._get_instance_ip_address(request.service_name)
+
+        # wrapper for a consumer request
+        log.info("sending <DocumentTransformRequest> to <%s>", instance_address)
+        log.info("content: %s", request.json(indent=4))
+        response = requests.post(
+            f"http://{instance_address}/v1/document/transform", json=request.dict()
+        )
+        # TODO: if url not found json object not available return error
+        log.debug("content of response: %s", response.text)
+        response_object = TransformDocumentResponse(**response.json())
+        return response_object
 
     def transform_document_pipe(
-        self, request: TransformDocumentPipeRequest
+        self,
+        request: TransformDocumentPipeRequest,
+        instance_address: Optional[str] = None,
     ) -> TransformDocumentPipeResponse:
-        instance_address = self._get_instance_ip_address(request.services[0].name)
-        # print(request.as_dict())
         if instance_address is None:
-            message = f"No service named <{request.services[0].name}>."
-            raise ServiceNotFoundError(message)
+            instance_address = self._get_instance_ip_address(request.services[0].name)
         log.info("sending transform document pipe request.")
         log.info("content: %s", request.json(indent=4))
         response = requests.post(
@@ -112,7 +104,9 @@ class Client:
         # print(response.text)
         return TransformDocumentPipeResponse(**response.json())
 
-    def list_services(self, service_name: Optional[str]) -> List[str]:
+    def list_services(
+        self, service_name: str, instance_address: Optional[str] = None
+    ) -> ListServicesResponse:
         """Lists the services which are known by the provided service.
         
         Args:
@@ -124,13 +118,20 @@ class Client:
         Note:
             Will always return its own service name.
         """
-        if not service_name:
+        if not instance_address:
             instance_address = self._get_instance_ip_address(service_name)
-        if instance_address:
-            response = requests.get(f"http://{instance_address}/v1/service/list")
-            response_object = response.json()
-            return response_object["services"]
-        return []
+
+        response = requests.get(f"http://{instance_address}/v1/service/list")
+        return ListServicesResponse(**response.json())
+
+    def get_options(
+        self, service_name: str, instance_address: Optional[str] = None
+    ) -> Schema:
+        if instance_address is None:
+            instance_address = self._get_instance_ip_address(service_name)
+
+        response = requests.get(f"http://{instance_address}/v1/service/options")
+        return cast(Schema, response.json())
 
 
 # if __name__ == "__main__":
