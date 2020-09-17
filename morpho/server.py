@@ -127,7 +127,7 @@ class Service:
                 instance_port=int(self.config.port_to_listen),
                 instance_secure_port_enabled=self.config.is_ssl,
                 # TODO: change morpho type name to use the same from the rest specification
-                metadata={},
+                metadata={"dtaType": self.config.type.value},
             )
 
         assert (
