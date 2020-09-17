@@ -427,7 +427,7 @@ def test_get_options(client: Client) -> None:
         "type": "object",
     }
 
-
+@httpretty.activate(allow_net_connect=False)
 def test_get_options(client: Client) -> None:
     httpretty.register_uri(
         method=httpretty.GET, uri="http://localhost:8761/eureka/apps/ECHO", status=404,
