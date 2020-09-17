@@ -1,3 +1,15 @@
+# v1.0.0b2 - (17.09.2020)
+
+## 💌 Added
+- (71e495cbdbe7317378bd329bc4aba939c74dd56f) **consumer**: new gateway rest consumer
+- (f2cdc10d2f4b15ea264a29ffc568c771c482e720) **unit**: add unit tests for the client
+- (d08ede25ed548868c8ad03e3525f56543f06c611) **client**: every client function has an optional `instance_address` parameter
+- (1352bbdf501ba9dd313d2731b842e010999d45e6): implement Document Transformation Application Types (DtaType)
+
+## ♻️ Changes
+- (1f1ad176317090b8e098abbba4300337751351e4) **examples**: remove deprecated `worker` decorator
+- (84e1a8eb71a87209aa9b8f3ead220a9cd7b18346) **server**: make worker function optional
+
 # v1.0.0b1 - (08.09.2020)
 
 ## 🔥 BREAKING CHANGES
