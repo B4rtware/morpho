@@ -25,8 +25,6 @@ In the first place this framework was created to be used for research purposes.
 
 `pip install morpho`
 
-⚠️ currently in alpha: public api may change with breaking changes ⚠️
-
 ### via git
 
 1. make sure to use at least **python 3.8**
