@@ -17,12 +17,7 @@ from morpho.rest.models import (
 )
 from morpho.types import Schema
 
-# from morpho.log import log
-# import logginga
-
-
 log = logging.getLogger(__name__)
-
 
 @dataclass
 class ClientConfig:
