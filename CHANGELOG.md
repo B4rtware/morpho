@@ -1,3 +1,16 @@
+# v1.0.0b3 - (18.09.2020)
+
+## 💌 Added
+- (ff3c757fa3f2576a49cd869655e0622b80b7ea21): new error type NoWorkerFunctionError
+- (81cad627cc9847327523428802eec57324eed1c5) **consumer**: list services will resolve a gateway and return options for each service
+- (ce9cbb34133432e22315ae331db518eb69ca4d22) **work_consumer**: add tests for WorkConsumer abstract class
+
+## ♻️ Changes
+- (f986549f8a3fb9a97076dcd981a68d76fb73a796): expose register parameter to Service class constructor
+
+## 🔨 Fixed
+- (e1da287eec8f5792978ad8da22095714b3189fd2): dtaType not visible in eureka's metadata
+
 # v1.0.0b2 - (17.09.2020)
 
 ## 💌 Added

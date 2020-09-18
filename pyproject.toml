@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "morpho"
-version = "1.0.0b2"
+version = "1.0.0b3"
 description = "A framework for microservice based document transformation."
 authors = ["B4rtware <34386047+B4rtware@users.noreply.github.com>"]
 license = "MIT"
@@ -32,7 +32,7 @@ regex = "^2020.6.7"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
-pylint = "^2.4.4"
+pylint = "^2.6.0"
 pyenchant = "^3.0.1"
 Sphinx = "^3.0.1"
 invoke = "^1.4.1"

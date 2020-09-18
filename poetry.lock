@@ -626,6 +626,7 @@ tests = ["pytest", "mock"]
 reference = "f5bf43085e6edce5e998cbdcec1736b2dc8bd8f1"
 type = "git"
 url = "https://github.com/B4rtware/sphinx-issues.git"
+
 [[package]]
 category = "dev"
 description = "Material sphinx theme"
@@ -840,7 +841,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "331ec79a6c45bd4ab6d98df6b20c749c484b88a91f4af3ce26085aaae034898f"
+content-hash = "4170243a0ad1d66086013bcea29bdec670b042656cdfc0134d7bc40369f041e5"
 lock-version = "1.0"
 python-versions = "^3.8"
 
