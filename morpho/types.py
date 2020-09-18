@@ -22,9 +22,5 @@ class DtaType(Enum):
     UNKNOWN = "unknown"
 
 
-# @dataclass
-# class Metadata(ServiceInfo):
-#     def
-
 # TODO consider to use dicttypes
 Headers = NewType("Headers", Dict[str, str])
