@@ -4,7 +4,7 @@ import io
 from morpho.error import NoWorkerFunctionError
 
 from pydantic.main import BaseModel
-from morpho.types import Schema, Worker
+from morpho.types import Schema, Worker, DtaType
 from morpho.client import Client, ClientConfig
 from morpho.util import unflatten_dict
 from morpho.rest.models import (
@@ -73,22 +73,55 @@ class WorkConsumer(ABC):
         Returns:
             List[ListServicesResponse]: List of services.
         """
-        services = []
-        if self.config.register:
-            try:
-                applications = eureka_client.get_applications(self.config.registrar_url)
-                for service in applications.applications:
-                    instance = service.instances[0]
-                    service_info = ServiceInfo(name=instance.app)
-                    services.append(service_info)
-            # TODO: add custom eureka not found error
-            except URLError:
-                log.error(
-                    "no eureka instance is running at: %s", self.config.registrar_url
-                )
         # the service always knows its self
-        if not services:
-            services.append(ServiceInfo(name=self.config.name,))
+        services = [ServiceInfo(name=self.config.name, options=self.options())]
+        if not self.config.register:
+            return ListServicesResponse(services=services)
+
+        try:
+            applications = eureka_client.get_applications(self.config.registrar_url)
+        # TODO: add custom eureka not found error
+        except URLError:
+            log.error("no eureka instance is running at: %s", self.config.registrar_url)
+            exit(1)
+
+        for service in applications.applications:
+            # always get first instance
+            instance = service.instances[0]
+            # skip self
+            if instance.app == self.config.name:
+                continue
+            instance_address = f"{instance.ipAddr}:{instance.port.port}"
+
+            # resolve gateway
+            if instance.metadata:
+                try:
+                    dta_type = DtaType(instance.metadata.get("dtaType"))
+                except ValueError:
+                    dta_type = DtaType.UNKNOWN
+                if dta_type == DtaType.GATEWAY:
+                    assert (
+                        len(instance.app.split(".")) == 2
+                    ), "a gateway always have a suffix e.g <service_name>.GW"
+                    gateway_name = instance.app.split(".")[0]
+                    # TODO: for now gateways options are always empty
+                    # TODO: gateways could cache the whole list of services
+                    services.append(ServiceInfo(name=instance.app, options={}))
+                    response = self.client.list_services(
+                        instance.app, instance_address=instance_address
+                    )
+                    for service in response.services:
+                        service.name = f"{gateway_name}.{service.name}"
+                    # add services from subgroup
+                    services += response.services
+                    continue
+
+            # get options from service via rest call
+            options = self.client.get_options(
+                service_name=instance.app, instance_address=instance_address
+            )
+            services.append(ServiceInfo(name=instance.app, options=options))
+
         return ListServicesResponse(services=services)
 
     def options(self) -> Schema:

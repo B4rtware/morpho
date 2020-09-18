@@ -35,6 +35,7 @@ class Model(BaseModel):
 
 class ServiceInfo(Model):
     name: str
+    options: Optional[Dict[str, Any]]
 
 
 class ListServicesResponse(Model):
