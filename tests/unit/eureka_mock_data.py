@@ -1,0 +1,284 @@
+EUREKA_GET_APPS_RESPONSE_CAESER_PERMUTATION_VIGENERE = """
+<applications>
+  <versions__delta>1</versions__delta>
+  <apps__hashcode>UP_3_</apps__hashcode>
+  <application>
+    <name>CAESER</name>
+    <instance>
+      <instanceId>localhost:caeser:50000</instanceId>
+      <hostName>localhost</hostName>
+      <app>CAESER</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50000</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384921418</registrationTimestamp>
+        <lastRenewalTimestamp>1600384921418</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384548132</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50000</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50000/</homePageUrl>
+      <statusPageUrl>http://localhost:50000/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50000/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>caeser</vipAddress>
+      <secureVipAddress>caeser</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384921418</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384922144</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+  <application>
+    <name>PERMUTATION</name>
+    <instance>
+      <instanceId>localhost:permutation:50001</instanceId>
+      <hostName>localhost</hostName>
+      <app>PERMUTATION</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50001</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384921420</registrationTimestamp>
+        <lastRenewalTimestamp>1600384921420</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384548569</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50001</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50001/</homePageUrl>
+      <statusPageUrl>http://localhost:50001/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50001/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>permutation</vipAddress>
+      <secureVipAddress>permutation</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384921420</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384922508</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+  <application>
+    <name>VIGENERE</name>
+    <instance>
+      <instanceId>localhost:vigenere:50002</instanceId>
+      <hostName>localhost</hostName>
+      <app>VIGENERE</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50002</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384922304</registrationTimestamp>
+        <lastRenewalTimestamp>1600384922304</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384921793</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50002</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50002/</homePageUrl>
+      <statusPageUrl>http://localhost:50002/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50002/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>vigenere</vipAddress>
+      <secureVipAddress>vigenere</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384922304</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384923029</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+</applications>"""
+
+EUREKA_GET_APPS_RESPONSE_ONLY_CAESER = """
+<applications>
+  <versions__delta>1</versions__delta>
+  <apps__hashcode>UP_3_</apps__hashcode>
+  <application>
+    <name>CAESER</name>
+    <instance>
+      <instanceId>localhost:caeser:50000</instanceId>
+      <hostName>localhost</hostName>
+      <app>CAESER</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50000</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384921418</registrationTimestamp>
+        <lastRenewalTimestamp>1600384921418</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384548132</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50000</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50000/</homePageUrl>
+      <statusPageUrl>http://localhost:50000/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50000/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>caeser</vipAddress>
+      <secureVipAddress>caeser</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384921418</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384922144</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+</applications>"""
+
+EUREKA_GET_APPS_RESPONSE_CAESER_PERMUATION_CRYPTOxGW = """
+<applications>
+  <versions__delta>1</versions__delta>
+  <apps__hashcode>UP_3_</apps__hashcode>
+  <application>
+    <name>CAESER</name>
+    <instance>
+      <instanceId>localhost:caeser:50000</instanceId>
+      <hostName>localhost</hostName>
+      <app>CAESER</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50000</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384921418</registrationTimestamp>
+        <lastRenewalTimestamp>1600384921418</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384548132</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50000</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50000/</homePageUrl>
+      <statusPageUrl>http://localhost:50000/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50000/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>caeser</vipAddress>
+      <secureVipAddress>caeser</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384921418</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384922144</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+  <application>
+    <name>PERMUTATION</name>
+    <instance>
+      <instanceId>localhost:permutation:50001</instanceId>
+      <hostName>localhost</hostName>
+      <app>PERMUTATION</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50001</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384921420</registrationTimestamp>
+        <lastRenewalTimestamp>1600384921420</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384548569</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50001</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50001/</homePageUrl>
+      <statusPageUrl>http://localhost:50001/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50001/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>permutation</vipAddress>
+      <secureVipAddress>permutation</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384921420</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384922508</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+  <application>
+    <name>CRYPTO.GW</name>
+    <instance>
+      <instanceId>localhost:crypto.gw:50002</instanceId>
+      <hostName>localhost</hostName>
+      <app>CRYPTO.GW</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50002</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384922304</registrationTimestamp>
+        <lastRenewalTimestamp>1600384922304</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384921793</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50002</management.port>
+        <dtaType>gateway</dtaType>
+      </metadata>
+      <homePageUrl>http://localhost:50002/</homePageUrl>
+      <statusPageUrl>http://localhost:50002/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50002/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>vigenere</vipAddress>
+      <secureVipAddress>crypto.gw</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384922304</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384923029</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+</applications>"""
