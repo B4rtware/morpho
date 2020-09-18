@@ -116,6 +116,7 @@ class Client:
             instance_address = self._get_instance_ip_address(service_name)
 
         response = requests.get(f"http://{instance_address}/v1/service/list")
+        # FIXME: missing validation (try except)
         return ListServicesResponse(**response.json())
 
     def get_options(
