@@ -135,7 +135,9 @@ class Service:
         ), "Have you called super() on your Server implemenation?"
         # start protocol consumer
         for protocol in self.config.protocols:
-            instance: WorkConsumer = protocol(self._worker, self.config, self.options_type)
+            instance: WorkConsumer = protocol(
+                self._worker, self.config, self.options_type
+            )
             instance.start()
 
         # fmt: off
@@ -161,6 +163,7 @@ class Service:
                 self._should_stop.wait(0.5)
         except KeyboardInterrupt:
             sys.exit(0)
+
 
 if __name__ == "__main__":
     # from pydantic import BaseModel
