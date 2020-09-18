@@ -114,7 +114,7 @@ class TestListServicesResponse:
         )
         response_dict = response.dict()
         assert len(response_dict.keys()) == 1
-        assert response_dict["services"] == [{"name": "QDS.TEST"}, {"name": "QDS.ECHO"}]
+        assert response_dict["services"] == [{"name": "QDS.TEST", "options": None}, {"name": "QDS.ECHO", "options": None}]
 
     def test_asjson(self):
         response = ListServicesResponse(
@@ -122,7 +122,7 @@ class TestListServicesResponse:
         )
         assert (
             response.json()
-            == '{"services": [{"name": "QDS.TEST"}, {"name": "QDS.ECHO"}]}'
+            == '{"services": [{"name": "QDS.TEST", "options": null}, {"name": "QDS.ECHO", "options": null}]}'
         )
 
 
