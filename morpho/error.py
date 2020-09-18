@@ -12,6 +12,10 @@ class ServerTimeout(Exception):
     pass
 
 
+class NoWorkerFunctionError(Exception):
+    pass
+
+
 class ServerValidationError(Exception):
     def __init__(self, properties: List["OptionsErrorResponse"]) -> None:
         self.code = 400
