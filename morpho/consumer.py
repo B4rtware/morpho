@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from contextlib import redirect_stderr, redirect_stdout
 import io
+from morpho.error import NoWorkerFunctionError
 
 from pydantic.main import BaseModel
 from morpho.types import Schema, Worker
@@ -114,7 +115,7 @@ class WorkConsumer(ABC):
                     self.options_type(**request.options) if self.options_type else None
                 )
                 if self._work is None:
-                    raise Exception("worker function is None!")
+                    raise NoWorkerFunctionError("No worker function specified!")
                 try:
                     document = self._work(request.document, options)
                 except BaseException:  # pylint: disable=broad-except
