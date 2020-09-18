@@ -155,7 +155,7 @@ def test_rest_list(rest_server):
     assert result.text
     document_response = result.json()
     assert document_response["services"] == [
-        {"name": "TEST"}
+        {"name": "TEST", "options": {}}
     ]
 
 
