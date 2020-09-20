@@ -118,10 +118,131 @@ EUREKA_GET_APPS_RESPONSE_CAESER_PERMUTATION_VIGENERE = """
   </application>
 </applications>"""
 
-EUREKA_GET_APPS_RESPONSE_ONLY_CAESER = """
+EUREKA_GET_APPS_RESPONSE_ECHO_COUNT_CRYPTOxGW = """
 <applications>
   <versions__delta>1</versions__delta>
   <apps__hashcode>UP_3_</apps__hashcode>
+  <application>
+    <name>ECHO</name>
+    <instance>
+      <instanceId>localhost:echo:50010</instanceId>
+      <hostName>localhost</hostName>
+      <app>ECHO</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50010</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384921418</registrationTimestamp>
+        <lastRenewalTimestamp>1600384921418</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384548132</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50010</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50010/</homePageUrl>
+      <statusPageUrl>http://localhost:50010/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50010/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>echo</vipAddress>
+      <secureVipAddress>echo</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384921418</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384922144</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+  <application>
+    <name>COUNT</name>
+    <instance>
+      <instanceId>localhost:count:50011</instanceId>
+      <hostName>localhost</hostName>
+      <app>COUNT</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50011</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384921420</registrationTimestamp>
+        <lastRenewalTimestamp>1600384921420</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384548569</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50011</management.port>
+      </metadata>
+      <homePageUrl>http://localhost:50011/</homePageUrl>
+      <statusPageUrl>http://localhost:50011/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50011/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>count</vipAddress>
+      <secureVipAddress>count</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384921420</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384922508</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+  <application>
+    <name>CRYPTO.GW</name>
+    <instance>
+      <instanceId>localhost:crypto.gw:50012</instanceId>
+      <hostName>localhost</hostName>
+      <app>CRYPTO.GW</app>
+      <ipAddr>localhost</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">50012</port>
+      <securePort enabled="false">9443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1600384922304</registrationTimestamp>
+        <lastRenewalTimestamp>1600384922304</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1600384921793</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>50012</management.port>
+        <dtaType>gateway</dtaType>
+      </metadata>
+      <homePageUrl>http://localhost:50012/</homePageUrl>
+      <statusPageUrl>http://localhost:50012/info</statusPageUrl>
+      <healthCheckUrl>http://localhost:50012/health</healthCheckUrl>
+      <secureHealthCheckUrl></secureHealthCheckUrl>
+      <vipAddress>vigenere</vipAddress>
+      <secureVipAddress>crypto.gw</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1600384922304</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1600384923029</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+</applications>"""
+
+EUREKA_GET_APPS_RESPONSE_ONLY_CAESER = """
+<applications>
+  <versions__delta>1</versions__delta>
+  <apps__hashcode>UP_1_</apps__hashcode>
   <application>
     <name>CAESER</name>
     <instance>

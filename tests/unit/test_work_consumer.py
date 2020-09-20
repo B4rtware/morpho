@@ -6,12 +6,13 @@ from pydantic.main import BaseModel
 import pytest
 
 from morpho.config import ServiceConfig
-from morpho.consumer import WorkConsumer
+from morpho.consumer import RestGatewayConsumer, RestGatewayServiceConfig, WorkConsumer
 from morpho.types import Worker
 from tests.unit.eureka_mock_data import (
     EUREKA_GET_APPS_RESPONSE_CAESER_PERMUTATION_VIGENERE,
     EUREKA_GET_APPS_RESPONSE_ONLY_CAESER,
     EUREKA_GET_APPS_RESPONSE_CAESER_PERMUATION_CRYPTOxGW,
+    EUREKA_GET_APPS_RESPONSE_ECHO_COUNT_CRYPTOxGW,
 )
 
 
@@ -125,7 +126,12 @@ def test_list_services_with_eureka_and_two_other_apps_and_one_gateway(
     httpretty.register_uri(
         httpretty.GET,
         "http://localhost:50002/v1/service/list",
-        body='{"services": [{"name": "CRYPTOSIE", "options": {}}]}',
+        body="""{"services": [
+                    {"name": "CAESER", "options": {}},
+                    {"name": "PERMUTATION", "options": {}},
+                    {"name": "CRYPTO.GW", "options": {}},
+                    {"name": "CRYPTO.CRYPTOSIE", "options": {}}
+                ]}""",
         status=200,
     )
 
@@ -139,6 +145,81 @@ def test_list_services_with_eureka_and_two_other_apps_and_one_gateway(
     assert list_services_response.services[2].options == {}
     assert list_services_response.services[3].name == "CRYPTO.CRYPTOSIE"
     assert list_services_response.services[3].options == {}
+
+
+@httpretty.activate(allow_net_connect=False)
+def test_list_services_with_eureka_and_two_other_apps_and_one_gateway_resolver():
+    httpretty.register_uri(
+        httpretty.GET,
+        "http://localhost:8761/eureka/apps/",
+        body=EUREKA_GET_APPS_RESPONSE_ECHO_COUNT_CRYPTOxGW,
+        status=200,
+    )
+    httpretty.register_uri(
+        httpretty.GET,
+        "http://localhost:8762/eureka/apps/",
+        body=EUREKA_GET_APPS_RESPONSE_CAESER_PERMUTATION_VIGENERE,
+        status=200,
+    )
+    # CEASER PERMUTATION VEVENERE
+    httpretty.register_uri(
+        httpretty.GET,
+        "http://localhost:50000/v1/service/options",
+        body="{}",
+        status=200,
+    )
+    httpretty.register_uri(
+        httpretty.GET,
+        "http://localhost:50001/v1/service/options",
+        body="{}",
+        status=200,
+    )
+    httpretty.register_uri(
+        httpretty.GET,
+        "http://localhost:50002/v1/service/options",
+        body="{}",
+        status=200,
+    )
+    # ECHO COUNT
+    httpretty.register_uri(
+        httpretty.GET,
+        "http://localhost:50010/v1/service/options",
+        body="{}",
+        status=200,
+    )
+    httpretty.register_uri(
+        httpretty.GET,
+        "http://localhost:50011/v1/service/options",
+        body="{}",
+        status=200,
+    )
+
+    mock_rest_gateway_consumer = RestGatewayConsumer(
+        work=None,
+        config=RestGatewayServiceConfig(
+            name="CRYPTO.GW",
+            register=True,
+            registrar_url="http://localhost:8761/eureka",
+            resolver_url="http://localhost:8762/eureka",
+        ),
+        options_type=None,
+    )
+
+    list_service_response = mock_rest_gateway_consumer.list_services()
+    assert len(list_service_response.services) == 6
+    assert list_service_response.services[0].name == "CRYPTO.GW"
+    assert list_service_response.services[0].options == {}
+    assert list_service_response.services[1].name == "ECHO"
+    assert list_service_response.services[1].options == {}
+    assert list_service_response.services[2].name == "COUNT"
+    assert list_service_response.services[2].options == {}
+    assert list_service_response.services[3].name == "CRYPTO.CAESER"
+    assert list_service_response.services[3].options == {}
+    assert list_service_response.services[4].name == "CRYPTO.PERMUTATION"
+    assert list_service_response.services[4].options == {}
+    assert list_service_response.services[5].name == "CRYPTO.VIGENERE"
+    assert list_service_response.services[5].options == {}
+
 
 
 def test_options_no_options(consumer: MockConsumer):
