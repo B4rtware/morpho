@@ -356,6 +356,29 @@ class RestGatewayConsumer(RestWorkConsumer):
     """Implements a gateway consumer on top of the rest protocol.
     """
 
+    def _get_applications(self) -> Applications:
+        applications = super()._get_applications()
+        try:
+            resolver_applications = eureka_client.get_applications(
+                self.gateway_config.resolver_url
+            )
+        # TODO: add custom eureka not found error
+        except URLError:
+            log.error(
+                "no eureka instance is running at: %s", self.gateway_config.resolver_url
+            )
+            exit(1)
+
+        gateway_prefix = self.config.name.split(".")[0]
+        for application in resolver_applications.applications:
+            application.instances[
+                0
+            ].app = f"{gateway_prefix}.{application.instances[0].app}"
+            # application.name = "CR" + application.name
+            applications.add_application(application)
+
+        return applications
+
     def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
         """Callback function which gets invoked by flask if a 'transform' request is received.
 
