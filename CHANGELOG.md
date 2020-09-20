@@ -1,3 +1,7 @@
+# v1.0.0b6 - (20.09.2020)
+## 🔨 Fixed
+- (7e8a4a4e422a3a277f700e896f563c2f8dedaef9) **consumer**: always compare to upper instance name to prevent request deadlock
+
 # v1.0.0b5 - (20.09.2020)
 
 ## 🔨 Fixed
