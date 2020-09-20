@@ -1,3 +1,8 @@
+# v1.0.0b5 - (20.09.2020)
+
+## 🔨 Fixed
+- (d8bb5a7ca58ac7b466ea0cda54745d6776735658) **server**: custom config is not being used
+
 # v1.0.0b4 - (20.09.2020)
 
 ## 💌 Added
