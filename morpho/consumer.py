@@ -363,6 +363,23 @@ class RestGatewayConsumer(RestWorkConsumer):
     """Implements a gateway consumer on top of the rest protocol.
     """
 
+    def __init__(
+        self,
+        work: Optional[Worker],
+        config: RestGatewayServiceConfig,
+        options_type: Optional[Type[BaseModel]],
+    ) -> None:
+        super().__init__(
+            work=work,
+            config=config,
+            options_type=options_type,
+            client=Client(ClientConfig(registrar_url=config.resolver_url)),
+        )
+        # TODO: somehow remove one of the config instances
+        self.gateway_config = config
+        # TODO: discuss: set implicit the default type to Gateway
+        self.config.type = DtaType.GATEWAY
+
     def _get_applications(self) -> Applications:
         applications = super()._get_applications()
         try:
