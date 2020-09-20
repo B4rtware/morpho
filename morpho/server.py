@@ -59,8 +59,8 @@ parser.add_argument("--init", help="Create a default config file as defined by c
 class Service:
     def __init__(
         self,
-        name: str,
-        version: str,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
         protocols: Optional[List[Type[WorkConsumer]]] = None,
         worker: Optional[Worker] = None,
         register: bool = False,
@@ -70,13 +70,19 @@ class Service:
     ):
         if protocols is None:
             protocols = [RestWorkConsumer]
-        self.config = ServiceConfig(
-            name=name,
-            version=version,
-            protocols=protocols,
-            type=type,
-            register=register,
-        )
+        if config is None:
+            # TODO: remove those asserts
+            assert not name is None
+            assert not version is None
+            self.config = ServiceConfig(
+                name=name,
+                version=version,
+                protocols=protocols,
+                type=type,
+                register=register,
+            )
+        else:
+            self.config = config
         self.options_type = options_type
 
         self._should_stop = Event()
