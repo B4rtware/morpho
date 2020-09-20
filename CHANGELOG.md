@@ -1,3 +1,14 @@
+# v1.0.0b4 - (20.09.2020)
+
+## 💌 Added
+- (96ee82a2e0cb87fa9ebf8caec301c6cf25ec395b) **consumer**: add overridable `_get_applications` function on WorkConsumer
+- (2f4384331bd0815bb178b0fc870738ace37dfa2d) **consumer**: add RestGatewayServiceConfig class
+
+## ♻️ Changes
+- (9457b144d62c383ea5c1a7074d0498fe7951450f) **consumer**: expose work, config, options_type parameters on RestWorkConsumer
+- (7689df06340010c13f03a30663e84145f3f8a354) **consumer**: expose optional client parameter on WorkCosumer constructor
+- (c8403aedcd6baf6c14f3a456b4ecb924f8ae8156) **consumer**: _major rewrite_ of `WorkConsumer.list_services`. It now fully respects gateways.
+
 # v1.0.0b3 - (18.09.2020)
 
 ## 💌 Added
