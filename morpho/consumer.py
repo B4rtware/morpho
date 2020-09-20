@@ -89,7 +89,7 @@ class WorkConsumer(ABC):
         # return the service itself if the service is not registered at eureka
         if not self.config.register:
             return ListServicesResponse(
-                services=[ServiceInfo(name=self.config.name, options=self.options())]
+                services=[ServiceInfo(name=self.config.name.upper(), options=self.options())]
             )
 
         applications = self._get_applications()
@@ -100,7 +100,7 @@ class WorkConsumer(ABC):
             instance = service.instances[0]
 
             # skip self
-            if instance.app == self.config.name:
+            if instance.app == self.config.name.upper():
                 continue
             instance_address = f"{instance.ipAddr}:{instance.port.port}"
 
@@ -112,7 +112,7 @@ class WorkConsumer(ABC):
 
                 if dta_type == dta_type.GATEWAY:
                     log.info(
-                        "found gateway send list request directly to <%s>", instance.app
+                        "found gateway send list request directly to <%s (%s)>", instance.app, instance_address
                     )
                     # TODO: gateways could cache the whole list of services
                     return self.client.list_services(
@@ -122,7 +122,7 @@ class WorkConsumer(ABC):
             # cache the list of instance_addresses
             cached_applications.append((instance.app, instance_address))
 
-        services = [ServiceInfo(name=self.config.name, options=self.options())]
+        services = [ServiceInfo(name=self.config.name.upper(), options=self.options())]
         # iterate over cached applications and create ListServicesResponse
         for cached_application in cached_applications:
             app_name, instance_address = cached_application
