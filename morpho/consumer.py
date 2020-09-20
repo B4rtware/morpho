@@ -85,54 +85,51 @@ class WorkConsumer(ABC):
         Returns:
             List[ListServicesResponse]: List of services.
         """
-        # the service always knows its self
-        services = [ServiceInfo(name=self.config.name, options=self.options())]
+        # return the service itself if the service is not registered at eureka
         if not self.config.register:
-            return ListServicesResponse(services=services)
+            return ListServicesResponse(
+                services=[ServiceInfo(name=self.config.name, options=self.options())]
+            )
 
-        try:
-            applications = eureka_client.get_applications(self.config.registrar_url)
-        # TODO: add custom eureka not found error
-        except URLError:
-            log.error("no eureka instance is running at: %s", self.config.registrar_url)
-            exit(1)
+        applications = self._get_applications()
+        cached_applications: List[Tuple[str, str]] = []
 
+        # check if we can find a available gateway
         for service in applications.applications:
-            # always get first instance
             instance = service.instances[0]
+
             # skip self
             if instance.app == self.config.name:
                 continue
             instance_address = f"{instance.ipAddr}:{instance.port.port}"
 
-            # resolve gateway
             if instance.metadata:
                 try:
                     dta_type = DtaType(instance.metadata.get("dtaType"))
                 except ValueError:
                     dta_type = DtaType.UNKNOWN
-                if dta_type == DtaType.GATEWAY:
-                    assert (
-                        len(instance.app.split(".")) == 2
-                    ), "a gateway always have a suffix e.g <service_name>.GW"
-                    gateway_name = instance.app.split(".")[0]
-                    # TODO: for now gateways options are always empty
+
+                if dta_type == dta_type.GATEWAY:
+                    log.info(
+                        "found gateway send list request directly to <%s>", instance.app
+                    )
                     # TODO: gateways could cache the whole list of services
-                    services.append(ServiceInfo(name=instance.app, options={}))
-                    response = self.client.list_services(
+                    return self.client.list_services(
                         instance.app, instance_address=instance_address
                     )
-                    for service in response.services:
-                        service.name = f"{gateway_name}.{service.name}"
-                    # add services from subgroup
-                    services += response.services
-                    continue
+            
+            # cache the list of instance_addresses
+            cached_applications.append((instance.app, instance_address))
 
+        services = [ServiceInfo(name=self.config.name, options=self.options())]
+        # iterate over cached applications and create ListServicesResponse
+        for cached_application in cached_applications:
+            app_name, instance_address = cached_application
             # get options from service via rest call
             options = self.client.get_options(
-                service_name=instance.app, instance_address=instance_address
+                service_name=app_name, instance_address=instance_address
             )
-            services.append(ServiceInfo(name=instance.app, options=options))
+            services.append(ServiceInfo(name=app_name, options=options))
 
         return ListServicesResponse(services=services)
 
