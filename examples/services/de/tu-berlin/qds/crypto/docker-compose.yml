@@ -6,6 +6,8 @@ services:
     environment:
       REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
     build: ./caeser
+    ports: 
+      - "50001:50000"
     networks:
       eureka:
         aliases:
@@ -19,6 +21,8 @@ services:
     environment:
       REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
     build: ./permutation
+    ports: 
+      - "50002:50000"
     networks:
       eureka:
         aliases:
@@ -31,6 +35,8 @@ services:
     environment:
       REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
     build: ./vigenere
+    ports: 
+      - "50003:50000"
     networks:
       eureka:
         aliases:
@@ -41,7 +47,7 @@ services:
   gateway: 
     image: b4rtware/morpho-gateway:latest
     environment:
-      REGISTRAR_URL: http://morpho-crypto-eureka:8761/eureka
+      REGISTRAR_URL: https://eureka.python-morpho.org/eureka
     build: ./gateway
     ports: 
       - "50000:50000"
