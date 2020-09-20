@@ -37,8 +37,8 @@ from morpho.log import logging
 
 log = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
-    from morpho.config import ServiceConfig
+# if TYPE_CHECKING:
+from morpho.config import ServiceConfig
 
 # TODO: rename to Base prefix or suffix
 class WorkConsumer(ABC):
@@ -350,6 +350,13 @@ class RestWorkConsumer(WorkConsumer):
             },
         )
         self.thread.start()
+
+
+@dataclass
+class RestGatewayServiceConfig(ServiceConfig):
+    public_ip: bool = False
+    resolver_url: str = ""
+    resolver_registration: bool = False
 
 
 class RestGatewayConsumer(RestWorkConsumer):
