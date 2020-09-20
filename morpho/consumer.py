@@ -60,10 +60,14 @@ class WorkConsumer(ABC):
         work: Optional[Worker],
         config: "ServiceConfig",
         options_type: Optional[Type[BaseModel]],
+        client: Optional[Client] = None,
     ) -> None:
         self._work = work
         self.config = config
-        self.client = Client(ClientConfig(registrar_url=config.registrar_url))
+        if client is None:
+            self.client = Client(ClientConfig(registrar_url=config.registrar_url))
+        else:
+            self.client = client
         self.options_type = options_type
         log.info("initialized abc worker.")
 
@@ -231,10 +235,10 @@ class RestWorkConsumer(WorkConsumer):
     """
 
     def __init__(
-        self, work: Worker, config: "ServiceConfig", options_type: Type[BaseModel]
+        client: Optional[Client] = None,
     ):
         log.info("initialized abc worker.")
-        super().__init__(work, config, options_type)
+        super().__init__(work, config, options_type, client)
         self._work = work
         self.config = config
         self.thread: Optional[Thread] = None
