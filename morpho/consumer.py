@@ -71,6 +71,14 @@ class WorkConsumer(ABC):
         self.options_type = options_type
         log.info("initialized abc worker.")
 
+    def _get_applications(self) -> Applications:
+        try:
+            return eureka_client.get_applications(self.config.registrar_url)
+        # TODO: add custom eureka not found error
+        except URLError:
+            log.error("no eureka instance is running at: %s", self.config.registrar_url)
+            exit(1)
+
     def list_services(self) -> ListServicesResponse:
         """Lists all services from the eureka server of the provided ``ServiceConfig``.
         
