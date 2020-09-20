@@ -235,6 +235,10 @@ class RestWorkConsumer(WorkConsumer):
     """
 
     def __init__(
+        self,
+        work: Optional[Worker],
+        config: "ServiceConfig",
+        options_type: Optional[Type[BaseModel]],
         client: Optional[Client] = None,
     ):
         log.info("initialized abc worker.")
