@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import dataclass
 import io
+
+from py_eureka_client.eureka_client import Applications
 from morpho.error import NoWorkerFunctionError
 
 from pydantic.main import BaseModel
 from morpho.types import Schema, Worker, DtaType
 from morpho.client import Client, ClientConfig
-from morpho.util import unflatten_dict
 from morpho.rest.models import (
     ListServicesResponse,
     PipeService,
@@ -23,7 +25,7 @@ from morpho.rest.raw import (
 )
 from threading import Thread
 import traceback
-from typing import Optional, TYPE_CHECKING, Tuple, Type
+from typing import List, Optional, Tuple, Type, cast
 from urllib.error import URLError
 import py_eureka_client.eureka_client as eureka_client
 
@@ -37,7 +39,6 @@ from morpho.log import logging
 
 log = logging.getLogger(__name__)
 
-# if TYPE_CHECKING:
 from morpho.config import ServiceConfig
 
 # TODO: rename to Base prefix or suffix
