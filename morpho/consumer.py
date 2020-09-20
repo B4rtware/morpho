@@ -364,17 +364,19 @@ class RestGatewayConsumer(RestWorkConsumer):
     def __init__(
         self,
         work: Optional[Worker],
-        config: RestGatewayServiceConfig,
+        config: ServiceConfig,
         options_type: Optional[Type[BaseModel]],
     ) -> None:
+        # consumers are only invoked with ServiceConfig
+        # so we need to cast to the RestGatewayServiceConfig
         super().__init__(
             work=work,
             config=config,
             options_type=options_type,
-            client=Client(ClientConfig(registrar_url=config.resolver_url)),
+            client=Client(ClientConfig(registrar_url=cast(RestGatewayServiceConfig ,config).resolver_url)),
         )
         # TODO: somehow remove one of the config instances
-        self.gateway_config = config
+        # self.gateway_config = cast(config
         # TODO: discuss: set implicit the default type to Gateway
         self.config.type = DtaType.GATEWAY
 
@@ -382,12 +384,12 @@ class RestGatewayConsumer(RestWorkConsumer):
         applications = super()._get_applications()
         try:
             resolver_applications = eureka_client.get_applications(
-                self.gateway_config.resolver_url
+                cast(RestGatewayServiceConfig, self.config).resolver_url
             )
         # TODO: add custom eureka not found error
         except URLError:
             log.error(
-                "no eureka instance is running at: %s", self.gateway_config.resolver_url
+                "no eureka instance is running at: %s", cast(RestGatewayServiceConfig, self.config).resolver_url
             )
             exit(1)
 
