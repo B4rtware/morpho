@@ -5,16 +5,13 @@ It also contains the raw responses and request types.
 Warning:
     This might change in future versions.
 """
-import argparse
-from morpho.types import DtaType, Worker
+import logging
 import sys
 from threading import Event
 from typing import List, Optional, Type
 
-import logging
 import colorama as cr
 import py_eureka_client.eureka_client as eureka_client
-
 from pydantic import BaseModel
 
 from morpho.config import ServiceConfig
