@@ -58,15 +58,35 @@ class Service:
         self._should_stop = Event()
         self._worker = worker
 
-    def run(self, port: Optional[int] = None):
+    def run(
+        self,
+        service_name: Optional[str] = None,
+        register: Optional[bool] = None,
+        registrar_url: Optional[str] = None,
+        ttl: Optional[int] = None,
+        host_name: Optional[str] = None,
+        # TODO: rename to port
+        port_to_listen: Optional[int] = None,
+        dta_type: Optional[DtaType] = None,
+        is_ssl: Optional[bool] = None,
+        consumers: Optional[List[Type[WorkConsumer]]] = None,
+    ):
         """Class method which is used to invoke the server.
         """
-        # working_home_dir = Path.home()
-        # parse args and override with config
-        args = parser.parse_args()
-        for arg in vars(args).items():
-            if arg[1]:
-                setattr(self.config, arg[0], arg[1])
+        properties = {
+            "register": register,
+            "service_name": service_name,
+            "registrar_url": registrar_url,
+            "ttl": ttl,
+            "host_name": host_name,
+            "port_to_listen": port_to_listen,
+            "type": dta_type,
+            "is_ssl": is_ssl,
+            "consumers": consumers,
+        }
+        for name, value in properties.items():
+            if value is None:
+                setattr(self.config, name, value)
 
         if self.config.name == "UNKNOWN":
             log.warning("no application name was specified instead using: UNKNOWN!")
