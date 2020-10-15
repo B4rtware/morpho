@@ -160,7 +160,10 @@ class WorkConsumer(ABC):
                 if self._work is None:
                     raise NoWorkerFunctionError("No worker function specified!")
                 try:
-                    document = self._work(request.document, options)
+                    if options is None:
+                        document = self._work(request.document)
+                    else:
+                        document = self._work(request.document, options)
                 except BaseException:  # pylint: disable=broad-except
                     traceback.print_exc()
         error = captured_stderr.getvalue().splitlines()
