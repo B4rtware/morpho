@@ -85,8 +85,7 @@ class ServiceConfig(BaseConfig):
 
     name: str = ""
     version: str = ""
-    protocols: Optional[List[Type["WorkConsumer"]]] = None
-    options: Optional[BaseConfig] = None
+    consumers: Optional[List[Type["WorkConsumer"]]] = None
 
     register: bool = False
     registrar_url: str = "http://localhost:8761/eureka"
