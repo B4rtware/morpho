@@ -92,7 +92,7 @@ class Service:
             log.warning("no application name was specified instead using: UNKNOWN!")
 
         # register at eureka server
-        if self.config.register:
+        if self.config.should_register:
             eureka_client.init_registry_client(
                 eureka_server=self.config.registrar_url,
                 instance_host=self.config.host_name,

@@ -21,7 +21,7 @@ class ServiceConfig(BaseModel):
     version: str = ""
     consumers: Optional[List[Type["WorkConsumer"]]] = None
 
-    eureka_register: bool = Field(default=True, alias="register")
+    should_register: bool = Field(default=False, alias="register")
     registrar_url: str = "http://localhost:8761/eureka"
     registrar_user: str = ""
     ttl: int = 0

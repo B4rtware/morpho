@@ -87,9 +87,11 @@ class WorkConsumer(ABC):
             List[ListServicesResponse]: List of services.
         """
         # return the service itself if the service is not registered at eureka
-        if not self.config.register:
+        if not self.config.should_register:
             return ListServicesResponse(
-                services=[ServiceInfo(name=self.config.name.upper(), options=self.options())]
+                services=[
+                    ServiceInfo(name=self.config.name.upper(), options=self.options())
+                ]
             )
 
         applications = self._get_applications()
