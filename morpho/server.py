@@ -31,15 +31,15 @@ class Service:
         self,
         name: Optional[str] = None,
         version: Optional[str] = None,
-        protocols: Optional[List[Type[WorkConsumer]]] = None,
+        consumers: Optional[List[Type[WorkConsumer]]] = None,
         worker: Optional[Worker] = None,
         register: bool = False,
         config: Optional[ServiceConfig] = None,
         type: DtaType = DtaType.SERVICE,
         options_type: Optional[Type[BaseModel]] = None,
     ):
-        if protocols is None:
-            protocols = [RestWorkConsumer]
+        if consumers is None:
+            consumers = [RestWorkConsumer]
         if config is None:
             # TODO: remove those asserts
             assert not name is None
@@ -47,7 +47,7 @@ class Service:
             self.config = ServiceConfig(
                 name=name,
                 version=version,
-                protocols=protocols,
+                consumers=consumers,
                 type=type,
                 register=register,
             )
@@ -103,10 +103,10 @@ class Service:
             )
 
         assert (
-            self.config.protocols
+            self.config.consumers
         ), "Have you called super() on your Server implemenation?"
         # start protocol consumer
-        for protocol in self.config.protocols:
+        for protocol in self.config.consumers:
             instance: WorkConsumer = protocol(
                 self._worker, self.config, self.options_type
             )
@@ -122,7 +122,7 @@ class Service:
             for setting in self.config.as_dict().items():
                 print(f" |- {setting[0]:<15} - {setting[1]}")
             print("")
-            for consumer in self.config.protocols:
+            for consumer in self.config.consumers:
                 print(f" [{consumer.__name__}] -> listening on port {self.config.port_to_listen}")
             print("")
             print(cr.Fore.YELLOW + "     You see this message because __debug__ is true.")
