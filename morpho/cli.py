@@ -26,5 +26,11 @@ def run(service: str, **kwargs):
     service_module = import_module(module)
     protocols: List[str]  = kwargs.pop("protocols")
     consumers = [str_to_dta_type[protocol] for protocol in protocols]
-    data_type: DtaType = str_to_dta_type[kwargs.pop("type")]
-    getattr(service_module, func).run(dict(**kwargs, consumers=consumers, type=data_type))
+    if not kwargs["type"] is None:
+        kwargs["type"] = str_to_dta_type[kwargs.pop("type")]
+    kwargs["dta_type"] = kwargs.pop("type")
+    # TODO: currently empty protocols will be converted to None
+    if consumers == []:
+        consumers = None
+
+    getattr(service_module, func).run(**dict(**kwargs, consumers=consumers))
