@@ -114,13 +114,15 @@ class WorkConsumer(ABC):
 
                 if dta_type == dta_type.GATEWAY:
                     log.info(
-                        "found gateway send list request directly to <%s (%s)>", instance.app, instance_address
+                        "found gateway send list request directly to <%s (%s)>",
+                        instance.app,
+                        instance_address,
                     )
                     # TODO: gateways could cache the whole list of services
                     return self.client.list_services(
                         instance.app, instance_address=instance_address
                     )
-            
+
             # cache the list of instance_addresses
             cached_applications.append((instance.app, instance_address))
 
@@ -378,7 +380,11 @@ class RestGatewayConsumer(RestWorkConsumer):
             work=work,
             config=config,
             options_type=options_type,
-            client=Client(ClientConfig(registrar_url=cast(RestGatewayServiceConfig ,config).resolver_url)),
+            client=Client(
+                ClientConfig(
+                    registrar_url=cast(RestGatewayServiceConfig, config).resolver_url
+                )
+            ),
         )
         # TODO: somehow remove one of the config instances
         # self.gateway_config = cast(config
@@ -394,7 +400,8 @@ class RestGatewayConsumer(RestWorkConsumer):
         # TODO: add custom eureka not found error
         except URLError:
             log.error(
-                "no eureka instance is running at: %s", cast(RestGatewayServiceConfig, self.config).resolver_url
+                "no eureka instance is running at: %s",
+                cast(RestGatewayServiceConfig, self.config).resolver_url,
             )
             exit(1)
 
