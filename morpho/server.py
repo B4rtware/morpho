@@ -119,7 +119,7 @@ class Service:
             print(" +-------" + "-" * len(self.config.name) + "-------+")
             print(f" |       {cr.Back.GREEN + cr.Fore.BLACK + self.config.name + cr.Back.RESET + cr.Fore.RESET}       |")
             print(" +-------" + "-" * len(self.config.name) + "-------+")
-            for setting in self.config.as_dict().items():
+            for setting in self.config.dict().items():
                 print(f" |- {setting[0]:<15} - {setting[1]}")
             print("")
             for consumer in self.config.consumers:
