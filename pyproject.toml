@@ -45,6 +45,9 @@ sphinx-material = "^0.0.30"
 sphinx-issues = {git = "https://github.com/B4rtware/sphinx-issues.git"}
 httpretty = "^1.0.2"
 
+[tool.poetry.scripts]
+morpho = "morpho.cli:run"
+
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

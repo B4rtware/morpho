@@ -1,6 +1,7 @@
 from importlib import import_module
 from typing import List
 from morpho.consumer import RestWorkConsumer
+from morpho.config import ServiceConfig
 import click
 
 from morpho.types import DtaType
@@ -8,8 +9,19 @@ from morpho.types import DtaType
 str_to_dta_type = {"service": DtaType.SERVICE, "gateway": DtaType.GATEWAY}
 str_to_consumer = {"rest": RestWorkConsumer}
 
+
+@click.group()
+def cli(**kwargs):
+    pass
+
+
+@cli.command()
+def config():
+    print(ServiceConfig.construct().dict())
+
+
+@cli.command()
 # fmt: off
-@click.command()
 @click.argument("service")
 @click.option("--register", is_flag=True, help="Register the service with an eureka server")
 @click.option("--registrar-url", type=str, help="Registry URL")
@@ -21,10 +33,10 @@ str_to_consumer = {"rest": RestWorkConsumer}
 @click.option("--is-ssl", is_flag=True, help="Can the service be reached via SSL.")
 @click.option("--protocols", type=click.Choice(["rest"]), multiple=True, help="Which protocol should be used by the server.")
 # fmt: on
-def run(service: str, **kwargs):
+def serve(service: str, **kwargs):
     module, func = service.split(":")
     service_module = import_module(module)
-    protocols: List[str]  = kwargs.pop("protocols")
+    protocols: List[str] = kwargs.pop("protocols")
     consumers = [str_to_dta_type[protocol] for protocol in protocols]
     if not kwargs["type"] is None:
         kwargs["type"] = str_to_dta_type[kwargs.pop("type")]
@@ -34,3 +46,8 @@ def run(service: str, **kwargs):
         consumers = None
 
     getattr(service_module, func).run(**dict(**kwargs, consumers=consumers))
+
+
+def run():
+    cli(auto_envvar_prefix="MORPHO")
+
