@@ -84,8 +84,10 @@ class Service:
             "is_ssl": is_ssl,
             "consumers": consumers,
         }
+        properties["name"] = properties.pop("service_name")
+        properties["should_register"] = properties.pop("register")
         for name, value in properties.items():
-            if value is None:
+            if not value is None:
                 setattr(self.config, name, value)
 
         if self.config.name == "UNKNOWN":
