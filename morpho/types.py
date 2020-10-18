@@ -14,12 +14,20 @@ Schema = Dict[str, Any]
 # fmt: on
 
 # must resides here because otherwise circular import
-class DtaType(Enum):
+class DtaType(str, Enum):
     """Document Transformation Application Type of a Service"""
 
     SERVICE = "service"
     GATEWAY = "gateway"
     UNKNOWN = "unknown"
+
+
+class ServiceStatus(Enum):
+    UP = "UP"
+    DOWN = "DOWN"
+    STARTING = "STARTING"
+    OUT_OF_SERVICE = "OUT_OF_SERVICE"
+    UNKNOWN = "UNKNOWN"
 
 
 # TODO consider to use dicttypes

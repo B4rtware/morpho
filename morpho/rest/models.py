@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
+from morpho.types import ServiceStatus
+
 
 # its models raw responses
 
@@ -31,6 +33,10 @@ from pydantic import BaseModel
 class Model(BaseModel):
     class Config:
         extra = "forbid"
+
+
+class Health(BaseModel):
+    status: ServiceStatus = ServiceStatus.UP
 
 
 class ServiceInfo(Model):

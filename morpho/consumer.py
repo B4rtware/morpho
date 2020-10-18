@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 import io
+from morpho.rest.models import Health
 
 from py_eureka_client.eureka_client import Applications
 from morpho.error import NoWorkerFunctionError
@@ -25,7 +26,7 @@ from morpho.rest.raw import (
 )
 from threading import Thread
 import traceback
-from typing import List, Optional, Tuple, Type, cast
+from typing import Dict, List, Optional, Tuple, Type, cast
 from urllib.error import URLError
 import py_eureka_client.eureka_client as eureka_client
 
@@ -79,6 +80,9 @@ class WorkConsumer(ABC):
         except URLError:
             log.error("no eureka instance is running at: %s", self.config.registrar_url)
             exit(1)
+
+    def health(self) -> Health:
+        return self.config.health
 
     def list_services(self) -> ListServicesResponse:
         """Lists all services from the eureka server of the provided ``ServiceConfig``.
@@ -271,6 +275,7 @@ class RestWorkConsumer(WorkConsumer):
         self.app.add_url_rule("/v1/service/list", "list", self._list_services, methods=["GET"])
         self.app.add_url_rule("/v1/document/transform", "transform", self._transform_document, methods=["POST"])
         self.app.add_url_rule("/v1/document/transform-pipe", "pipe", self._transform_document_pipe, methods=["POST"])
+        self.app.add_url_rule("/health", "health", self._health, methods=["GET"])
         # pylint: enable: line-too-long
         # fmt: on
 
@@ -282,6 +287,12 @@ class RestWorkConsumer(WorkConsumer):
         """
         options = self.options()
         return options, Status.OK
+
+    def _health(self) -> Tuple[Dict[str, str], Status]:
+        # FIXME: pydantic does not convert Enum to string if using dict() only with json()
+        health = self.health().dict()
+        health["status"] = health["status"].value
+        return health, Status.OK
 
     # TODO: rename to list services / transform document and transform document pipe
     def _transform_document(self) -> Tuple[RawTransformDocumentResponse, Status]:
