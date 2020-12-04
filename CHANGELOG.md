@@ -1,4 +1,18 @@
+# v1.0.0b7 - (04.12.2020)
+
+## 💌 Added
+- (a941545bff360cf87211f821c85ba055d06f4378) **examples**: add echo example service
+- (66c6022d34b10aac9459c4e4cff48baa302bc205) **server**: expose multiple config parameters to the `Server.run(...)` function
+- (fc09853a843a8a7b812c1e7dc38cc961a6a430b9) **cli**: add a `morpho` cli command (is being used to start services from the comman line) and replaces `argparse` with `click`. Use `morpho --help`for a list of commands.
+- (7d96dea6e0053b7ad3109c95a542751e2cb5962f) : add health endpoint for services `/health`
+- (412c00f144a14eb9be156c4c3c7c9e2bf8b558b9) : a default config is now printable through `morpho config`
+
+## ♻️ Changes
+- (bd0471524a262c0e5bb459fd235f1ade99c4987f) **server**: remove argparse argument parsing
+- (c8fe9dbb7651e9b5319d2675f4120a007b46406b) **config**: rename protocols parameter to consumers
+
 # v1.0.0b6 - (20.09.2020)
+
 ## 🔨 Fixed
 - (7e8a4a4e422a3a277f700e896f563c2f8dedaef9) **consumer**: always compare to upper instance name to prevent request deadlock
 
