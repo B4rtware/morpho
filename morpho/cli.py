@@ -15,9 +15,18 @@ def cli(**kwargs):
     pass
 
 
+# TODO: implement yaml option type
 @cli.command()
-def config():
-    print(ServiceConfig.construct().dict())
+@click.option(
+    "--type",
+    type=click.Choice(["json"]),
+    help="Type for the output format of the configuration string",
+)
+def config(type: str):
+    if type == "json":
+        print(ServiceConfig().json(by_alias=True, indent=4))
+    else:
+        print(ServiceConfig().json(by_alias=True, indent=4))
 
 
 @cli.command()
