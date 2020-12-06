@@ -1,3 +1,8 @@
+# v1.0.0b8 - (06.12.2020)
+
+## 🔨 Fixed
+- (ae7d6ff8066cf2fe23b8f49758d2b62a516f5248) **cli**: working dir not available for module import
+
 # v1.0.0b7 - (04.12.2020)
 
 ## 💌 Added
