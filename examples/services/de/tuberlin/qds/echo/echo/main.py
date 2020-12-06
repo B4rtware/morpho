@@ -1,8 +1,7 @@
-from pydantic.main import BaseModel
 from morpho.server import Service
 
 
-def work(document: str, _: BaseModel):
+def work(document: str):
     return document
 
 
