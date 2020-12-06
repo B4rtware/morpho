@@ -3,6 +3,7 @@ from typing import List
 from morpho.consumer import RestWorkConsumer
 from morpho.config import ServiceConfig
 import click
+import sys
 
 from morpho.types import DtaType
 
@@ -43,6 +44,7 @@ def config(type: str):
 @click.option("--protocols", type=click.Choice(["rest"]), multiple=True, help="Which protocol should be used by the server.")
 # fmt: on
 def serve(service: str, **kwargs):
+    sys.path.insert(0, ".")
     module, func = service.split(":")
     service_module = import_module(module)
     protocols: List[str] = kwargs.pop("protocols")
