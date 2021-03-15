@@ -368,7 +368,7 @@ class RestWorkConsumer(WorkConsumer):
         self.thread.start()
 
 
-@dataclass
+# @dataclass
 class RestGatewayServiceConfig(ServiceConfig):
     public_ip: bool = False
     resolver_url: str = ""
