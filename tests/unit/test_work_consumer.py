@@ -221,7 +221,6 @@ def test_list_services_with_eureka_and_two_other_apps_and_one_gateway_resolver()
     assert list_service_response.services[5].options == {}
 
 
-
 def test_options_no_options(consumer: MockConsumer):
     result = consumer.options()
     assert result == {}
@@ -232,7 +231,9 @@ def test_options_with_options():
         offset: int = 0
 
     consumer = MockConsumer(
-        work=None, config=ServiceConfig("CAESER", options=Options), options_type=Options
+        work=None,
+        config=ServiceConfig(name="CAESER", options=Options),
+        options_type=Options,
     )
     result = consumer.options()
     assert result == {
@@ -249,15 +250,15 @@ def test_transform_document_no_worker(consumer: MockConsumer):
         consumer.transform_document(request=request)
 
 
-def mock_echo_worker(document: str, options: BaseModel):
+def mock_echo_worker(document: str):
     return document
 
 
-def mock_append_worker(document: str, options: BaseModel):
+def mock_append_worker(document: str):
     return "Appended" + document
 
 
-def mock_echo_print_output_worker(document: str, options: BaseModel):
+def mock_echo_print_output_worker(document: str):
     print("transforming...")
     return document
 
@@ -276,7 +277,6 @@ def test_transform_document_with_worker(
     expected_document: str,
     expected_output: List[str],
 ):
-
     consumer = MockConsumer(
         work=worker_function, config=ServiceConfig(name="ECHO"), options_type=None
     )
