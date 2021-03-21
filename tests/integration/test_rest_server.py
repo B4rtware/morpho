@@ -116,6 +116,8 @@ def eureka_server():
                 result_service = requests.get(f"http://localhost:{service_port}/health")
             except requests.exceptions.ConnectionError:
                 pass
+            except requests.exceptions.RequestException as exception:
+                SystemExit(exception)
             if (
                 result_service.status_code == 200
                 and result_service.json()["status"] == "UP"
