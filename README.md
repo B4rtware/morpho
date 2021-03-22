@@ -42,14 +42,17 @@ service.py
 ```python
 from morpho.server import Service
 
+
 def work(document: str) -> str:
     return document
 
-service = Service(name="Echo", version="0.0.1")
+
+service = Service(name="Echo", version="0.0.1", worker=work)
 
 if __name__ == "__main__":
     service.run()
 ```
+> Tested with Python 3.8.1 and morpho v1.0.0b8 ✔️
 
 ### ... with options
 
@@ -58,35 +61,49 @@ service.py
 from morpho.server import Service
 from pydantic import BaseModel
 
+
 class Options(BaseModel):
     name: str
+
 
 def work(document: str, options: Options) -> str:
     return document + options.name
 
-service = Service(name="AppendName", version="0.0.1", options_type=Options)
+
+service = Service(name="AppendName", version="0.0.1", worker=work, options_type=Options)
 
 if __name__ == "__main__":
     service.run()
 ```
+> Tested with Python 3.8.1 and morpho v1.0.0b8 ✔️
 
 ## 🖥️ Client Example
 
+This example expects a service named `Echo` that was started with the `--register` option and was registered with the Eureka server with the url `http://localhost:8761/eureka/`.
+
 client.py
 ```python
+from morpho.rest.models import TransformDocumentRequest
 from morpho.client import Client
 from morpho.client import ClientConfig
 
-morpho = Client(ClientConfig("http://localhost:8761/eureka/"))
 
-response = morpho.transform_document(
-    "This is a Document!",
+morpho = Client(
+    ClientConfig("http://localhost:8761/eureka/")
+)
+
+request = TransformDocumentRequest(
+    document="This is a Document!",
     service_name="Echo"
 )
+
+response = morpho.transform_document(request=request)
 
 print(response.document)
 ```
 `>>> This is a Document!`
+
+> Tested with Python 3.8.1 and morpho v1.0.0b8 ✔️
 
 ## 👩🏽‍💻 Development
 
